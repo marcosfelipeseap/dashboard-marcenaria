@@ -1,8 +1,7 @@
 const express = require('express');
 const { google } = require('googleapis');
 const NodeCache = require('node-cache');
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+const chromium = require('@sparticuz/chromium'); // Puppeteer foi removido daqui do topo
 const path = require('path');
 
 const app = express();
@@ -58,7 +57,7 @@ async function fetchDataFromSheets() {
             const linkMap = {};
             if (resLink.data.values) {
                 resLink.data.values.forEach(row => {
-                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); // Remove pontos do processo
+                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); 
                     let pLinkRaw = (row[1] || '').trim();
                     if (pNumRaw && !pNumRaw.toUpperCase().includes('PROCESSO')) linkMap[pNumRaw] = pLinkRaw;
                 });
@@ -273,6 +272,10 @@ app.post('/api/pdf', async (req, res) => {
         }
         html += "</body></html>";
 
+        // Importação Dinâmica (Resolve o erro ERR_REQUIRE_ESM do Vercel)
+        const puppeteerModule = await import('puppeteer-core');
+        const puppeteer = puppeteerModule.default || puppeteerModule;
+
         // Lança o Chromium leve suportado pelo Vercel
         const browser = await puppeteer.launch({
             args: chromium.args,
@@ -281,6 +284,7 @@ app.post('/api/pdf', async (req, res) => {
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
+        
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
