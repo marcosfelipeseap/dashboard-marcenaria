@@ -3,7 +3,7 @@ const { google } = require('googleapis');
 const NodeCache = require('node-cache');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
-const path = require('path'); // Corrigido para caminhos no Vercel
+const path = require('path');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -16,6 +16,7 @@ const myCache = new NodeCache({ stdTTL: 600 });
 
 // --- AUTENTICAÇÃO ANTI-CRASH PARA O VERCEL ---
 let auth;
+let sheets;
 try {
     if (process.env.GOOGLE_CREDENTIALS) {
         // Corrige o bug do Vercel que bagunça as quebras de linha do JSON
@@ -30,14 +31,15 @@ try {
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
         });
     }
+    sheets = google.sheets({ version: 'v4', auth });
 } catch (error) {
     console.error("ERRO CRÍTICO NA LEITURA DA CHAVE DO GOOGLE:", error.message);
 }
 
-const sheets = google.sheets({ version: 'v4', auth });
-
 // --- LÓGICA DE BUSCA DE DADOS ---
 async function fetchDataFromSheets() {
+    if (!sheets) throw new Error("API do Google não inicializada. Verifique as credenciais.");
+
     const sources = [
         { type: 'SEDE', id: '17WAyG3sGud8441tlQR2E0gxWp15Ogd26zDoViv2PisE', sheetName: 'MÓVEIS ATUALIZADOS' },
         { type: 'REGIONAL', id: '1RtsILkt3MJ-djQAXSGvKOWN1VNOCCdNVNIGFYA5WrnE', sheetName: 'MARCENARIA | REGIONAL' }
@@ -56,7 +58,7 @@ async function fetchDataFromSheets() {
             const linkMap = {};
             if (resLink.data.values) {
                 resLink.data.values.forEach(row => {
-                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); 
+                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); // Remove pontos do processo
                     let pLinkRaw = (row[1] || '').trim();
                     if (pNumRaw && !pNumRaw.toUpperCase().includes('PROCESSO')) linkMap[pNumRaw] = pLinkRaw;
                 });
@@ -163,6 +165,7 @@ app.get('/', async (req, res) => {
         }
         res.render('index', { INITIAL_DATA: JSON.stringify(data) });
     } catch (err) {
+        console.error("Erro no GET /:", err);
         res.status(500).send("Erro ao carregar o painel: " + err.message);
     }
 });
@@ -177,7 +180,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// --- GERAÇÃO DE PDF (Otimizado para Vercel Serverless) ---
+// --- GERAÇÃO DE PDF ---
 app.post('/api/pdf', async (req, res) => {
     try {
         const { type, items } = req.body;
@@ -295,10 +298,11 @@ app.post('/api/pdf', async (req, res) => {
     }
 });
 
-// Apenas escuta na porta 3000 se não estiver em produção no Vercel
-if (process.env.NODE_ENV !== 'production') {
+// Apenas escuta na porta 3000 se NÃO estiver no Vercel
+if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`Dashboard rodando em http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`Dashboard rodando localmente na porta ${PORT}`));
 }
 
+// Exportação obrigatória para o Vercel Serverless
 module.exports = app;
