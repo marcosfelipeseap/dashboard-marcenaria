@@ -1,8 +1,7 @@
 const express = require('express');
 const { google } = require('googleapis');
 const NodeCache = require('node-cache');
-const chromium = require('@sparticuz/chromium'); // Puppeteer foi removido daqui do topo
-const path = require('path');
+const path = require('path'); // Mantido para resolver o caminho no Vercel
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -179,7 +178,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// --- GERAÇÃO DE PDF ---
+// --- GERAÇÃO DE PDF (COM IMPORTAÇÃO DINÂMICA) ---
 app.post('/api/pdf', async (req, res) => {
     try {
         const { type, items } = req.body;
@@ -272,9 +271,12 @@ app.post('/api/pdf', async (req, res) => {
         }
         html += "</body></html>";
 
-        // Importação Dinâmica (Resolve o erro ERR_REQUIRE_ESM do Vercel)
+        // Importação Dinâmica DUPLA (Resolve o erro ERR_REQUIRE_ESM do Vercel)
         const puppeteerModule = await import('puppeteer-core');
         const puppeteer = puppeteerModule.default || puppeteerModule;
+
+        const chromiumModule = await import('@sparticuz/chromium');
+        const chromium = chromiumModule.default || chromiumModule;
 
         // Lança o Chromium leve suportado pelo Vercel
         const browser = await puppeteer.launch({
