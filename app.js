@@ -1,24 +1,35 @@
 const express = require('express');
 const { google } = require('googleapis');
 const NodeCache = require('node-cache');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// Cache configurado para 10 minutos (600 segundos)
 const myCache = new NodeCache({ stdTTL: 600 });
 
-// Configuração da API do Google (Requer o arquivo credentials.json na raiz)
-const auth = new google.auth.GoogleAuth({
-    keyFile: 'credentials.json',
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
-});
+// --- AUTENTICAÇÃO ADAPTADA PARA O VERCEL ---
+let auth;
+if (process.env.GOOGLE_CREDENTIALS) {
+    // Se estiver rodando no Vercel, pega as credenciais das variáveis de ambiente
+    auth = new google.auth.GoogleAuth({
+        credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    });
+} else {
+    // Se estiver rodando no seu computador (Local), pega do arquivo
+    auth = new google.auth.GoogleAuth({
+        keyFile: 'credentials.json',
+        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    });
+}
+
 const sheets = google.sheets({ version: 'v4', auth });
 
-// --- LÓGICA DE BUSCA DE DADOS (Substitui o Code.gs) ---
+// --- LÓGICA DE BUSCA DE DADOS (Exatamente a mesma que já estava funcionando) ---
 async function fetchDataFromSheets() {
     const sources = [
         { type: 'SEDE', id: '17WAyG3sGud8441tlQR2E0gxWp15Ogd26zDoViv2PisE', sheetName: 'MÓVEIS ATUALIZADOS' },
@@ -38,7 +49,7 @@ async function fetchDataFromSheets() {
             const linkMap = {};
             if (resLink.data.values) {
                 resLink.data.values.forEach(row => {
-                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); // Regra mantida: Sanitização do número do processo
+                    let pNumRaw = (row[0] || '').replace(/\./g, '').trim(); 
                     let pLinkRaw = (row[1] || '').trim();
                     if (pNumRaw && !pNumRaw.toUpperCase().includes('PROCESSO')) linkMap[pNumRaw] = pLinkRaw;
                 });
@@ -84,32 +95,19 @@ async function fetchDataFromSheets() {
 
                 let rawC = (idxTipoReal > -1 && row[idxTipoReal]) ? row[idxTipoReal].toString().trim() : '';
                 let valConvenio = (rawC === '' || rawC === '-') ? 'OUTROS' : rawC.toUpperCase();
-                let numProcesso = (row[idxProcesso] || '').toString().replace(/\./g, '').trim(); // Sanitização aplicada
+                let numProcesso = (row[idxProcesso] || '').toString().replace(/\./g, '').trim(); 
                 let localVal = (row[idxLocal] || 'Não Identificado').toString().trim();
                 let localCheck = localVal.toLowerCase();
 
                 let item = {
-                    origem: src.type,
-                    processo: numProcesso,
-                    link_sei: linkMap[numProcesso] || '',
+                    origem: src.type, processo: numProcesso, link_sei: linkMap[numProcesso] || '',
                     link_planilha: `https://docs.google.com/spreadsheets/d/${src.id}/edit`,
-                    local: localVal,
-                    tipo: (row[idxTipoReal] || '').toString().trim(),
-                    mobilia: (row[idxMobilia] || '').toString().trim(),
-                    material: (idxMaterial > -1 ? (row[idxMaterial] || '').toString().trim() : ''),
-                    dimensoes: (idxDimensoes > -1 ? (row[idxDimensoes] || '').toString().trim() : ''),
-                    status: (row[idxStatus] || '').toString().toUpperCase().trim(),
-                    prioridade: row[idxPrio] || '',
-                    data_autorizacao: (row[idxDataAut] || '').toString().trim(),
-                    data_entrega: (row[idxDataEnt] || '').toString().trim(),
-                    previsao: (row[idxPrev] || '').toString().trim(),
-                    demandante: (row[idxDem] || '').toString().trim(),
-                    beneficiario: (row[idxBen] || '').toString().trim(),
-                    convenio: valConvenio,
-                    qtd_solicitada: parseNum(row[idxQtdSol]),
-                    qtd_entregue: parseNum(row[idxQtdEnt]),
-                    qtd_pendente: parseNum(row[idxQtdPen]),
-                    observacao: (row[idxObs] !== undefined && row[idxObs] !== null) ? row[idxObs].toString().trim() : ''
+                    local: localVal, tipo: (row[idxTipoReal] || '').toString().trim(), mobilia: (row[idxMobilia] || '').toString().trim(),
+                    material: (idxMaterial > -1 ? (row[idxMaterial] || '').toString().trim() : ''), dimensoes: (idxDimensoes > -1 ? (row[idxDimensoes] || '').toString().trim() : ''),
+                    status: (row[idxStatus] || '').toString().toUpperCase().trim(), prioridade: row[idxPrio] || '', data_autorizacao: (row[idxDataAut] || '').toString().trim(),
+                    data_entrega: (row[idxDataEnt] || '').toString().trim(), previsao: (row[idxPrev] || '').toString().trim(), demandante: (row[idxDem] || '').toString().trim(),
+                    beneficiario: (row[idxBen] || '').toString().trim(), convenio: valConvenio, qtd_solicitada: parseNum(row[idxQtdSol]),
+                    qtd_entregue: parseNum(row[idxQtdEnt]), qtd_pendente: parseNum(row[idxQtdPen]), observacao: (row[idxObs] !== undefined && row[idxObs] !== null) ? row[idxObs].toString().trim() : ''
                 };
 
                 let mobLower = item.mobilia.toLowerCase();
@@ -139,13 +137,12 @@ app.get('/', async (req, res) => {
         let data = myCache.get('DASHBOARD_DATA');
 
         if (!data || forceRefresh) {
-            console.log("Buscando dados no Google Sheets...");
             data = await fetchDataFromSheets();
             myCache.set('DASHBOARD_DATA', data);
         }
         res.render('index', { INITIAL_DATA: JSON.stringify(data) });
     } catch (err) {
-        res.status(500).send("Erro ao carregar o painel. Verifique as permissões da Service Account.");
+        res.status(500).send("Erro ao carregar o painel: " + err.message);
     }
 });
 
@@ -159,35 +156,24 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// --- ROTA DE GERAÇÃO DE PDF (Substitui PdfGenerator.gs via Puppeteer) ---
+// --- GERAÇÃO DE PDF (Otimizado para Vercel) ---
 app.post('/api/pdf', async (req, res) => {
     try {
         const { type, items } = req.body;
         
-        let html = `<!DOCTYPE html><html lang='pt-BR'><head><style>
-            body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11px; color: #333; }
-            h2 { text-align: center; color: #3e2723; margin-bottom: 5px; font-size: 16px; text-transform: uppercase; }
-            .header-info { text-align: center; font-size: 10px; color: #777; margin-bottom: 20px; }
-            .processo-box { margin-bottom: 15px; border: 1px solid #d7ccc8; border-radius: 6px; padding: 10px; page-break-inside: avoid; background-color: #fafafa; }
-            .proc-title { font-size: 11px; font-weight: bold; color: #3e2723; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; }
-            table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-            th, td { border-bottom: 1px solid #e0e0e0; padding: 6px 4px; text-align: left; font-size: 10px; }
-            th { color: #5d4037; font-weight: bold; background-color: #fff; text-transform: uppercase; font-size: 9px;}
-            .text-center { text-align: center; }
-            .pend-alert { color: #d32f2f; font-weight: bold; }
-        </style></head><body>`;
+        let html = ``;
 
         let title = (type === 3 || type === 4) ? "RELATÓRIO CONSOLIDADO GERAL - MARCENARIA" : "RELATÓRIO DE PROCESSOS - MARCENARIA";
-        html += `<h2>${title}</h2><div class='header-info'>Data de Emissão: ${new Date().toLocaleString('pt-BR')}</div>`;
+        html += `${title}Data de Emissão: ${new Date().toLocaleString('pt-BR')}`;
 
         const formatRow = (cols) => {
-            let rowHtml = "<tr>";
+            let rowHtml = "";
             cols.forEach((c, i) => {
                 let clazz = (i >= cols.length - 3) ? "text-center" : "";
                 if (i === cols.length - 1 && parseFloat(c) > 0) clazz += " pend-alert";
-                rowHtml += `<td class='${clazz}'>${c}</td>`;
+                rowHtml += `${c}`;
             });
-            return rowHtml + "</tr>";
+            return rowHtml + "";
         };
 
         if (type === 1 || type === 2) {
@@ -200,10 +186,10 @@ app.post('/api/pdf', async (req, res) => {
 
             for (let proc in grouped) {
                 let g = grouped[proc];
-                html += `<div class='processo-box'><div class='proc-title'>PROCESSO: ${proc} &nbsp;|&nbsp; LOCAL: ${g.local}</div><table><thead><tr>`;
-                if (type === 1) html += "<th width='35%'>Mobília</th><th width='20%'>Material</th><th width='15%'>Dimensões</th>";
-                else html += "<th width='70%'>Mobília (Agrupada)</th>";
-                html += "<th width='10%' class='text-center'>Sol.</th><th width='10%' class='text-center'>Ent.</th><th width='10%' class='text-center'>Pend.</th></tr></thead><tbody>";
+                html += `PROCESSO: ${proc}  |  LOCAL: ${g.local}`;
+                if (type === 1) html += "";
+                else html += "";
+                html += "";
 
                 if (type === 1) {
                     g.items.forEach(item => {
@@ -223,13 +209,13 @@ app.post('/api/pdf', async (req, res) => {
                         html += formatRow([m, aggProcesso[m].sol, aggProcesso[m].ent, pend]);
                     }
                 }
-                html += "</tbody></table></div>";
+                html += "MobíliaMaterialDimensõesMobília (Agrupada)Sol.Ent.Pend.";
             }
         } else {
-            html += "<table><thead><tr>";
-            if (type === 3) html += "<th width='35%'>Mobília</th><th width='20%'>Material</th><th width='15%'>Dimensões</th>";
-            else html += "<th width='70%'>Mobília</th>";
-            html += "<th width='10%' class='text-center'>Sol.</th><th width='10%' class='text-center'>Ent.</th><th width='10%' class='text-center'>Pend.</th></tr></thead><tbody>";
+            html += "";
+            if (type === 3) html += "";
+            else html += "";
+            html += "";
 
             let aggGlobal = {};
             items.forEach(item => {
@@ -248,11 +234,18 @@ app.post('/api/pdf', async (req, res) => {
                 if (type === 3) html += formatRow([obj.mobilia, obj.material, obj.dimensoes, obj.sol, obj.ent, pend]);
                 else html += formatRow([obj.mobilia, obj.sol, obj.ent, pend]);
             });
-            html += "</tbody></table>";
+            html += "MobíliaMaterialDimensõesMobíliaSol.Ent.Pend.";
         }
-        html += "</body></html>";
+        html += "";
 
-        const browser = await puppeteer.launch({ headless: 'new' });
+        // Lança o Chromium leve suportado pelo Vercel
+        const browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
@@ -270,5 +263,11 @@ app.post('/api/pdf', async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Dashboard rodando em http://localhost:${PORT}`));
+// Em vez de "app.listen", no Vercel nós EXPORTAMOS o app.
+// O listen fica apenas para rodar localmente no seu PC.
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = 3000;
+    app.listen(PORT, () => console.log(`Dashboard rodando em http://localhost:${PORT}`));
+}
+
+module.exports = app;
