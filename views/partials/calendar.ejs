@@ -1,0 +1,383 @@
+<style>
+  /* --- ESTILOS DO FULLCALENDAR --- */
+  
+  .fc-event {
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer;
+    margin-bottom: 2px;
+  }
+
+  .custom-event-box {
+    border-radius: 4px;
+    padding: 3px 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  .fc-event:hover .custom-event-box {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 50;
+  }
+
+  .evt-badge {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .evt-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* --- CORES DE STATUS --- */
+  
+  /* CINZA: Sem itens (Erro ou Vazio) */
+  .bg-empty {
+      background-color: #6c757d; 
+      border-left: 3px solid #495057;
+  }
+
+  /* VERMELHO: Atrasado */
+  .bg-late { 
+      background-color: #dc3545; 
+      border-left: 3px solid #b02a37; 
+  }
+  
+  /* AMARELO: Próximos 5 dias */
+  .bg-near { 
+      background-color: #ffc107; 
+      border-left: 3px solid #d39e00; 
+      color: #3e2723 !important; 
+  }
+  .bg-near .evt-badge {
+      background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  /* AZUL: Futuro */
+  .bg-future { 
+      background-color: #0d6efd; 
+      border-left: 3px solid #0a58ca; 
+  }
+
+  /* VERDE: Concluído */
+  .bg-done { 
+      background-color: #198754; 
+      border-left: 3px solid #146c43; 
+  }
+
+  /* --- MODAL --- */
+  .modal-custom .modal-content {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    color: var(--text-pri);
+  }
+  .modal-custom .modal-header {
+    background-color: var(--highlight);
+    color: #fff;
+    border-radius: 15px 15px 0 0;
+  }
+  .detail-label {
+    font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; margin-bottom: 2px;
+  }
+  .detail-value {
+    font-size: 0.95rem; color: var(--text-pri); font-weight: 600; margin-bottom: 12px;
+    border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;
+  }
+  .modal-table th {
+    background-color: rgba(0,0,0,0.05); color: var(--text-sec); font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border-color);
+  }
+  .modal-table td {
+    color: var(--text-pri); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); vertical-align: middle;
+  }
+</style>
+
+<div class="viz-box h-100 d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="chart-header m-0">Calendário de Entregas</h5>
+        <div class="small d-flex gap-2 flex-wrap">
+            <span class="badge" style="background:#dc3545; font-weight:normal;">Atrasado</span>
+            <span class="badge" style="background:#ffc107; color:#000; font-weight:normal;">Próx. 5 Dias</span>
+            <span class="badge" style="background:#0d6efd; font-weight:normal;">Futuro</span>
+            <span class="badge" style="background:#198754; font-weight:normal;">Concluído</span>
+            <span class="badge" style="background:#6c757d; font-weight:normal;">Verificar (0 Itens)</span>
+        </div>
+    </div>
+    <div id="calendar" style="flex:1; min-height:600px;"></div>
+</div>
+
+<div class="modal fade modal-custom" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-uppercase"><i class="bi bi-info-circle-fill me-2"></i>Detalhes da Entrega</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+          
+          <div class="row mb-3">
+              <div class="col-md-8">
+                  <div class="detail-label">Local / Órgão</div>
+                  <div class="detail-value fs-5" id="mdlLocal">...</div>
+              </div>
+              <div class="col-md-4 text-end">
+                   <div class="detail-label">Data Previsão</div>
+                   <div class="detail-value fs-5" id="mdlData" style="font-weight:800;">...</div>
+              </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                  <div class="detail-label">Nº Processo</div>
+                  <div class="detail-value" id="mdlProcesso">...</div>
+              </div>
+              <div class="col-md-4">
+                  <div class="detail-label">Status Geral</div>
+                  <div class="detail-value" id="mdlStatus">...</div>
+              </div>
+              <div class="col-md-4">
+                  <div class="detail-label">Resumo</div>
+                  <div class="detail-value" id="mdlResumo">...</div>
+              </div>
+          </div>
+
+          <h6 class="fw-bold text-uppercase mb-2" style="color:var(--highlight); font-size:0.85rem; border-bottom: 2px solid var(--highlight); display:inline-block; padding-bottom:2px;">Lista de Itens</h6>
+          <div class="table-responsive">
+              <table class="table modal-table mb-0">
+                  <thead>
+                      <tr>
+                          <th>Mobília/Produto</th>
+                          <th>Dimensões</th>
+                          <th class="text-center">Qtd. Sol.</th>
+                          <th class="text-center">Qtd. Pendente</th>
+                      </tr>
+                  </thead>
+                  <tbody id="mdlTableBody"></tbody>
+              </table>
+          </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    if (typeof calendarInstance === 'undefined') {
+        var calendarInstance = null; 
+    }
+
+    function updateCalendar() {
+        const calendarEl = document.getElementById('calendar');
+        if(!calendarEl) return;
+        
+        if(typeof filteredData === 'undefined' || !filteredData) return;
+
+        // 1. Agrupamento de Dados
+        const groups = {};
+
+        filteredData.forEach(item => {
+            if (!item.previsao || item.previsao.trim() === '') return;
+            const parts = item.previsao.split('/');
+            if(parts.length !== 3) return;
+            
+            // Chave única
+            const groupKey = `${item.local}_${item.previsao}_${item.processo}`;
+            
+            if(!groups[groupKey]) {
+                groups[groupKey] = {
+                    start: `${parts[2]}-${parts[1]}-${parts[0]}`, 
+                    processo: item.processo,
+                    local: item.local,
+                    previsao: item.previsao,
+                    items: [], 
+                    totalPend: 0,
+                    totalSol: 0
+                };
+            }
+            
+            groups[groupKey].items.push(item);
+            groups[groupKey].totalPend += (item.qtd_pendente || 0);
+            groups[groupKey].totalSol += (item.qtd_solicitada || 0);
+        });
+
+        // 2. Criar Eventos
+        const events = Object.values(groups).map(group => {
+            return {
+                start: group.start,
+                allDay: true,
+                extendedProps: {
+                    groupData: group
+                }
+            };
+        });
+
+        // 3. Renderizar Calendário
+        if(calendarInstance) {
+            calendarInstance.removeAllEvents();
+            calendarInstance.addEventSource(events);
+            calendarInstance.render();
+        } else {
+            calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                themeSystem: 'bootstrap5',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,listMonth'
+                },
+                buttonText: { today: 'Hoje', month: 'Mês', list: 'Lista' },
+                height: '100%',
+                events: events,
+                
+                eventContent: function(arg) {
+                    const data = arg.event.extendedProps.groupData;
+                    const pend = data.totalPend;
+                    const sol = data.totalSol;
+
+                    const dateParts = data.previsao.split('/');
+                    const eventDate = new Date(dateParts[2], dateParts[1]-1, dateParts[0]);
+                    const today = new Date(); 
+                    today.setHours(0,0,0,0); 
+
+                    const diffTime = eventDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    let boxClass = '';
+                    let badgeHtml = '';
+
+                    if (sol === 0) {
+                        boxClass = 'bg-empty'; 
+                        badgeHtml = `<span class="evt-badge"><i class="bi bi-question-circle-fill"></i> S/ ITENS</span>`;
+                    }
+                    else if (pend === 0) {
+                        boxClass = 'bg-done'; 
+                        badgeHtml = `<span class="evt-badge"><i class="bi bi-check-circle-fill"></i> OK</span>`;
+                    }
+                    else {
+                        if (diffDays < 0) {
+                            boxClass = 'bg-late'; 
+                        } else if (diffDays <= 5) {
+                            boxClass = 'bg-near'; 
+                        } else {
+                            boxClass = 'bg-future'; 
+                        }
+                        
+                        badgeHtml = `<span class="evt-badge"><i class="bi bi-exclamation-triangle-fill"></i> ${pend} PEND.</span>`;
+                    }
+
+                    return {
+                        html: `
+                        <div class="custom-event-box ${boxClass}">
+                            ${badgeHtml}
+                            <span class="evt-title">${data.local}</span>
+                        </div>
+                        `
+                    };
+                },
+                
+                eventClick: function(info) {
+                    const data = info.event.extendedProps.groupData;
+                    openDetailModal(data);
+                }
+            });
+            calendarInstance.render();
+        }
+    }
+
+    function openDetailModal(data) {
+        $('#mdlLocal').text(data.local);
+        
+        const dateParts = data.previsao.split('/');
+        const eventDate = new Date(dateParts[2], dateParts[1]-1, dateParts[0]);
+        const today = new Date(); today.setHours(0,0,0,0);
+        const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+        
+        let dateColor = 'text-muted';
+        if(data.totalSol > 0 && data.totalPend > 0) {
+             if(diffDays < 0) dateColor = 'text-danger';
+             else if(diffDays <= 5) dateColor = 'text-warning';
+             else dateColor = 'text-primary';
+        } else if(data.totalSol > 0 && data.totalPend === 0) {
+             dateColor = 'text-success';
+        }
+
+        $('#mdlData').removeClass().addClass(`detail-value fs-5 ${dateColor}`).text(data.previsao);
+        $('#mdlProcesso').text(data.processo || '-');
+        
+        const totalItens = data.items.length;
+        const totalPend = data.totalPend;
+        const totalSol = data.totalSol;
+
+        if(totalSol === 0) {
+            $('#mdlStatus').html('<span class="badge bg-secondary">SEM ITENS</span>');
+            $('#mdlResumo').text(`Não há itens solicitados para este processo.`);
+        } else if(totalPend === 0) {
+            $('#mdlStatus').html('<span class="badge bg-success">FINALIZADO</span>');
+            $('#mdlResumo').text(`Todos os ${totalItens} itens foram entregues.`);
+        } else {
+            $('#mdlStatus').html('<span class="badge bg-danger">PENDENTE</span>');
+            $('#mdlResumo').text(`${totalPend} itens pendentes de um total de ${totalSol}.`);
+        }
+
+        const tbody = $('#mdlTableBody');
+        tbody.empty();
+
+        data.items.forEach(item => {
+            const pend = item.qtd_pendente || 0;
+            const sol = item.qtd_solicitada || 0;
+            
+            let pendStyle = '';
+            let pendText = '';
+            
+            if (sol === 0) {
+                 pendStyle = 'color:var(--text-sec); font-style:italic;';
+                 pendText = '-';
+            } else if (pend > 0) {
+                 pendStyle = 'color:#dc3545; font-weight:800;';
+                 pendText = `${pend}`;
+            } else {
+                 pendStyle = 'color:#198754; font-weight:600;';
+                 pendText = `<i class="bi bi-check"></i> OK`;
+            }
+
+            const row = `
+                <tr>
+                    <td>
+                        <div class="fw-bold">${item.mobilia}</div>
+                        <div class="small text-muted" style="font-size:0.75rem">${item.material || ''}</div>
+                    </td>
+                    <td>${item.dimensoes || '-'}</td>
+                    <td class="text-center">${item.qtd_solicitada}</td>
+                    <td class="text-center" style="${pendStyle}">${pendText}</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+
+        const myModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        myModal.show();
+    }
+</script>

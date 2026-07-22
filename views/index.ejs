@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+  
+  <style>
+    :root {
+      --bg-page: #f4f1ea; --text-pri: #3e2723; --text-sec: #8d6e63;
+      --accent: #a1887f; --highlight: #6d4c41; --card-bg: #ffffff;
+      --border-color: #d7ccc8; --input-bg: #ffffff; --input-text: #3e2723;
+      --dropdown-bg: #ffffff; --hover-item: #f5f5f5;
+      --shadow: 0 8px 24px rgba(62, 39, 35, 0.08);
+      --st-sol: #1e88e5; --st-ent: #43a047; --st-pen: #ffb300; 
+    }
+    body.dark-mode {
+      --bg-page: #1a1a1a; --text-pri: #e0e0e0; --text-sec: #bdbdbd;
+      --highlight: #a1887f; --card-bg: #2d2d2d; --border-color: #444444;
+      --input-bg: #333333; --input-text: #ffffff; --dropdown-bg: #333333;
+      --hover-item: #444444; --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    body { background-color: var(--bg-page); color: var(--text-pri); font-family: 'Segoe UI', system-ui, sans-serif; transition: 0.3s; overflow-x: hidden; }
+    
+    .text-uppercase-force { text-transform: uppercase !important; }
+
+    .layout-wrapper { display: flex; min-height: 100vh; }
+    .sidebar {
+        width: 220px; background-color: var(--card-bg); border-right: 1px solid var(--border-color);
+        display: flex; flex-direction: column; align-items: center; padding-top: 20px; transition: width 0.3s;
+        z-index: 100; position: fixed; top: 0; bottom: 0; left: 0;
+    }
+    .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 30px; }
+    .nav-btn {
+        width: 100%; padding: 15px 20px; background: transparent; border: none;
+        color: var(--text-sec); text-align: left; display: flex; align-items: center;
+        cursor: pointer; transition: 0.2s; white-space: nowrap; overflow: hidden;
+    }
+    .nav-btn i { font-size: 1.5rem; min-width: 40px; text-align: center; }
+    .nav-btn span { opacity: 1; transition: opacity 0.2s; font-weight: 600; margin-left: 10px; }
+    .nav-btn:hover { background-color: var(--hover-item); color: var(--highlight); }
+    .nav-btn.active { background-color: var(--highlight); color: #fff; }
+    
+    .custom-dropdown-btn {
+        background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--input-text);
+        text-align: left; display: flex; justify-content: space-between; align-items: center;
+        width: 100%; padding: 10px 15px; border-radius: 10px; font-weight: 500; transition: 0.2s;
+        text-transform: uppercase;
+    }
+    .custom-dropdown-btn:hover { border-color: var(--highlight); }
+    .dropdown-menu-custom {
+        background-color: var(--dropdown-bg); border: 1px solid var(--border-color);
+        padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        max-height: 400px; width: 100%; min-width: 250px; z-index: 1050;
+    }
+    .dropdown-search {
+        background-color: var(--bg-page); border: 1px solid var(--border-color); color: var(--input-text);
+        border-radius: 6px; padding: 8px; margin-bottom: 10px; width: 100%;
+        text-transform: uppercase;
+    }
+    .dropdown-search:focus { outline: none; border-color: var(--highlight); }
+    .dropdown-list-container { max-height: 250px; overflow-y: auto; }
+    .dropdown-list-container::-webkit-scrollbar { width: 6px; }
+    .dropdown-list-container::-webkit-scrollbar-thumb { background-color: var(--highlight); border-radius: 3px; }
+    .dropdown-item-custom {
+        display: flex; align-items: center; padding: 8px; border-radius: 6px;
+        cursor: pointer; color: var(--input-text); transition: 0.1s;
+        text-transform: uppercase; font-size: 0.85rem;
+    }
+    .dropdown-item-custom:hover { background-color: var(--hover-item); }
+    .form-check-input {
+        width: 18px; height: 18px; margin-right: 10px; cursor: pointer;
+        background-color: var(--bg-page); border-color: var(--border-color);
+    }
+    .form-check-input:checked { background-color: var(--highlight); border-color: var(--highlight); }
+    
+    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); }
+    
+    .oficina-selector {
+        background-color: var(--input-bg); color: var(--input-text); border: 2px solid var(--border-color);
+        font-weight: 700; border-radius: 10px; padding: 10px; width: 100%; cursor: pointer;
+    }
+    .oficina-selector option { background-color: var(--input-bg); color: var(--input-text); }
+    
+    .kpi-card { 
+      background: var(--card-bg); border-radius: 16px; padding: 25px 20px; 
+      box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border-color); position: relative;
+    }
+    .kpi-card.blue { border-left: 5px solid var(--st-sol); }
+    .kpi-card.green { border-left: 5px solid var(--st-ent); }
+    .kpi-card.yellow { border-left: 5px solid var(--st-pen); }
+    .kpi-label { font-size: 0.8rem; color: var(--text-sec); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+    .kpi-val { font-size: 2.5rem; font-weight: 800; color: var(--text-pri); }
+    
+    .viz-box { 
+      background: var(--card-bg); border-radius: 16px; padding: 25px; 
+      box-shadow: var(--shadow); border: 1px solid var(--border-color);
+      position: relative; height: 100%; min-height: 550px; display: flex; flex-direction: column;
+    }
+    .chart-container { flex: 1; position: relative; }
+    .chart-header { font-weight: 700; color: var(--text-sec); text-align: center; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 15px; }
+    
+    .table-box { flex: 1; overflow-y: auto; }
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .custom-table th { 
+        background-color: var(--highlight); color: #fff; position: sticky; top: 0; 
+        padding: 12px; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border: none; z-index: 10;
+    }
+    .custom-table td { padding: 12px; font-size: 0.9rem; color: var(--text-pri); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    .custom-table tbody tr.parent-row:hover td { background-color: var(--hover-item); cursor: pointer; }
+    
+    .sim-input {
+        width: 60px; padding: 4px; border: 1px solid var(--border-color); border-radius: 6px;
+        background-color: var(--bg-page); color: var(--text-pri); text-align: center;
+        font-weight: bold; font-size: 0.85rem;
+    }
+    .sim-input:focus { outline: none; border-color: var(--highlight); background-color: var(--card-bg); }
+    .sim-val-pen { font-weight: 800; color: var(--st-pen); font-size: 0.9rem; }
+
+    .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid; display: inline-block; text-transform: uppercase; }
+    .st-prod { background: rgba(33, 150, 243, 0.1); color: #2196F3; border-color: #2196F3; } 
+    .st-montagem { background: rgba(156, 39, 176, 0.1); color: #9C27B0; border-color: #9C27B0; }
+    .st-planejamento { background: rgba(233, 30, 99, 0.1); color: #E91E63; border-color: #E91E63; }
+    .st-aguardando { background: rgba(253, 126, 20, 0.1); color: #fd7e14; border-color: #fd7e14; }
+    .st-pendente { background: rgba(255, 193, 7, 0.1); color: #ffc107; border-color: #ffc107; }
+    .st-estoque { background: rgba(0, 188, 212, 0.1); color: #00BCD4; border-color: #00BCD4; }
+    .st-orcamento { background: rgba(121, 85, 72, 0.1); color: #795548; border-color: #795548; }
+    .st-nao-aut { background: rgba(220, 53, 69, 0.1); color: #dc3545; border-color: #dc3545; }
+    .st-arquivado { background: rgba(108, 117, 125, 0.1); color: #6c757d; border-color: #6c757d; }
+    .st-finalizado { background: rgba(25, 135, 84, 0.1); color: #198754; border-color: #198754; }
+    .st-default { background: rgba(158, 158, 158, 0.1); color: #9E9E9E; border-color: #9E9E9E; }
+
+    .prio-badge { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; border: 1px solid; }
+    .prio-1 { background: rgba(220, 53, 69, 0.1); color: #dc3545; border-color: #dc3545; }
+    .prio-2 { background: rgba(253, 126, 20, 0.1); color: #fd7e14; border-color: #fd7e14; }
+    .prio-3 { background: rgba(255, 193, 7, 0.1); color: #ffc107; border-color: #ffc107; }
+    .prio-4 { background: rgba(25, 135, 84, 0.1); color: #198754; border-color: #198754; }
+    .prio-5 { background: rgba(13, 110, 253, 0.1); color: #0d6efd; border-color: #0d6efd; }
+    .prio-default { color: var(--text-sec); border-color: var(--border-color); }
+
+    .date-alert { color: #dc3545 !important; font-weight: 800 !important; }
+
+    .detail-row td { padding: 0 !important; border: none !important; }
+    .sub-table th { background: transparent !important; color: var(--text-sec); font-size: 0.75rem; border-bottom: 2px solid var(--border-color); }
+    .sub-table td { font-size: 0.8rem; color: var(--text-pri); padding: 8px; vertical-align: middle; }
+    
+    .parent-row .bi-chevron-down { transition: transform 0.3s; }
+    .parent-row[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
+
+    .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-top: 1px solid var(--border-color); }
+    .pagination-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-pri); padding: 5px 15px; border-radius: 8px; cursor: pointer; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination-btn:hover:not(:disabled) { background-color: var(--hover-item); border-color: var(--highlight); }
+
+    .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-page); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; }
+    .btn-action {
+        width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color);
+        background: var(--card-bg); color: var(--text-pri); display: flex; justify-content: center; align-items: center; cursor: pointer;
+    }
+    .btn-action:hover { background: var(--highlight); color: #fff; border-color: var(--highlight); }
+    .view-section { display: none; height: 100%; }
+    .view-section.active { display: block; animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .fc { --fc-border-color: var(--border-color); --fc-page-bg-color: var(--card-bg); --fc-neutral-bg-color: var(--bg-page); --fc-list-event-hover-bg-color: var(--hover-item); color: var(--text-pri); }
+    .fc-toolbar-title { font-size: 1.2rem !important; text-transform: uppercase; color: var(--text-pri); }
+    .fc-button-primary { background-color: var(--highlight) !important; border-color: var(--highlight) !important; }
+    .fc-button-primary:hover { background-color: var(--text-sec) !important; border-color: var(--text-sec) !important; }
+    .fc-daygrid-day-number { color: var(--text-pri); text-decoration: none; }
+    .fc-col-header-cell-cushion { color: var(--text-sec); text-decoration: none; text-transform: uppercase; font-size: 0.8rem; }
+    
+    .procon-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 20px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; }
+    .procon-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .procon-header { padding: 15px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+    .header-totals { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border-color); }
+    .h-badge { padding: 4px 8px; border-radius: 4px; font-weight: 700; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); text-transform: uppercase; }
+    .origin-badge { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; display: inline-block; width: fit-content; text-transform: uppercase; }
+    .date-badge { font-size: 0.75rem; font-weight: 700; color: var(--text-sec); margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .origin-sede { background-color: #3e2723; color: #fff; }
+    .origin-regional { background-color: #8d6e63; color: #fff; }
+    .procon-title { font-weight: 700; color: var(--text-pri); font-size: 1rem; line-height: 1.3; text-transform: uppercase; }
+    .procon-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; font-size: 0.85rem; color: var(--text-sec); text-transform: uppercase; }
+    .procon-details { background-color: var(--hover-item); border-top: 1px solid var(--border-color); padding: 0; }
+    .procon-item-row { padding: 15px; border-bottom: 1px solid var(--border-color); }
+    .procon-item-row:last-child { border-bottom: none; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem; margin-bottom: 10px; }
+    .detail-item strong { display: block; color: var(--text-sec); font-size: 0.7rem; text-transform: uppercase; }
+    .detail-item span { color: var(--text-pri); font-weight: 600; text-transform: uppercase; }
+    .qty-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); min-width: 50px; flex: 1; }
+    .qty-val { font-weight: 800; font-size: 1rem; }
+    .qty-lbl { font-size: 0.6rem; text-transform: uppercase; color: var(--text-sec); }
+
+    .post-it-container { position: relative; display: inline-flex; align-items: center; margin-left: 6px; vertical-align: middle; }
+    .post-it-icon { color: #ffca28; font-size: 1.1rem; cursor: help; transition: transform 0.2s; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2)); }
+    .post-it-icon:hover { transform: scale(1.2); color: #ffb300; }
+    .post-it-tooltip {
+        visibility: hidden; opacity: 0; position: absolute; bottom: 140%; left: 50%;
+        transform: translateX(-50%) translateY(10px); width: max-content; max-width: 280px;
+        background: linear-gradient(135deg, #fff9c4 80%, #f0e68c 100%); color: #3e2723 !important;
+        text-align: left; padding: 10px 14px; box-shadow: 3px 5px 15px rgba(0,0,0,0.3); z-index: 1060;
+        font-size: 0.85rem; line-height: 1.4; border-radius: 2px 10px 10px 10px; border: 1px solid #e6c513;
+        transition: all 0.2s ease-in-out; pointer-events: none; white-space: normal;
+    }
+    .post-it-tooltip::after {
+        content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px;
+        border-style: solid; border-color: #f0e68c transparent transparent transparent;
+    }
+    .post-it-container:hover .post-it-tooltip { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .sortable-header { cursor: pointer; user-select: none; white-space: nowrap; transition: filter 0.2s; }
+    .sortable-header:hover { filter: brightness(0.85); }
+    .sort-icon { font-size: 0.8rem; margin-left: 4px; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; }
+
+    @keyframes slideDownFadIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    .notif-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10500; display: none; align-items: center; justify-content: center; }
+    .notif-box { background: var(--card-bg); width: 95%; max-width: 600px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid var(--border-color); animation: slideDownFadIn 0.3s ease-out forwards; }
+    .notif-header { padding: 20px; background: var(--highlight); color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .notif-body { padding: 20px; overflow-y: auto; color: var(--text-pri); flex: 1; }
+    .notif-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background: var(--bg-page); }
+    
+    .notif-item { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+    .notif-item:last-child { margin-bottom: 0; }
+    .notif-item-header { padding: 15px; background: var(--hover-item); cursor: pointer; transition: background 0.2s; }
+    .notif-item-header:hover { background: var(--bg-page); }
+    .notif-item-header .bi-chevron-down { transition: transform 0.3s; }
+    .notif-item-header[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
+    .notif-item-body { padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); }
+    .notif-item-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+    .notif-item-list li { background: var(--bg-page); padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <div id="loader" class="loader-overlay">
+    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem; color: var(--highlight); border-width: 4px;"></div>
+    <h6 style="color: var(--text-sec); font-weight: 700; letter-spacing: 1px;">CARREGANDO...</h6>
+  </div>
+
+  <div class="layout-wrapper">
+      <div class="sidebar">
+          <div class="mb-4 d-flex align-items-center gap-3">
+              <i class="bi bi-box-seam fs-1" style="color: var(--highlight);"></i>
+              <div class="position-relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                  <i class="bi bi-bell-fill fs-4" style="color: var(--highlight);"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow" id="notifBadge" style="display:none; font-size: 0.6rem; border: 2px solid var(--card-bg);">0</span>
+              </div>
+          </div>
+
+          <button class="nav-btn active" onclick="switchView('viewTable', this)"><i class="bi bi-table"></i> <span>Tabela</span></button>
+          <button class="nav-btn" onclick="switchView('viewCalendar', this)"><i class="bi bi-calendar-event"></i> <span>Calendário</span></button>
+          <button class="nav-btn" onclick="switchView('viewChart1', this)"><i class="bi bi-bar-chart-fill"></i> <span>Status</span></button>
+          <button class="nav-btn" onclick="switchView('viewChart2', this)"><i class="bi bi-geo-alt-fill"></i> <span>Parceiros</span></button>
+          <button class="nav-btn" onclick="switchView('viewChart3', this)"><i class="bi bi-boxes"></i> <span>Volume</span></button>
+          <button class="nav-btn" onclick="switchView('viewProcon', this)"><i class="bi bi-building-gear"></i> <span>PROCON | TECH</span></button>
+      </div>
+
+      <div class="main-content">
+          <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+              <h2 class="fw-bold m-0" style="color: var(--text-pri);">DASHBOARD - MARCENARIA</h2>
+              <p class="m-0 small" style="color: var(--text-sec);">Marcenaria & Serralheria</p>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar dados (Forçar atualização do Cache)"><i class="bi bi-arrow-repeat fs-5"></i></button>
+              <button class="btn-action" onclick="toggleTheme()" title="Modo Escuro"><i class="bi bi-moon-stars-fill fs-6" id="themeIcon"></i></button>
+              <div class="ms-3 d-none d-md-block text-end"><span class="badge" style="background: rgba(128,128,128,0.1); color: var(--text-sec); border: 1px solid var(--border-color);"><i class="bi bi-clock me-1"></i> <span id="lastUpdate">...</span></span></div>
+            </div>
+          </div>
+
+          <div id="mainSectionGroup">
+              <div class="card card-custom mb-4">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.8rem;">
+                          <i class="bi bi-funnel-fill me-2"></i>Filtros
+                      </h6>
+                      <div class="d-flex gap-2">
+                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetFilters()">Limpar Todos</button>
+                          
+                          <div class="dropdown">
+                              <button class="btn btn-sm text-white rounded-pill px-3 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #d32f2f; border: none;" id="btnExportPDFMain">
+                                  <i class="bi bi-file-earmark-pdf-fill me-1"></i>Gerar PDF
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999;">
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Separado por Processo</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(1)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(2)">Apenas Mobília (Soma as Quantidades)</a></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Sem Processo (Consolidado)</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(3)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(4)">Apenas Mobília (Geral)</a></li>
+                              </ul>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row g-3">
+                      <div class="col-md-3 border-end" style="border-color: var(--border-color) !important;">
+                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">1. Selecione a Oficina</label>
+                          <select id="selOficina" class="form-select oficina-selector mb-3" onchange="applyFilters('oficina')">
+                              <option value="TODAS" selected>TODAS AS OFICINAS</option>
+                              <option value="SEDE">MARCENARIA SEDE</option>
+                              <option value="REGIONAL">MARCENARIA REGIONAL</option>
+                          </select>
+                          
+                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Data de Entrega</label>
+                          <div class="d-flex gap-2 mb-3">
+                              <input type="date" id="filterDateStart" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
+                              <input type="date" id="filterDateEnd" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
+                          </div>
+
+                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisa por Qualquer Palavra</label>
+                          <input type="text" id="globalSearchInput" class="form-control oficina-selector" placeholder="Digite para filtrar..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="applyFilters('global')">
+                      </div>
+                      <div class="col-md-9">
+                          <div class="row g-3" id="filterContainer"></div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-4 g-4">
+                <div class="col-md-4"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">Total Solicitado </div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
+                <div class="col-md-4"><div class="kpi-card green"><div class="kpi-label">Total Entregue </div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
+                <div class="col-md-4"><div class="kpi-card yellow"><div class="kpi-label">Total Pendente </div><div class="kpi-val" id="kpiPendente">0</div></div></div>
+              </div>
+          </div>
+
+          <div style="min-height: 600px;">
+              <div id="viewTable" class="view-section active">
+                  <div class="viz-box">
+                    <h5 class="chart-header">Detalhamento dos Processos (Simulação Ativa)</h5>
+                    <div class="table-box">
+                        <table class="custom-table w-100">
+                          <thead>
+                            <tr>
+                              <th width="3%" class="text-center align-middle">
+                                  <input type="checkbox" id="checkAllMaster" class="form-check-input m-0" onchange="toggleAllFiltered(this)" title="Marcar/Desmarcar Todos">
+                              </th>
+                              <th width="15%">Processo</th>
+                              <th width="12%">Convênio</th>
+                              <th width="20%">Local</th>
+                              <th width="10%">Solicitado</th>
+                              <th class="text-center">Prioridade</th>
+                              <th class="text-center">Status</th>
+                              <th class="sortable-header" onclick="handleSort('previsao')" title="Clique para ordenar">Previsão <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_previsao"></i></th>
+                              <th class="sortable-header" onclick="handleSort('data_aut')" title="Clique para ordenar">Data Aut. <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
+                              <th class="sortable-header" onclick="handleSort('data_ent')" title="Clique para ordenar">Data Ent. <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
+                            </tr>
+                          </thead>
+                          <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container" id="paginationControls">
+                        <span class="small fw-bold" style="color:var(--text-sec)" id="pageInfo">Página 1</span>
+                        <div>
+                            <button class="pagination-btn" id="btnPrev" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
+                            <button class="pagination-btn ms-2" id="btnNext" onclick="changePage(1)">Próximo <i class="bi bi-chevron-right"></i></button>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+
+              <div id="viewCalendar" class="view-section">
+                  <%- include('partials/calendar') %>
+              </div>
+
+              <div id="viewChart1" class="view-section"><div class="viz-box"><h5 class="chart-header">Pendente vs Entregue (Por Móvel)</h5><div class="chart-container"><canvas id="chartMovelStatus"></canvas></div></div></div>
+              <div id="viewChart2" class="view-section"><div class="viz-box"><h5 class="chart-header">Solicitações por Parceiro (Local)</h5><div class="chart-container"><canvas id="chartParceiro"></canvas></div></div></div>
+              <div id="viewChart3" class="view-section"><div class="viz-box"><h5 class="chart-header">Volume Total de Itens</h5><div class="chart-container"><canvas id="chartVolumeMovel"></canvas></div></div></div>
+              
+              <div id="viewProcon" class="view-section">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="fw-bold" style="color:var(--text-sec)">PROCON | ESTAÇÃO TECH</h5>
+                  </div>
+                  
+                  <div class="row mb-4 g-4">
+                      <div class="col-md-6">
+                          <div class="card card-custom p-4" style="border-left: 6px solid var(--st-sol); background-color: var(--card-bg);">
+                              <h5 class="fw-bolder mb-4 text-uppercase text-center" style="color: var(--text-pri); letter-spacing: 2px;">PROCON</h5>
+                              <div class="d-flex justify-content-around text-center">
+                                  <div>
+                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">FINALIZADOS</div>
+                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="proconKpiFin">0</div>
+                                  </div>
+                                  <div>
+                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">PENDENTES</div>
+                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="proconKpiPen">0</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-6">
+                          <div class="card card-custom p-4" style="border-left: 6px solid var(--st-sol); background-color: var(--card-bg);">
+                              <h5 class="fw-bolder mb-4 text-uppercase text-center" style="color: var(--text-pri); letter-spacing: 2px;">ESTAÇÃO TECH</h5>
+                              <div class="d-flex justify-content-around text-center">
+                                  <div>
+                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">FINALIZADOS</div>
+                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="techKpiFin">0</div>
+                                  </div>
+                                  <div>
+                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">PENDENTES</div>
+                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="techKpiPen">0</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="card card-custom mb-4">
+                    <div class="card-body p-4">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                          <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.8rem;"><i class="bi bi-funnel-fill me-2"></i>Filtros & Pesquisa</h6>
+                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetProconFilters()">Limpar</button>
+                      </div>
+                      <div class="row g-3">
+                          <div class="col-md-4">
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisar Cidade/Local</label>
+                              <div class="input-group">
+                                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                                  <input type="text" id="proconSearchInput" class="form-control border-start-0" placeholder="Ex: Centro, Bacabal..." onkeyup="filterProconData()">
+                              </div>
+                          </div>
+                          <div class="col-md-4">
+                             <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Tipo</label>
+                             <div class="dropdown">
+                                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_tipo">Todos</button>
+                                <div class="dropdown-menu dropdown-menu-custom">
+                                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                        <input class="form-check-input" type="checkbox" id="selectAll_proc_tipo" onchange="toggleSelectAllProcon('tipo', this)">
+                                        <span class="text-truncate">SELECIONAR TODOS</span>
+                                    </label>
+                                    <div class="dropdown-list-container" id="list_proc_tipo"></div>
+                                </div>
+                             </div>
+                          </div>
+                          <div class="col-md-4">
+                             <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Status</label>
+                             <div class="dropdown">
+                                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_status">Todos</button>
+                                <div class="dropdown-menu dropdown-menu-custom">
+                                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                        <input class="form-check-input" type="checkbox" id="selectAll_proc_status" onchange="toggleSelectAllProcon('status', this)">
+                                        <span class="text-truncate">SELECIONAR TODOS</span>
+                                    </label>
+                                    <div class="dropdown-list-container" id="list_proc_status"></div>
+                                </div>
+                             </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row" id="proconContainer">
+                      </div>
+              </div>
+          </div>
+      </div> 
+  </div>
+
+  <div class="notif-overlay" id="notifOverlay">
+      <div class="notif-box">
+          <div class="notif-header">
+              <h5 class="m-0 fw-bold"><i class="bi bi-calendar-week-fill me-2"></i>Entregas Pendentes da Semana</h5>
+              <button type="button" class="btn-close btn-close-white" onclick="closeNotifications()"></button>
+          </div>
+          <div class="notif-body" id="notifBody">
+              <div class="text-center py-4"><div class="spinner-border text-secondary" role="status"></div></div>
+          </div>
+          <div class="notif-footer">
+              <button class="btn btn-outline-secondary" onclick="closeNotifications()">Fechar</button>
+              <button class="btn btn-success fw-bold" id="btnCopyNotif" onclick="copyWhatsAppText()"><i class="bi bi-whatsapp me-2"></i>Copiar para WhatsApp</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+    
+    let isDark = false;
+    let currentPage = 1;
+    const itemsPerPage = 50;
+    let groupedDataForTable = [];
+    let currentViewId = 'viewTable';
+    
+    let currentSortCol = null;
+    let currentSortDir = 'asc';
+    let hasShownNotif = false; 
+
+    // === INJEÇÃO DIRETA DOS DADOS PELO NODE.JS ===
+    const INITIAL_DATA = <%- INITIAL_DATA %>;
+
+    function getColors() {
+        return {
+            text: isDark ? '#e0e0e0' : '#3e2723',
+            grid: isDark ? '#333333' : '#f0f0f0',
+            pend: '#dc3545', 
+            ent: '#43a047', 
+            sol: '#1e88e5', 
+            vol: isDark ? '#a1887f' : '#5d4037'
+        };
+    }
+
+    const getOpts = () => {
+        const c = getColors();
+        return {
+            responsive: true, maintainAspectRatio: false,
+            layout: { padding: { top: 25, right: 30, left: 10, bottom: 10 } },
+            plugins: {
+                datalabels: { color: c.text, anchor: 'end', align: 'end', offset: 4, font: { weight: 'bold', size: 11 }, formatter: v => v > 0 ? v : '', clip: false },
+                legend: { labels: { color: c.text } }
+            },
+            scales: { x: { grid: { display: false }, ticks: { color: c.text } }, y: { grid: { color: c.grid }, ticks: { color: c.text }, beginAtZero: true } }
+        };
+    };
+
+    let fullData = [], filteredData = [], chartInstances = {}, activeFilters = {}; 
+
+    let proconRawData = [];
+    let proconActiveFilters = { tipo: [], status: [] };
+
+    const filterFields = [
+      {key: 'tipo_servico', label: 'Tipo Serviço'},
+      {key: 'convenio', label: 'Convênio'},
+      {key: 'demandante', label: 'Demandante'},
+      {key: 'beneficiario', label: 'Beneficiário'},
+      {key: 'local', label: 'Local'},
+      {key: 'processo', label: 'Processo'},
+      {key: 'status', label: 'Status'},
+      {key: 'mobilia', label: 'Mobília'}
+    ];
+
+    $(document).ready(function() {
+        createFilterInputs(); 
+        loadData(false); // Carrega usando INITIAL_DATA em vez de fetch
+    });
+
+    window.refreshCurrent = function(forceRefresh = false) {
+        if(currentViewId === 'viewProcon') {
+            loadProconData(forceRefresh);
+        } else {
+            loadData(forceRefresh);
+        }
+    }
+
+    window.switchView = function(viewId, btn) {
+        currentViewId = viewId;
+        $('.view-section').removeClass('active'); $('#' + viewId).addClass('active');
+        $('.nav-btn').removeClass('active'); $(btn).addClass('active');
+        
+        if(viewId === 'viewProcon') {
+            $('#mainSectionGroup').hide();
+            loadProconData(false);
+        } else {
+            $('#mainSectionGroup').show();
+            if(viewId === 'viewCalendar' && typeof updateCalendar === 'function') {
+               updateCalendar(); 
+            } else if(viewId !== 'viewTable') {
+               Object.values(chartInstances).forEach(c => c && c.resize());
+            }
+        }
+    }
+
+    window.toggleTheme = function() {
+        isDark = !isDark;
+        if(isDark) { $('body').addClass('dark-mode'); $('#themeIcon').removeClass('bi-moon-stars-fill').addClass('bi-sun-fill'); } 
+        else { $('body').removeClass('dark-mode'); $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars-fill'); }
+        updateCharts();
+        if(typeof calendarInstance !== 'undefined' && calendarInstance) calendarInstance.render();
+    }
+
+    window.toggleSelectAll = function(key, el) {
+        $(`#list_${key} input[type="checkbox"]`).prop('checked', el.checked);
+        applyFilters(key); 
+    }
+
+    function updateAllSelectAllCheckboxes() {
+        filterFields.forEach(f => {
+            const container = $(`#list_${f.key}`);
+            const total = container.find('input[type="checkbox"]').length;
+            const checkedNum = container.find('input[type="checkbox"]:checked').length;
+            $(`#selectAll_${f.key}`).prop('checked', total > 0 && total === checkedNum);
+        });
+    }
+
+    function createFilterInputs() {
+      const container = $('#filterContainer'); container.empty();
+      filterFields.forEach(f => {
+        const div = `
+          <div class="col-md-3">
+            <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">${f.label}</label>
+            <div class="dropdown" id="dd_${f.key}">
+                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_${f.key}">Todos</button>
+                <div class="dropdown-menu dropdown-menu-custom">
+                    <input type="text" class="dropdown-search" placeholder="Pesquisar..." onkeyup="filterList('${f.key}')" id="search_${f.key}">
+                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                        <input class="form-check-input" type="checkbox" id="selectAll_${f.key}" onchange="toggleSelectAll('${f.key}', this)">
+                        <span class="text-truncate">SELECIONAR TODOS</span>
+                    </label>
+                    <div class="dropdown-list-container" id="list_${f.key}"></div>
+                </div>
+            </div>
+          </div>`;
+        container.append(div);
+      });
+    }
+
+    // === COMUNICAÇÃO VIA FETCH COM NODE.JS ===
+    window.loadData = async function(forceRefresh = false) {
+      if(forceRefresh || fullData.length === 0) $('#loader').fadeIn();
+      
+      activeFilters = {}; 
+      $('#globalSearchInput').val('');
+      
+      filterFields.forEach(f => { 
+          $(`#list_${f.key}`).empty(); 
+          updateBtnLabel(f.key); 
+      });
+
+      try {
+          let dataToProcess = INITIAL_DATA;
+          
+          if (forceRefresh) {
+              const res = await fetch('/api/data');
+              if(!res.ok) throw new Error("Erro na rede");
+              dataToProcess = await res.json();
+          }
+
+          fullData = dataToProcess.marcenaria.map((d, i) => {
+             d._uniqueId = i;
+             d._active = true;
+             d._sim_sol = d.qtd_solicitada;
+             d._sim_ent = d.qtd_entregue;  
+             return d;
+          });
+          
+          applyFilters(null); 
+          $('#lastUpdate').text(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+          
+          buildNotifications();
+      } catch (err) {
+          alert("Erro: " + err.message); 
+      } finally {
+          $('#loader').fadeOut(); 
+      }
+    }
+
+    function getStartAndEndOfWeek() {
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let dayOfWeek = today.getDay(); 
+        
+        let start = new Date(today.getTime());
+        start.setDate(today.getDate() - dayOfWeek); 
+        
+        let end = new Date(today.getTime());
+        end.setDate(today.getDate() + (6 - dayOfWeek)); 
+        end.setHours(23, 59, 59, 999);
+        
+        return { start, end };
+    }
+
+    function buildNotifications() {
+        const { start, end } = getStartAndEndOfWeek();
+        const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+
+        let pendingThisWeek = fullData.filter(item => {
+            if(item.qtd_pendente <= 0) return false;
+            if(!item.previsao) return false;
+            const dParts = item.previsao.split('/');
+            if(dParts.length !== 3) return false;
+            
+            const prevDate = new Date(dParts[2], dParts[1]-1, dParts[0], 12, 0, 0);
+            
+            item._parsedDate = prevDate;
+            item._nomeDia = diasSemana[prevDate.getDay()];
+
+            return prevDate >= start && prevDate <= end;
+        });
+
+        pendingThisWeek.sort((a,b) => a._parsedDate - b._parsedDate);
+
+        let notifHtml = '';
+        let whatsappText = '*⚠️ ENTREGAS PENDENTES DA SEMANA* 📅\n\n';
+
+        if(pendingThisWeek.length === 0) {
+            notifHtml = '<div class="text-center py-4 text-muted"><i class="bi bi-check-circle fs-1 text-success d-block mb-3"></i>Nenhuma entrega pendente para esta semana! 🎉</div>';
+            whatsappText += 'Nenhuma entrega pendente para esta semana! 🎉';
+            $('#notifBadge').hide();
+        } else {
+            let processGroupsSet = new Set(pendingThisWeek.map(i => i.processo));
+            $('#notifBadge').text(processGroupsSet.size).show();
+            
+            let groups = {};
+            pendingThisWeek.forEach(item => {
+                let prevFormatada = `${item.previsao} (${item._nomeDia})`;
+                let key = item.processo + '|' + item.local + '|' + prevFormatada;
+                if(!groups[key]) groups[key] = { local: item.local, processo: item.processo, previsao: prevFormatada, items: [] };
+                groups[key].items.push(item);
+            });
+
+            let collapseCounter = 0;
+
+            for(let k in groups) {
+                let g = groups[k];
+                let collapseId = "notif_col_" + collapseCounter;
+                collapseCounter++;
+                
+                let sumUI = {};
+                g.items.forEach(i => {
+                    let nomeMob = i.mobilia.trim().toUpperCase();
+                    if(!sumUI[nomeMob]) sumUI[nomeMob] = 0;
+                    sumUI[nomeMob] += i.qtd_pendente;
+                });
+                
+                let uiItemsHtml = Object.keys(sumUI).map(nome => {
+                    return `<li><span class="fw-bold text-truncate" style="max-width:70%;">${nome}</span> <span class="badge bg-warning text-dark">${sumUI[nome]} pendentes</span></li>`;
+                }).join('');
+                
+                notifHtml += `
+                <div class="notif-item">
+                    <div class="notif-item-header" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-bold text-uppercase" style="color:var(--highlight); font-size:1.0rem;">${g.local}</div>
+                            <i class="bi bi-chevron-down fs-5 text-muted"></i>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center small">
+                            <span>Processo: <strong>${g.processo || 'N/A'}</strong></span>
+                            <span class="text-danger fw-bold bg-danger bg-opacity-10 px-2 py-1 rounded"><i class="bi bi-calendar-event"></i> ${g.previsao}</span>
+                        </div>
+                    </div>
+                    <div class="collapse" id="${collapseId}">
+                        <div class="notif-item-body">
+                            <ul class="notif-item-list">
+                                ${uiItemsHtml}
+                            </ul>
+                        </div>
+                    </div>
+                </div>`;
+
+                whatsappText += `🏢 *Local:* ${g.local}\n`;
+                whatsappText += `📄 *Processo:* ${g.processo || 'N/A'}\n`;
+                whatsappText += `🗓 *Previsão:* ${g.previsao}\n`;
+                whatsappText += `*Itens Pendentes:*\n`;
+                
+                Object.keys(sumUI).forEach(nome => {
+                    whatsappText += `- ${sumUI[nome]}x ${nome}\n`;
+                });
+                
+                whatsappText += `\n------------------------\n\n`;
+            }
+        }
+
+        $('#notifBody').html(notifHtml);
+        $('#btnCopyNotif').attr('data-text', whatsappText);
+        
+        if(!hasShownNotif) {
+            openNotifications();
+            hasShownNotif = true;
+        }
+    }
+
+    window.openNotifications = function() {
+        $('#notifOverlay').fadeIn(200).css('display', 'flex');
+    }
+
+    window.closeNotifications = function() {
+        $('#notifOverlay').fadeOut(200);
+    }
+
+    window.copyWhatsAppText = function() {
+        const text = $('#btnCopyNotif').attr('data-text');
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = $('#btnCopyNotif');
+            const origHtml = btn.html();
+            btn.html('<i class="bi bi-check-lg me-2"></i> Copiado!');
+            btn.removeClass('btn-success').addClass('btn-outline-success');
+            setTimeout(() => {
+                btn.html(origHtml);
+                btn.removeClass('btn-outline-success').addClass('btn-success');
+            }, 2500);
+        });
+    }
+
+    // === MUDANÇA NO CARREGAMENTO PROCON (FETCH NODE) ===
+    window.loadProconData = async function(forceRefresh = false) {
+        if(forceRefresh || proconRawData.length === 0) $('#loader').fadeIn();
+        try {
+            let dataToProcess = INITIAL_DATA;
+            if (forceRefresh) {
+                const res = await fetch('/api/data');
+                dataToProcess = await res.json();
+            }
+            proconRawData = dataToProcess.procon;
+            initProconFilters(); 
+            filterProconData();  
+            $('#lastUpdate').text(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+        } catch (err) {
+            alert("Erro ao carregar Procon: " + err.message);
+        } finally {
+            $('#loader').fadeOut();
+        }
+    }
+
+    window.toggleSelectAllProcon = function(listType, el) {
+        $(`#list_proc_${listType} input[type="checkbox"]`).prop('checked', el.checked);
+        filterProconData();
+    }
+
+    function initProconFilters() {
+        const tipos = new Set();
+        const statusList = new Set();
+        const customOrder = ["EM PRODUÇÃO", "FABRICAÇÃO", "PLANEJAMENTO", "PENDENTE", "EM ESTOQUE", "SEM ORÇAMENTO", "NÃO AUTORIZADO", "NAO AUTORIZADO", "ARQUIVADO", "", "FINALIZADA", "FINALIZADO", "ENTREGUE"];
+
+        proconRawData.forEach(item => {
+            let nomeLower = item.local.toLowerCase();
+            let tipo = "OUTROS";
+            if(nomeLower.includes('procon')) tipo = "PROCON";
+            else if(nomeLower.includes('estação') || nomeLower.includes('estacao')) tipo = "ESTAÇÃO TECH";
+            tipos.add(tipo);
+            item._virtualTipo = tipo;
+            statusList.add(item.status);
+        });
+
+        const divTipo = $('#list_proc_tipo').empty();
+        [...tipos].sort().forEach(t => {
+            divTipo.append(`<label class="dropdown-item-custom"><input class="form-check-input" type="checkbox" value="${t}" onchange="filterProconData()"><span class="text-truncate">${t}</span></label>`);
+        });
+
+        const divStatus = $('#list_proc_status').empty();
+        const sortedStatus = [...statusList].sort((a, b) => {
+             const getIndex = (val) => {
+                 val = (val || '').toUpperCase();
+                 let idx = customOrder.indexOf(val);
+                 if(idx > -1) return idx;
+                 return customOrder.findIndex(c => c !== "" && val.includes(c));
+             };
+             let idxA = getIndex(a); if(idxA === -1) idxA = 999;
+             let idxB = getIndex(b); if(idxB === -1) idxB = 999;
+             if (idxA !== idxB) return idxA - idxB;
+             return a.localeCompare(b);
+        });
+
+        sortedStatus.forEach(s => {
+            let label = s === "" ? "(SEM STATUS)" : s;
+            divStatus.append(`<label class="dropdown-item-custom"><input class="form-check-input" type="checkbox" value="${s}" onchange="filterProconData()"><span class="text-truncate">${label}</span></label>`);
+        });
+    }
+
+    window.filterProconData = function() {
+        const searchTerm = $('#proconSearchInput').val().toLowerCase();
+        const selTipos = [];
+        $('#list_proc_tipo input:checked').each(function() { selTipos.push($(this).val()); });
+        const selStatus = [];
+        $('#list_proc_status input:checked').each(function() { selStatus.push($(this).val()); });
+
+        $('#btn_proc_tipo').text(selTipos.length ? `${selTipos.length} SELECIONADO(S)` : 'TODOS').css('color', selTipos.length ? 'var(--highlight)' : 'var(--input-text)').css('font-weight', selTipos.length ? 'bold' : 'normal');
+        $('#btn_proc_status').text(selStatus.length ? `${selStatus.length} SELECIONADO(S)` : 'TODOS').css('color', selStatus.length ? 'var(--highlight)' : 'var(--input-text)').css('font-weight', selStatus.length ? 'bold' : 'normal');
+
+        const filtered = proconRawData.filter(item => {
+            if (searchTerm && !item.local.toLowerCase().includes(searchTerm)) return false;
+            if (selTipos.length > 0 && !selTipos.includes(item._virtualTipo)) return false;
+            if (selStatus.length > 0 && !selStatus.includes(item.status)) return false;
+            return true;
+        });
+        renderProconCards(filtered);
+
+        const tTipo = $('#list_proc_tipo input[type="checkbox"]').length;
+        const cTipo = $('#list_proc_tipo input[type="checkbox"]:checked').length;
+        $('#selectAll_proc_tipo').prop('checked', tTipo > 0 && tTipo === cTipo);
+
+        const tStatus = $('#list_proc_status input[type="checkbox"]').length;
+        const cStatus = $('#list_proc_status input[type="checkbox"]:checked').length;
+        $('#selectAll_proc_status').prop('checked', tStatus > 0 && tStatus === cStatus);
+    }
+
+    window.resetProconFilters = function() {
+        $('#proconSearchInput').val('');
+        $('#viewProcon input[type="checkbox"]').prop('checked', false);
+        filterProconData();
+    }
+
+    function renderProconCards(data) {
+        const container = $('#proconContainer'); container.empty();
+        if(!data || data.length === 0) {
+            container.html('<div class="col-12 text-center text-muted py-5 text-uppercase">Nenhum processo encontrado.</div>'); return;
+        }
+        const parseDateLocal = (str) => {
+            if (!str || typeof str !== 'string') return new Date(9999, 11, 31); 
+            const parts = str.split('/'); return parts.length === 3 ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(9999, 11, 31);
+        };
+        
+        const groups = {};
+        data.forEach(item => {
+            const key = item.local.trim().toUpperCase() + "|" + item.origem; 
+            if (!groups[key]) groups[key] = { local: item.local.trim(), origem: item.origem, processo: item.processo, items: [], key: key };
+            groups[key].items.push(item);
+        });
+
+        const groupArray = Object.values(groups);
+        const getWeight = (s) => {
+            s = (s || '').toUpperCase().trim();
+            if (s.includes('PRODUÇÃO') || s.includes('FABRICAÇÃO')) return 1;
+            if (s.includes('MONTAGEM')) return 2;
+            if (s.includes('PLANEJAMENTO')) return 3;
+            if (s.includes('AGUARDANDO')) return 4;
+            if (s.includes('PENDENTE')) return 5;
+            if (s.includes('ESTOQUE')) return 6;
+            if (s.includes('SEM ORÇAMENTO')) return 7;
+            if (s.includes('NÃO AUTORIZADO') || s.includes('NAO AUTORIZADO')) return 8;
+            if (s.includes('ARQUIVADO')) return 9;
+            if (s === 'FINALIZADA') return 10; 
+            if (s === '') return 11;
+            return 99;
+        };
+
+        let proconFin = 0, proconPen = 0;
+        let techFin = 0, techPen = 0;
+
+        groupArray.forEach(group => {
+            const rawItems = proconRawData.filter(i => (i.local.trim().toUpperCase() + "|" + i.origem) === group.key);
+            
+            group.isFinalized = rawItems.every(i => (i.status || '').toUpperCase().trim() === 'FINALIZADA');
+
+            let bestItem = rawItems[0]; let bestWeight = 999;
+            rawItems.forEach(item => { let w = getWeight(item.status); if (w < bestWeight) { bestWeight = w; bestItem = item; } });
+            
+            group.mainStatus = group.isFinalized ? 'FINALIZADA' : bestItem.status;
+            group.mainDate = bestItem.previsao; 
+
+            group.totalSol = rawItems.reduce((acc, curr) => acc + (curr.qtd_sol || 0), 0);
+            group.totalEnt = rawItems.reduce((acc, curr) => acc + (curr.qtd_ent || 0), 0);
+            group.totalPen = rawItems.reduce((acc, curr) => acc + (curr.qtd_pen || 0), 0);
+
+            let tipo = group.items[0] && group.items[0]._virtualTipo;
+            if (tipo === "PROCON") {
+                if (group.isFinalized) proconFin++; else proconPen++;
+            } else if (tipo === "ESTAÇÃO TECH") {
+                if (group.isFinalized) techFin++; else techPen++;
+            }
+        });
+
+        $('#proconKpiFin').text(proconFin);
+        $('#proconKpiPen').text(proconPen);
+        $('#techKpiFin').text(techFin);
+        $('#techKpiPen').text(techPen);
+
+        groupArray.sort((a, b) => {
+            if (a.isFinalized && !b.isFinalized) return 1;
+            if (!a.isFinalized && b.isFinalized) return -1;
+            const wA = getWeight(a.mainStatus); const wB = getWeight(b.mainStatus);
+            if (wA !== wB) return wA - wB;
+            return parseDateLocal(a.mainDate) - parseDateLocal(b.mainDate);
+        });
+
+        groupArray.forEach((group, index) => {
+            const isRegional = group.origem === 'REGIONAL';
+            const originLabel = isRegional ? 'REGIONAL' : 'SEDE';
+            const originClass = isRegional ? 'origin-regional' : 'origin-sede';
+            let stClass = "st-default";
+            let st = (group.mainStatus || '').toUpperCase().trim();
+            
+            if(st.includes('PRODUÇÃO')) stClass = "st-prod";
+            else if(st.includes('MONTAGEM')) stClass = "st-montagem";
+            else if(st.includes('PLANEJAMENTO')) stClass = "st-planejamento";
+            else if(st.includes('AGUARDANDO')) stClass = "st-aguardando";
+            else if(st.includes('PENDENTE')) stClass = "st-pendente";
+            else if(st.includes('ESTOQUE')) stClass = "st-estoque";
+            else if(st.includes('ORÇAMENTO')) stClass = "st-orcamento";
+            else if(st.includes('AUTORIZADO')) stClass = "st-nao-aut";
+            else if(st.includes('ARQUIVADO')) stClass = "st-arquivado";
+            else if(st === 'FINALIZADA') stClass = "st-finalizado";
+            
+            if (group.isFinalized) stClass = "st-finalizado";
+
+            const cardId = `proconCard_${index}`;
+            const itemsHtml = group.items.map(item => {
+                return `<div class="procon-item-row">
+                    <div class="d-flex justify-content-between align-items-center mb-2"><h6 class="fw-bold m-0 text-uppercase" style="font-size:0.9rem; color:var(--highlight);">${item.mobilia}</h6><span class="status-badge" style="transform:scale(0.9)">${item.status}</span></div>
+                    <div class="detail-grid"><div class="detail-item"><strong>MATERIAL</strong><span>${item.material || '-'}</span></div><div class="detail-item"><strong>DIMENSÕES</strong><span>${item.dimensoes || '-'}</span></div></div>
+                    <div class="d-flex justify-content-between gap-2"><div class="qty-badge"><span class="qty-val" style="color:var(--st-sol)">${item.qtd_sol}</span><span class="qty-lbl">SOLIC.</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-ent)">${item.qtd_ent}</span><span class="qty-lbl">ENT.</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-pen);">${item.qtd_pen}</span><span class="qty-lbl">PEND.</span></div></div>
+                </div>`;
+            }).join('');
+            
+            container.append(`<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12"><div class="procon-card">
+                <div class="procon-header" data-bs-toggle="collapse" data-bs-target="#collapse_${cardId}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="origin-badge ${originClass}">${originLabel}</span>
+                        <div class="date-badge"><i class="bi bi-calendar"></i> ${group.mainDate || '-'}</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center"><span class="status-badge ${stClass}">${group.mainStatus || 'SEM STATUS'}</span></div>
+                    <div class="procon-title text-truncate mt-2">${group.local}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-sec); font-weight: 700; margin-top: 2px;">PROCESSO: <span style="color: var(--highlight);">${group.processo || '-'}</span></div>
+                    <div class="header-totals"><span class="h-badge" style="color:var(--st-sol)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--st-ent)">ENT: ${group.totalEnt}</span><span class="h-badge" style="color:var(--st-pen)">PEN: ${group.totalPen}</span></div>
+                </div>
+                <div class="collapse" id="collapse_${cardId}"><div class="procon-details">${itemsHtml}</div></div>
+            </div></div>`);
+        });
+    }
+
+    window.applyFilters = function(triggerKey) {
+      activeFilters = {};
+      filterFields.forEach(f => {
+        const checked = [];
+        $(`#list_${f.key} input:checked`).each(function() { checked.push($(this).val()); });
+        if (checked.length > 0) activeFilters[f.key] = checked;
+        updateBtnLabel(f.key, checked.length);
+      });
+
+      const searchText = $('#globalSearchInput').val().toLowerCase().trim();
+      const oficinaFilter = $('#selOficina').val(); 
+      const dtStartRaw = $('#filterDateStart').val();
+      const dtEndRaw = $('#filterDateEnd').val();
+
+      filteredData = fullData.filter(row => {
+        if (oficinaFilter !== 'TODAS' && row.origem !== oficinaFilter) return false;
+        
+        for (let key in activeFilters) {
+          if (!activeFilters[key].includes(String(row[key]))) return false;
+        }
+
+        if (dtStartRaw || dtEndRaw) {
+            if (!row.data_entrega) return false;
+            const dParts = row.data_entrega.toString().split('/');
+            if (dParts.length === 3) {
+                const rowDate = new Date(dParts[2], dParts[1] - 1, dParts[0], 12, 0, 0);
+                if (dtStartRaw) {
+                    const sParts = dtStartRaw.split('-');
+                    const startDate = new Date(sParts[0], sParts[1] - 1, sParts[2], 0, 0, 0);
+                    if (rowDate < startDate) return false;
+                }
+                if (dtEndRaw) {
+                    const eParts = dtEndRaw.split('-');
+                    const endDate = new Date(eParts[0], eParts[1] - 1, eParts[2], 23, 59, 59);
+                    if (rowDate > endDate) return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        if (searchText) {
+            const matchFound = filterFields.some(f => {
+                const cellVal = String(row[f.key] || '').toLowerCase();
+                return cellVal.includes(searchText);
+            });
+            if (!matchFound) return false;
+        }
+        return true;
+      });
+      
+      currentPage = 1;
+      updateLists(triggerKey); 
+      updateDashboard();
+      if(typeof updateCalendar === 'function' && currentViewId === 'viewCalendar') updateCalendar(); 
+      
+      updateAllSelectAllCheckboxes();
+    }
+
+    function updateBtnLabel(key, count) {
+        const btn = $(`#btn_${key}`);
+        if (!count || count === 0) btn.text("TODOS").css('font-weight', 'normal').css('color', 'var(--input-text)');
+        else btn.text(`${count} SELECIONADO(S)`).css('font-weight', 'bold').css('color', 'var(--highlight)');
+    }
+
+    function updateLists(triggerKey) {
+      if (triggerKey === 'global' || triggerKey === 'date') return; 
+
+      const oficinaFilter = $('#selOficina').val();
+
+      filterFields.forEach(f => {
+        if (f.key === triggerKey) return;
+        const container = $(`#list_${f.key}`);
+        const currentChecked = [];
+        container.find('input:checked').each(function() { currentChecked.push($(this).val()); });
+        
+        let availableData = fullData.filter(row => {
+          if (oficinaFilter !== 'TODAS' && row.origem !== oficinaFilter) return false;
+          for (let k in activeFilters) {
+            if (k === f.key) continue; 
+            if (!activeFilters[k].includes(String(row[k]))) return false;
+          }
+          return true;
+        });
+
+        const uniqueValues = [...new Set(availableData.map(r => String(r[f.key] || '')).filter(v => v !== ''))];
+        uniqueValues.sort((a, b) => a.localeCompare(b));
+
+        container.empty();
+        if(uniqueValues.length === 0) container.append('<div class="text-muted p-2 small">VAZIO</div>');
+        else {
+            uniqueValues.forEach(val => {
+                const isChecked = currentChecked.includes(val) ? 'checked' : '';
+                const item = `<label class="dropdown-item-custom"><input class="form-check-input" type="checkbox" value="${val}" ${isChecked} onchange="applyFilters('${f.key}')"><span class="text-truncate">${val}</span></label>`;
+                container.append(item);
+            });
+        }
+      });
+    }
+
+    window.filterList = function(key) {
+        const term = $(`#search_${key}`).val().toLowerCase();
+        $(`#list_${key} label`).each(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(term) > -1);
+        });
+    }
+
+    window.resetFilters = function() { 
+        $('input[type="checkbox"]').prop('checked', false); 
+        $('#globalSearchInput').val(''); 
+        $('#selOficina').val('TODAS'); 
+        $('#filterDateStart').val(''); 
+        $('#filterDateEnd').val(''); 
+        
+        fullData.forEach(d => {
+            d._active = true;
+            d._sim_sol = d.qtd_solicitada;
+            d._sim_ent = d.qtd_entregue;
+        });
+
+        currentSortCol = null;
+        currentSortDir = 'asc';
+        updateSortIcons();
+        
+        applyFilters(null); 
+    }
+    
+    $(document).on('click', '.filter-menu', function (e) { e.stopPropagation(); });
+
+    function updateDashboard() { 
+        try {
+            updateKPIs(); 
+            prepareTableData(); 
+            renderTablePage(); 
+            updateCharts();
+        } catch(e) { console.error("Erro ao atualizar dashboard:", e); }
+    }
+
+    window.toggleAllFiltered = function(el) {
+        const isChecked = el.checked;
+        filteredData.forEach(item => {
+            item._active = isChecked;
+        });
+        updateDashboard();
+    }
+
+    window.toggleProcess = function(procKey, el) {
+        const isChecked = el.checked;
+        const group = groupedDataForTable.find(g => g.key === procKey);
+        if (group) {
+            group.items.forEach(item => {
+                item._active = isChecked;
+            });
+        }
+        updateDashboard();
+    }
+
+    window.toggleItem = function(uniqueId, el) {
+        const isChecked = el.checked;
+        const item = fullData.find(d => d._uniqueId === uniqueId);
+        if(item) {
+            item._active = isChecked;
+            updateDashboard();
+        }
+    }
+
+    window.updateSimQty = function(type, uniqueId, el) {
+        let val = parseFloat(el.value);
+        if(isNaN(val)) val = 0;
+        const item = fullData.find(d => d._uniqueId === uniqueId);
+        if(item) {
+            if (type === 'sol') item._sim_sol = val;
+            if (type === 'ent') item._sim_ent = val;
+            
+            const penVal = Math.max(0, item._sim_sol - item._sim_ent);
+            $('#sim_pen_' + uniqueId).text(penVal);
+            updateKPIs(); 
+        }
+    }
+
+    function updateKPIs() {
+      let dataForKPI = filteredData.filter(d => d._active === true);
+      
+      const statusFilter = activeFilters['status'] || [];
+      const hasRestrictedSelection = statusFilter.some(s => {
+          const sLower = s.toLowerCase();
+          return sLower.includes('arquivado') || (sLower.includes('não') && sLower.includes('aut'));
+      });
+
+      let labelText = "TOTAL SOLICITADO (SIM)";
+      if (!hasRestrictedSelection) {
+         labelText = "TOTAL AUTORIZADO (SIM)";
+         dataForKPI = dataForKPI.filter(r => {
+             const st = r.status.toLowerCase();
+             const isRestricted = st.includes('arquivado') || (st.includes('não') && st.includes('aut'));
+             return !isRestricted;
+         });
+      }
+      $('#lblKpiSolicitada').text(labelText);
+      
+      const totalSol = dataForKPI.reduce((a, b) => a + (b._sim_sol || 0), 0);
+      const totalEnt = dataForKPI.reduce((a, b) => a + (b._sim_ent || 0), 0);
+      const totalPen = dataForKPI.reduce((a, b) => a + Math.max(0, (b._sim_sol || 0) - (b._sim_ent || 0)), 0);
+      
+      $('#kpiSolicitada').text(totalSol.toLocaleString('pt-BR'));
+      $('#kpiEntregue').text(totalEnt.toLocaleString('pt-BR'));
+      $('#kpiPendente').text(totalPen.toLocaleString('pt-BR'));
+    }
+
+    const parseDate = (str) => {
+        if (!str || typeof str !== 'string') return new Date(9999, 11, 31); 
+        const parts = str.split('/');
+        return parts.length === 3 ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(9999, 11, 31);
+    };
+
+    window.handleSort = function(col) {
+        if (currentSortCol === col) {
+            currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortCol = col;
+            currentSortDir = 'asc';
+        }
+        updateSortIcons();
+        updateDashboard();
+    }
+
+    function updateSortIcons() {
+        $('.sort-icon').removeClass('bi-arrow-down bi-arrow-up').addClass('bi-arrow-down-up').css('opacity', '0.5');
+        if (currentSortCol) {
+            let iconId = '#icon_sort_' + currentSortCol;
+            $(iconId).removeClass('bi-arrow-down-up').addClass(currentSortDir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down').css('opacity', '1');
+        }
+    }
+
+    function prepareTableData() {
+        const tableCustomOrder = ["EM PRODUÇÃO", "EM MONTAGEM", "PLANEJAMENTO", "PENDENTE", "EM ESTOQUE", "SEM ORÇAMENTO", "NÃO AUTORIZADO", "ARQUIVADO", "FINALIZADA"];
+        
+        let sortedRaw = [...filteredData].sort((a, b) => {
+            if (currentSortCol) {
+                let dateA, dateB;
+                if (currentSortCol === 'previsao') {
+                    dateA = parseDate(a.previsao);
+                    dateB = parseDate(b.previsao);
+                } else if (currentSortCol === 'data_aut') {
+                    dateA = parseDate(a.data_autorizacao);
+                    dateB = parseDate(b.data_autorizacao);
+                } else if (currentSortCol === 'data_ent') {
+                    dateA = parseDate(a.data_entrega);
+                    dateB = parseDate(b.data_entrega);
+                }
+                
+                let tA = dateA.getTime();
+                let tB = dateB.getTime();
+                let emptyTime = new Date(9999, 11, 31).getTime();
+                
+                let isAEmpty = tA === emptyTime;
+                let isBEmpty = tB === emptyTime;
+
+                if (isAEmpty && !isBEmpty) return 1; 
+                if (!isAEmpty && isBEmpty) return -1;
+                
+                if (tA !== tB) {
+                    return currentSortDir === 'asc' ? tA - tB : tB - tA;
+                }
+            }
+
+            const getStIdx = (s) => {
+                s = (s || '').toUpperCase();
+                let idx = tableCustomOrder.findIndex(o => s.includes(o));
+                return idx === -1 ? 999 : idx;
+            };
+            let idxA = getStIdx(a.status); 
+            let idxB = getStIdx(b.status);
+            if (idxA !== idxB) return idxA - idxB;
+            
+            const getPrioVal = (p) => {
+                let val = parseInt(p);
+                if (isNaN(val) || val < 1) return 999;
+                return val;
+            };
+            let prioA = getPrioVal(a.prioridade);
+            let prioB = getPrioVal(b.prioridade);
+            if (prioA !== prioB) return prioA - prioB;
+
+            return parseDate(a.previsao) - parseDate(b.previsao);
+        });
+
+        let groups = {}; let order = []; 
+        sortedRaw.forEach(r => {
+            let procKey = String(r.processo).trim();
+            if(procKey === "") procKey = "SEM_PROCESSO_" + Math.random();
+            if(!groups[procKey]) { groups[procKey] = { main: r, items: [], totalSol: 0, key: procKey }; order.push(procKey); }
+            groups[procKey].items.push(r);
+            groups[procKey].totalSol += (r.qtd_solicitada || 0);
+        });
+        groupedDataForTable = order.map(k => groups[k]);
+    }
+
+    function renderTablePage() {
+        const tbody = $('#tableBody');
+        
+        let openCollapses = [];
+        $('.collapse.show').each(function() {
+            openCollapses.push($(this).attr('id'));
+        });
+
+        const allFilteredActive = filteredData.length > 0 && filteredData.every(d => d._active);
+        const someFilteredActive = filteredData.length > 0 && filteredData.some(d => d._active);
+        $('#checkAllMaster').prop('checked', allFilteredActive);
+        $('#checkAllMaster').prop('indeterminate', someFilteredActive && !allFilteredActive);
+
+        tbody.empty();
+        if (groupedDataForTable.length === 0) {
+            tbody.html(`<tr><td colspan="10" class="text-center p-4" style="color:var(--text-sec);">NENHUM DADO ENCONTRADO.</td></tr>`);
+            $('#paginationControls').hide(); return;
+        }
+        $('#paginationControls').show();
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = groupedDataForTable.slice(start, end);
+        const totalPages = Math.ceil(groupedDataForTable.length / itemsPerPage);
+
+        $('#pageInfo').text(`PÁGINA ${currentPage} DE ${totalPages} (${groupedDataForTable.length} PROCESSOS)`);
+        $('#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext').prop('disabled', currentPage === totalPages);
+        const today = new Date(); today.setHours(0,0,0,0);
+        let htmlBuilder = "";
+
+        pageItems.forEach((group, idx) => {
+            let r = group.main; let subItems = group.items; let totalSol = group.totalSol;
+            const uniqueId = `p${currentPage}_${idx}`; const collapseId = `collapse_${uniqueId}`;
+
+            let prioVal = parseInt(r.prioridade); let prioClass = 'prio-default';
+            if(prioVal === 1) prioClass = 'prio-1';
+            else if(prioVal === 2) prioClass = 'prio-2';
+            else if(prioVal === 3) prioClass = 'prio-3';
+            else if(prioVal === 4) prioClass = 'prio-4';
+            else if(prioVal === 5) prioClass = 'prio-5';
+            let prioBadge = `<span class="prio-badge ${prioClass}">${r.prioridade || '-'}</span>`;
+
+            let stClass = "st-default"; let st = (r.status || '').toLowerCase();
+            if(st.includes('produção')) stClass = "st-prod";
+            else if(st.includes('montagem')) stClass = "st-montagem";
+            else if(st.includes('planejamento')) stClass = "st-planejamento";
+            else if(st.includes('aguardando')) stClass = "st-aguardando";
+            else if(st.includes('pendente')) stClass = "st-pendente";
+            else if(st.includes('estoque')) stClass = "st-estoque";
+            else if(st.includes('orcamento')) stClass = "st-orcamento";
+            else if(st.includes('não') && st.includes('aut')) stClass = "st-nao-aut";
+            else if(st.includes('arquivado')) stClass = "st-arquivado";
+            else if(st === 'finalizada') stClass = "st-finalizado";
+
+            let dateClass = ""; const prevDate = parseDate(r.previsao);
+            const diffTime = prevDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            if (diffDays <= 5 && !stClass.includes('finalizado')) dateClass = "date-alert";
+
+            const allActive = subItems.every(i => i._active === true);
+            const someActive = subItems.some(i => i._active === true);
+            const checkAttr = allActive ? 'checked' : '';
+            const indeterminadeAttr = (someActive && !allActive) ? 'data-indeterminate="true"' : '';
+
+            const linkTratado = r.link_sei && r.link_sei.startsWith('http') ? r.link_sei : 'https://' + r.link_sei;
+            const processoExibicao = r.link_sei 
+                ? `<a href="${linkTratado}" target="_blank" rel="noopener noreferrer" onclick="window.open('${linkTratado}', '_blank'); event.stopPropagation(); return false;" style="color:var(--highlight); text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Abrir processo no SEI">
+                      <span style="text-decoration:underline;">${r.processo}</span>
+                      <span class="material-symbols-outlined" style="font-size: 1.1rem;">open_in_new</span>
+                   </a>`
+                : `<span style="color:#dc3545;">${r.processo}</span>`;
+
+            let obsList = subItems.map(i => i.observacao).filter(o => o && o !== '');
+            let uniqueObs = [...new Set(obsList)];
+            let obsMestreHtml = '';
+            
+            if (uniqueObs.length > 0) {
+                let obsText = uniqueObs.join('<br><br>');
+                obsMestreHtml = `
+                    <div class="post-it-container" onclick="event.stopPropagation()">
+                        <i class="bi bi-sticky-fill post-it-icon" title="O Processo possui observações (passe o mouse)"></i>
+                        <div class="post-it-tooltip">
+                            <strong style="display:block; margin-bottom:4px; font-size:0.75rem; text-transform:uppercase; color:#f57f17; font-family:'Segoe UI', sans-serif;">Observações do Processo</strong>
+                            ${obsText}
+                        </div>
+                    </div>
+                `;
+            }
+
+            htmlBuilder += `
+                <tr class="parent-row">
+                    <td class="text-center align-middle" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="form-check-input m-0 process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)">
+                    </td>
+                    <td class="fw-bold text-nowrap" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" style="cursor: pointer;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-chevron-down me-2 small" style="color:var(--highlight);"></i>
+                            ${processoExibicao}
+                            ${obsMestreHtml}
+                        </div>
+                    </td>
+                    <td style="font-size:0.85rem;">${r.convenio}</td>
+                    <td><div style="font-size:0.85rem; white-space:normal; line-height:1.2;">${r.local}</div></td>
+                    <td class="text-center fw-bold" style="color:var(--text-sec);">${totalSol}</td>
+                    <td class="text-center">${prioBadge}</td>
+                    <td class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
+                    <td><div class="text-truncate ${dateClass}" style="max-width:200px;">${r.previsao}</div></td>
+                    <td>${r.data_autorizacao}</td>
+                    <td>${r.data_entrega || '-'}</td>
+                </tr>
+            `;
+
+            let subRows = subItems.map(item => {
+                const itemCheck = item._active ? 'checked' : '';
+                const calcPen = Math.max(0, (item._sim_sol || 0) - (item._sim_ent || 0));
+
+                let itemObsHtml = '';
+                if (item.observacao && item.observacao !== '') {
+                    itemObsHtml = `
+                        <div class="post-it-container" onclick="event.stopPropagation()">
+                            <i class="bi bi-sticky-fill post-it-icon" title="Observação desta Mobília"></i>
+                            <div class="post-it-tooltip">
+                                ${item.observacao}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                <tr>
+                    <td class="text-center align-middle">
+                        <input type="checkbox" class="form-check-input m-0" ${itemCheck} onchange="toggleItem(${item._uniqueId}, this)">
+                    </td>
+                    <td>
+                        <strong>${item.mobilia}</strong>
+                        ${itemObsHtml}
+                        <a href="${item.link_planilha}" target="_blank" rel="noopener noreferrer" title="Abrir linha no Google Planilhas" class="ms-2" style="color: #0f9d58; font-size: 1.1rem; vertical-align: middle;" onclick="event.stopPropagation()">
+                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        </a>
+                    </td>
+                    <td>${item.material || '-'}</td>
+                    <td>${item.dimensoes || '-'}</td>
+                    <td class="text-center">
+                        <input type="number" class="sim-input" value="${item._sim_sol}" onchange="updateSimQty('sol', ${item._uniqueId}, this)" min="0">
+                    </td>
+                    <td class="text-center">
+                        <input type="number" class="sim-input" value="${item._sim_ent}" onchange="updateSimQty('ent', ${item._uniqueId}, this)" min="0">
+                    </td>
+                    <td class="text-center">
+                        <span id="sim_pen_${item._uniqueId}" class="sim-val-pen">${calcPen}</span>
+                    </td>
+                </tr>
+            `}).join('');
+
+            htmlBuilder += `<tr class="detail-row">
+                <td colspan="10">
+                    <div class="collapse" id="${collapseId}">
+                        <div class="p-3">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body p-0">
+                                   <table class="table table-sm table-borderless sub-table mb-0">
+                                     <thead style="background-color: #f8f9fa;">
+                                       <tr>
+                                         <th width="3%" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias deste processo"></th>
+                                         <th width="30%">MOBÍLIA</th><th width="20%">MATERIAL</th><th width="20%">DIMENSÕES</th><th class="text-center">SOL. </th><th class="text-center">ENT. </th><th class="text-center">PEN. </th>
+                                       </tr>
+                                     </thead>
+                                     <tbody>${subRows}</tbody>
+                                   </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        });
+        tbody.html(htmlBuilder);
+
+        $('.process-checkbox[data-indeterminate="true"]').prop('indeterminate', true);
+        $('.sub-process-checkbox[data-indeterminate="true"]').prop('indeterminate', true);
+
+        if (openCollapses.length > 0) {
+            openCollapses.forEach(id => {
+                $('#' + id).addClass('show');
+                $(`[data-bs-target="#${id}"]`).attr('aria-expanded', 'true');
+            });
+        }
+    }
+
+    window.changePage = function(delta) {
+        const totalPages = Math.ceil(groupedDataForTable.length / itemsPerPage);
+        const newPage = currentPage + delta;
+        if(newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            renderTablePage();
+            document.querySelector('.table-box').scrollTop = 0;
+        }
+    }
+
+    function groupAndTop(data, groupKey, valueKeys, topN = 9) {
+      let groups = {};
+      data.forEach(r => {
+        let key = (r[groupKey] || 'N/D').trim(); if(key === "") key = "N/D";
+        if (!groups[key]) groups[key] = valueKeys.map(() => 0);
+        valueKeys.forEach((vk, i) => groups[key][i] += (r[vk] || 0));
+      });
+      let arr = Object.keys(groups).map(k => ({ key: k, values: groups[k] }));
+      arr.sort((a, b) => b.values[0] - a.values[0]);
+      let top = arr.slice(0, topN); let others = arr.slice(topN);
+      if (others.length > 0) {
+        let otherVals = valueKeys.map(() => 0);
+        others.forEach(o => o.values.forEach((v, i) => otherVals[i] += v));
+        top.push({ key: 'Outros', values: otherVals });
+      }
+      return { labels: top.map(t => t.key), datasets: valueKeys.map((vk, i) => top.map(t => t.values[i])) };
+    }
+
+    function wrapLabel(str) {
+        if(!str) return ''; if(str.length < 15) return str; 
+        const words = str.split(' '); const lines = []; let currentLine = words[0];
+        for (let i = 1; i < words.length; i++) { if (currentLine.length + words[i].length < 15) { currentLine += " " + words[i]; } else { lines.push(currentLine); currentLine = words[i]; } }
+        lines.push(currentLine); return lines;
+    }
+
+    function updateCharts() {
+      ['chartMovelStatus', 'chartParceiro', 'chartVolumeMovel'].forEach(id => { if (chartInstances[id]) { chartInstances[id].destroy(); chartInstances[id] = null; } });
+      const c = getColors(), opts = getOpts();
+      
+      const dataMovel = groupAndTop(filteredData, 'mobilia', ['qtd_pendente', 'qtd_entregue']);
+      const labelsWrappedMovel = dataMovel.labels.map(l => wrapLabel(l));
+      if(document.getElementById('chartMovelStatus')) {
+          chartInstances['chartMovelStatus'] = new Chart(document.getElementById('chartMovelStatus'), { 
+            type: 'bar', data: { labels: labelsWrappedMovel, datasets: [{ label: 'PENDENTE', data: dataMovel.datasets[0], backgroundColor: c.pend, borderRadius: 4 }, { label: 'ENTREGUE', data: dataMovel.datasets[1], backgroundColor: c.ent, borderRadius: 4 }] }, 
+            options: { ...opts, scales: { ...opts.scales, x: { stacked: false, grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false } } } } 
+          });
+      }
+
+      const dataParceiro = groupAndTop(filteredData, 'local', ['qtd_solicitada']);
+      if(document.getElementById('chartParceiro')) chartInstances['chartParceiro'] = new Chart(document.getElementById('chartParceiro'), { type: 'bar', data: { labels: dataParceiro.labels, datasets: [{ label: 'SOLICITADOS', data: dataParceiro.datasets[0], backgroundColor: c.sol, borderRadius: 4 }] }, options: { ...opts, indexAxis: 'y' } });
+      
+      const dataVol = groupAndTop(filteredData, 'mobilia', ['qtd_solicitada']);
+      const labelsWrappedVol = dataVol.labels.map(l => wrapLabel(l));
+      if(document.getElementById('chartVolumeMovel')) {
+          chartInstances['chartVolumeMovel'] = new Chart(document.getElementById('chartVolumeMovel'), { 
+            type: 'bar', data: { labels: labelsWrappedVol, datasets: [{ label: 'TOTAL ITENS', data: dataVol.datasets[0], backgroundColor: c.vol, borderRadius: 4 }] }, 
+            options: { ...opts, scales: { ...opts.scales, x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false } } } } 
+          });
+      }
+    }
+
+    // === GERAÇÃO DE PDF VIA PUPPETEER ===
+    window.exportToPDF = async function(reportType) {
+        var btn = $('#btnExportPDFMain');
+        var originalHTML = btn.html();
+        
+        btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando...').prop('disabled', true);
+
+        var dataToExport = filteredData.filter(d => d._active === true);
+
+        if(dataToExport.length === 0) {
+            alert("Nenhum dado na tabela para exportar.");
+            btn.html(originalHTML).prop('disabled', false);
+            return;
+        }
+
+        var cleanData = dataToExport.map(d => ({
+            processo: d.processo,
+            local: d.local,
+            mobilia: d.mobilia,
+            material: d.material,
+            dimensoes: d.dimensoes,
+            qtd_solicitada: d._sim_sol,
+            qtd_entregue: d._sim_ent,
+            status: d.status,
+            previsao: d.previsao
+        }));
+
+        try {
+            const response = await fetch('/api/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: reportType, items: cleanData })
+            });
+            
+            if(!response.ok) throw new Error('Falha ao gerar o documento');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = reportType <= 2 ? 'Marcenaria_Processos.pdf' : 'Marcenaria_Consolidado.pdf';
+            document.body.appendChild(a);
+            a.click();
+            
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch(err) {
+            alert("Erro ao gerar PDF: " + err.message);
+        } finally {
+            btn.html(originalHTML).prop('disabled', false);
+        }
+    };
+
+  </script>
+</body>
+</html>
