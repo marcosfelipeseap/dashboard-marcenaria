@@ -1,7 +1,7 @@
 const express = require('express');
 const { google } = require('googleapis');
 const NodeCache = require('node-cache');
-const path = require('path'); // Mantido para resolver o caminho no Vercel
+const path = require('path');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -17,13 +17,13 @@ let auth;
 let sheets;
 try {
     if (process.env.GOOGLE_CREDENTIALS) {
-        // Corrige o bug do Vercel que bagunça as quebras de linha do JSON
-        const cleanJson = process.env.GOOGLE_CREDENTIALS.replace(/\\n/g, '\n');
+        // Quando rodar no Vercel (Puxa da aba Environment Variables)
         auth = new google.auth.GoogleAuth({
-            credentials: JSON.parse(cleanJson),
+            credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
         });
     } else {
+        // Quando rodar no seu computador (Puxa do arquivo)
         auth = new google.auth.GoogleAuth({
             keyFile: 'credentials.json',
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
@@ -271,7 +271,7 @@ app.post('/api/pdf', async (req, res) => {
         }
         html += "</body></html>";
 
-        // Importação Dinâmica DUPLA (Resolve o erro ERR_REQUIRE_ESM do Vercel)
+        // Importação Dinâmica DUPLA
         const puppeteerModule = await import('puppeteer-core');
         const puppeteer = puppeteerModule.default || puppeteerModule;
 
@@ -310,5 +310,4 @@ if (!process.env.VERCEL) {
     app.listen(PORT, () => console.log(`Dashboard rodando localmente na porta ${PORT}`));
 }
 
-// Exportação obrigatória para o Vercel Serverless
 module.exports = app;
