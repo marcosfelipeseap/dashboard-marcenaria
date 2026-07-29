@@ -363,15 +363,16 @@
                  pendText = `<i class="bi bi-check"></i> OK`;
             }
 
+            // --- AQUI: INJEÇÃO DOS DATA LABELS NA TABELA DO MODAL ---
             const row = `
                 <tr>
-                    <td>
+                    <td data-label="Mobília/Produto">
                         <div class="fw-bold">${item.mobilia}</div>
                         <div class="small text-muted" style="font-size:0.75rem">${item.material || ''}</div>
                     </td>
-                    <td>${item.dimensoes || '-'}</td>
-                    <td class="text-center">${item.qtd_solicitada}</td>
-                    <td class="text-center" style="${pendStyle}">${pendText}</td>
+                    <td data-label="Dimensões">${item.dimensoes || '-'}</td>
+                    <td data-label="Qtd. Sol." class="text-center">${item.qtd_solicitada}</td>
+                    <td data-label="Qtd. Pendente" class="text-center" style="${pendStyle}">${pendText}</td>
                 </tr>
             `;
             tbody.append(row);

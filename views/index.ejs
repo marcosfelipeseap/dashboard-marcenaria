@@ -2,19 +2,18 @@
 <html lang="pt-BR">
 <head>
   <base target="_top">
+  <!-- TRAVA DE ZOOM APLICADA AQUI -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
   
   <style>
@@ -32,17 +31,29 @@
       --input-bg: #333333; --input-text: #ffffff; --dropdown-bg: #333333;
       --hover-item: #444444; --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
-    body { background-color: var(--bg-page); color: var(--text-pri); font-family: 'Segoe UI', system-ui, sans-serif; transition: 0.3s; overflow-x: hidden; }
+    
+    /* PREVENÇÃO ABSOLUTA DE VAZAMENTO HORIZONTAL */
+    html, body { 
+      background-color: var(--bg-page); color: var(--text-pri); 
+      font-family: 'Segoe UI', system-ui, sans-serif; transition: 0.3s; 
+      max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0;
+    }
+    * { box-sizing: border-box; }
     
     .text-uppercase-force { text-transform: uppercase !important; }
 
-    .layout-wrapper { display: flex; min-height: 100vh; }
+    .layout-wrapper { display: flex; min-height: 100vh; position: relative; width: 100%; max-width: 100vw; overflow-x: hidden; }
+    
+    /* OVERLAY DO MENU MOBILE */
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 90; backdrop-filter: blur(2px); }
+    .sidebar-overlay.show { display: block; }
+
     .sidebar {
         width: 220px; background-color: var(--card-bg); border-right: 1px solid var(--border-color);
-        display: flex; flex-direction: column; align-items: center; padding-top: 20px; transition: width 0.3s;
+        display: flex; flex-direction: column; align-items: center; padding-top: 20px; transition: left 0.3s;
         z-index: 100; position: fixed; top: 0; bottom: 0; left: 0;
     }
-    .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 30px; }
+    .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 30px; transition: margin-left 0.3s, width 0.3s; overflow-x: hidden; }
     .nav-btn {
         width: 100%; padding: 15px 20px; background: transparent; border: none;
         color: var(--text-sec); text-align: left; display: flex; align-items: center;
@@ -53,6 +64,10 @@
     .nav-btn:hover { background-color: var(--hover-item); color: var(--highlight); }
     .nav-btn.active { background-color: var(--highlight); color: #fff; }
     
+    /* SETA DOS FILTROS */
+    .filter-chevron { transition: transform 0.3s ease; display: inline-block; }
+    [aria-expanded="true"] .filter-chevron { transform: rotate(180deg); }
+
     .custom-dropdown-btn {
         background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--input-text);
         text-align: left; display: flex; justify-content: space-between; align-items: center;
@@ -63,21 +78,19 @@
     .dropdown-menu-custom {
         background-color: var(--dropdown-bg); border: 1px solid var(--border-color);
         padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        max-height: 400px; width: 100%; min-width: 250px; z-index: 1050;
+        max-height: 400px; width: 100%; min-width: 250px; z-index: 1050; max-width: 90vw;
     }
     .dropdown-search {
         background-color: var(--bg-page); border: 1px solid var(--border-color); color: var(--input-text);
-        border-radius: 6px; padding: 8px; margin-bottom: 10px; width: 100%;
-        text-transform: uppercase;
+        border-radius: 6px; padding: 8px; margin-bottom: 10px; width: 100%; text-transform: uppercase;
     }
     .dropdown-search:focus { outline: none; border-color: var(--highlight); }
-    .dropdown-list-container { max-height: 250px; overflow-y: auto; }
+    .dropdown-list-container { max-height: 250px; overflow-y: auto; overflow-x: hidden; }
     .dropdown-list-container::-webkit-scrollbar { width: 6px; }
     .dropdown-list-container::-webkit-scrollbar-thumb { background-color: var(--highlight); border-radius: 3px; }
     .dropdown-item-custom {
         display: flex; align-items: center; padding: 8px; border-radius: 6px;
-        cursor: pointer; color: var(--input-text); transition: 0.1s;
-        text-transform: uppercase; font-size: 0.85rem;
+        cursor: pointer; color: var(--input-text); transition: 0.1s; text-transform: uppercase; font-size: 0.85rem;
     }
     .dropdown-item-custom:hover { background-color: var(--hover-item); }
     .form-check-input {
@@ -86,11 +99,11 @@
     }
     .form-check-input:checked { background-color: var(--highlight); border-color: var(--highlight); }
     
-    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); }
+    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); max-width: 100%; overflow: hidden; }
     
     .oficina-selector {
         background-color: var(--input-bg); color: var(--input-text); border: 2px solid var(--border-color);
-        font-weight: 700; border-radius: 10px; padding: 10px; width: 100%; cursor: pointer;
+        font-weight: 700; border-radius: 10px; padding: 10px; width: 100%; cursor: pointer; max-width: 100%;
     }
     .oficina-selector option { background-color: var(--input-bg); color: var(--input-text); }
     
@@ -107,12 +120,12 @@
     .viz-box { 
       background: var(--card-bg); border-radius: 16px; padding: 25px; 
       box-shadow: var(--shadow); border: 1px solid var(--border-color);
-      position: relative; height: 100%; min-height: 550px; display: flex; flex-direction: column;
+      position: relative; height: 100%; min-height: 550px; display: flex; flex-direction: column; width: 100%; overflow: hidden;
     }
-    .chart-container { flex: 1; position: relative; }
+    .chart-container { flex: 1; position: relative; min-width: 0; min-height: 0; width: 100%; }
     .chart-header { font-weight: 700; color: var(--text-sec); text-align: center; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 15px; }
     
-    .table-box { flex: 1; overflow-y: auto; }
+    .table-box { flex: 1; overflow-y: auto; overflow-x: auto; width: 100%; max-width: 100%; }
     .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; }
     .custom-table th { 
         background-color: var(--highlight); color: #fff; position: sticky; top: 0; 
@@ -174,14 +187,14 @@
     .view-section.active { display: block; animation: fadeIn 0.4s; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .fc { --fc-border-color: var(--border-color); --fc-page-bg-color: var(--card-bg); --fc-neutral-bg-color: var(--bg-page); --fc-list-event-hover-bg-color: var(--hover-item); color: var(--text-pri); }
+    .fc { --fc-border-color: var(--border-color); --fc-page-bg-color: var(--card-bg); --fc-neutral-bg-color: var(--bg-page); --fc-list-event-hover-bg-color: var(--hover-item); color: var(--text-pri); min-width: 0; width: 100%; }
     .fc-toolbar-title { font-size: 1.2rem !important; text-transform: uppercase; color: var(--text-pri); }
     .fc-button-primary { background-color: var(--highlight) !important; border-color: var(--highlight) !important; }
     .fc-button-primary:hover { background-color: var(--text-sec) !important; border-color: var(--text-sec) !important; }
     .fc-daygrid-day-number { color: var(--text-pri); text-decoration: none; }
     .fc-col-header-cell-cushion { color: var(--text-sec); text-decoration: none; text-transform: uppercase; font-size: 0.8rem; }
     
-    .procon-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 20px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; }
+    .procon-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 20px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; width: 100%; }
     .procon-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     .procon-header { padding: 15px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
     .header-totals { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border-color); }
@@ -197,7 +210,7 @@
     .procon-item-row:last-child { border-bottom: none; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem; margin-bottom: 10px; }
     .detail-item strong { display: block; color: var(--text-sec); font-size: 0.7rem; text-transform: uppercase; }
-    .detail-item span { color: var(--text-pri); font-weight: 600; text-transform: uppercase; }
+    .detail-item span { color: var(--text-pri); font-weight: 600; text-transform: uppercase; word-break: break-word; }
     .qty-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); min-width: 50px; flex: 1; }
     .qty-val { font-weight: 800; font-size: 1rem; }
     .qty-lbl { font-size: 0.6rem; text-transform: uppercase; color: var(--text-sec); }
@@ -239,6 +252,69 @@
     .notif-item-body { padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); }
     .notif-item-list { list-style: none; padding-left: 0; margin-bottom: 0; }
     .notif-item-list li { background: var(--bg-page); padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border: 1px solid var(--border-color); }
+
+    /* =========================================
+       SUPER COMPACTAÇÃO E ADAPTAÇÃO PARA TABLETS E CELULARES
+       ========================================= */
+    @media (max-width: 1199px) { /* <- Agora abrange Tablets, iPads e Celulares perfeitamente */
+        /* Sidebar Oculta */
+        .sidebar { left: -250px; width: 250px; }
+        .sidebar.open { left: 0; }
+        .main-content { margin-left: 0; width: 100vw; max-width: 100vw; padding: 10px; overflow-x: hidden; }
+
+        /* Ajustes de Layout e Fontes (Caiba tudo) */
+        .top-title h2 { font-size: 1.1rem !important; }
+        .chart-header { font-size: 0.85rem; margin-bottom: 10px; }
+        
+        /* Deixa os KPIs espremidos em 1 linha e com padding minimo */
+        .kpi-card { padding: 8px 4px !important; border-left-width: 3px !important; border-radius: 8px;}
+        .kpi-val { font-size: 1.3rem !important; word-break: break-all; }
+        .procon-kpi-val { font-size: 1.5rem !important; word-break: break-all; }
+        .kpi-label { font-size: 0.55rem !important; margin-bottom: 2px; letter-spacing: -0.5px; }
+        
+        .card-body { padding: 12px !important; }
+        .pagination-container { flex-direction: column; gap: 15px; text-align: center; padding: 10px;}
+
+        /* TRANSFORMANDO TABELAS EM CARDS */
+        .custom-table, .sub-table, .modal-table,
+        .custom-table tbody, .sub-table tbody, .modal-table tbody { 
+            display: block; width: 100%; border: none !important; background: transparent; 
+        }
+        .custom-table thead, .sub-table thead, .modal-table thead { display: none; }
+        
+        /* Linhas viram Cartões Compactos */
+        .custom-table tbody tr:not(.detail-row), .sub-table tbody tr, .modal-table tbody tr {
+            display: block; margin-bottom: 12px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 0; width: 100%;
+        }
+        
+        /* Células dividem flex: Label (esquerda) e Valor (direita) */
+        .custom-table tbody td, .sub-table tbody td, .modal-table tbody td {
+            display: flex; justify-content: space-between; align-items: flex-start; text-align: right;
+            padding: 8px 10px !important; border-bottom: 1px solid var(--border-color) !important; border-top: none;
+            gap: 10px; font-size: 0.8rem; width: 100%; overflow-wrap: anywhere; word-break: break-word;
+        }
+        .custom-table tbody td:last-child, .sub-table tbody td:last-child, .modal-table tbody td:last-child { border-bottom: none !important; }
+        
+        /* Injeta o nome da coluna no celular */
+        .custom-table tbody td::before, .sub-table tbody td::before, .modal-table tbody td::before {
+            content: attr(data-label); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; 
+            color: var(--text-muted); text-align: left; flex-shrink: 0; max-width: 40%; margin-right: 5px;
+        }
+        .custom-table tbody td > * { flex-shrink: 1; min-width: 0; }
+
+        /* Fixes para Linha de Detalhe (que contém o Colapso) */
+        .detail-row td { display: block !important; padding: 0 !important; border: none !important; }
+        .detail-row td::before { display: none !important; }
+        .sub-table tbody tr { margin-bottom: 8px; box-shadow: none; border-color: var(--border-color); }
+        
+        /* Fixes para Inputs e Botões dentro do Card */
+        .sim-input { width: 50px; font-size: 0.8rem; padding: 2px; text-align: center;}
+        
+        .viz-box { padding: 10px; min-height: auto; width: 100%; max-width: 100%; }
+        .table-box { width: 100%; overflow-x: hidden; }
+    }
   </style>
 </head>
 <body>
@@ -249,7 +325,9 @@
   </div>
 
   <div class="layout-wrapper">
-      <div class="sidebar">
+      <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+      
+      <div class="sidebar" id="sidebar">
           <div class="mb-4 d-flex align-items-center gap-3">
               <i class="bi bi-box-seam fs-1" style="color: var(--highlight);"></i>
               <div class="position-relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
@@ -267,36 +345,45 @@
       </div>
 
       <div class="main-content">
-          <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-              <h2 class="fw-bold m-0" style="color: var(--text-pri);">DASHBOARD - MARCENARIA</h2>
-              <p class="m-0 small" style="color: var(--text-sec);">Marcenaria & Serralheria</p>
+          <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
+            <div class="d-flex align-items-center gap-2 top-title">
+              <!-- Botão Hamburger para Mobile (Aparece em telas < 1200px) -->
+              <button id="mobile-menu-btn" class="btn btn-outline-secondary d-xl-none px-2 py-1" onclick="toggleSidebar()" style="color: var(--text-pri); border-color: var(--border-color);">
+                <i class="bi bi-list fs-4"></i>
+              </button>
+              <div>
+                <h2 class="fw-bold m-0" style="color: var(--text-pri); font-size: 1.3rem;">DASHBOARD - MARCENARIA</h2>
+                <p class="m-0 small" style="color: var(--text-sec); font-size:0.75rem;">Marcenaria & Serralheria</p>
+              </div>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-              <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar dados (Forçar atualização do Cache)"><i class="bi bi-arrow-repeat fs-5"></i></button>
+            
+            <div class="d-flex gap-2 align-items-center ms-auto">
+              <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar dados"><i class="bi bi-arrow-repeat fs-5"></i></button>
               <button class="btn-action" onclick="toggleTheme()" title="Modo Escuro"><i class="bi bi-moon-stars-fill fs-6" id="themeIcon"></i></button>
-              <div class="ms-3 d-none d-md-block text-end"><span class="badge" style="background: rgba(128,128,128,0.1); color: var(--text-sec); border: 1px solid var(--border-color);"><i class="bi bi-clock me-1"></i> <span id="lastUpdate">...</span></span></div>
+              <div class="ms-2 d-none d-md-block text-end"><span class="badge" style="background: rgba(128,128,128,0.1); color: var(--text-sec); border: 1px solid var(--border-color);"><i class="bi bi-clock me-1"></i> <span id="lastUpdate">...</span></span></div>
             </div>
           </div>
 
           <div id="mainSectionGroup">
-              <div class="card card-custom mb-4">
-                <div class="card-body p-4">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                      <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.8rem;">
-                          <i class="bi bi-funnel-fill me-2"></i>Filtros
+              
+              <!-- CARD DOS FILTROS (GAVETA / ACORDEÃO) -->
+              <div class="card card-custom mb-3">
+                <div class="card-body p-3 p-lg-4">
+                  <!-- Cabeçalho Clickável -->
+                  <div class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" style="cursor: pointer;">
+                      <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.85rem;">
+                          <i class="bi bi-funnel-fill me-1"></i>Filtros Gerais <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
                       </h6>
-                      <div class="d-flex gap-2">
-                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetFilters()">Limpar Todos</button>
-                          
+                      <div class="d-flex gap-2 flex-wrap" onclick="event.stopPropagation()">
+                          <button class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="resetFilters()">Limpar</button>
                           <div class="dropdown">
-                              <button class="btn btn-sm text-white rounded-pill px-3 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #d32f2f; border: none;" id="btnExportPDFMain">
-                                  <i class="bi bi-file-earmark-pdf-fill me-1"></i>Gerar PDF
+                              <button class="btn btn-sm text-white rounded-pill px-2 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #d32f2f; border: none;" id="btnExportPDFMain" onclick="event.stopPropagation()">
+                                  <i class="bi bi-file-earmark-pdf-fill"></i> PDF
                               </button>
                               <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999;">
                                   <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Separado por Processo</h6></li>
                                   <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(1)">Com Material e Dimensão</a></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(2)">Apenas Mobília (Soma as Quantidades)</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(2)">Apenas Mobília</a></li>
                                   <li><hr class="dropdown-divider"></li>
                                   <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Sem Processo (Consolidado)</h6></li>
                                   <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(3)">Com Material e Dimensão</a></li>
@@ -305,42 +392,46 @@
                           </div>
                       </div>
                   </div>
-                  <div class="row g-3">
-                      <div class="col-md-3 border-end" style="border-color: var(--border-color) !important;">
-                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">1. Selecione a Oficina</label>
-                          <select id="selOficina" class="form-select oficina-selector mb-3" onchange="applyFilters('oficina')">
-                              <option value="TODAS" selected>TODAS AS OFICINAS</option>
-                              <option value="SEDE">MARCENARIA SEDE</option>
-                              <option value="REGIONAL">MARCENARIA REGIONAL</option>
-                          </select>
-                          
-                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Data de Entrega</label>
-                          <div class="d-flex gap-2 mb-3">
-                              <input type="date" id="filterDateStart" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
-                              <input type="date" id="filterDateEnd" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
-                          </div>
+                  
+                  <div class="collapse mt-3" id="collapseFilters">
+                      <div class="row g-3">
+                          <div class="col-lg-3 border-end" style="border-color: var(--border-color) !important;">
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">1. Selecione a Oficina</label>
+                              <select id="selOficina" class="form-select oficina-selector mb-3" onchange="applyFilters('oficina')">
+                                  <option value="TODAS" selected>TODAS AS OFICINAS</option>
+                                  <option value="SEDE">MARCENARIA SEDE</option>
+                                  <option value="REGIONAL">MARCENARIA REGIONAL</option>
+                              </select>
+                              
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Data de Entrega</label>
+                              <div class="d-flex gap-2 mb-3">
+                                  <input type="date" id="filterDateStart" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
+                                  <input type="date" id="filterDateEnd" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
+                              </div>
 
-                          <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisa por Qualquer Palavra</label>
-                          <input type="text" id="globalSearchInput" class="form-control oficina-selector" placeholder="Digite para filtrar..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="applyFilters('global')">
-                      </div>
-                      <div class="col-md-9">
-                          <div class="row g-3" id="filterContainer"></div>
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisa por Palavra</label>
+                              <input type="text" id="globalSearchInput" class="form-control oficina-selector" placeholder="Digite para filtrar..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="applyFilters('global')">
+                          </div>
+                          <div class="col-lg-9">
+                              <div class="row g-3" id="filterContainer"></div>
+                          </div>
                       </div>
                   </div>
                 </div>
               </div>
 
-              <div class="row mb-4 g-4">
-                <div class="col-md-4"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">Total Solicitado </div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
-                <div class="col-md-4"><div class="kpi-card green"><div class="kpi-label">Total Entregue </div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
-                <div class="col-md-4"><div class="kpi-card yellow"><div class="kpi-label">Total Pendente </div><div class="kpi-val" id="kpiPendente">0</div></div></div>
+              <!-- KPIs ESPREMIDOS LADO A LADO NO CELULAR (col-4) -->
+              <div class="row mb-3 g-2 g-lg-4 w-100 m-0">
+                <div class="col-4 col-md-4 p-0 pe-1"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">SOLIC. </div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 px-1"><div class="kpi-card green"><div class="kpi-label">ENTR. </div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 ps-1"><div class="kpi-card yellow"><div class="kpi-label">PEND. </div><div class="kpi-val" id="kpiPendente">0</div></div></div>
               </div>
           </div>
 
           <div style="min-height: 600px;">
               <div id="viewTable" class="view-section active">
                   <div class="viz-box">
-                    <h5 class="chart-header">Detalhamento dos Processos (Simulação Ativa)</h5>
+                    <h5 class="chart-header">Detalhamento dos Processos</h5>
                     <div class="table-box">
                         <table class="custom-table w-100">
                           <thead>
@@ -364,9 +455,9 @@
                     </div>
                     <div class="pagination-container" id="paginationControls">
                         <span class="small fw-bold" style="color:var(--text-sec)" id="pageInfo">Página 1</span>
-                        <div>
+                        <div class="d-flex gap-2">
                             <button class="pagination-btn" id="btnPrev" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
-                            <button class="pagination-btn ms-2" id="btnNext" onclick="changePage(1)">Próximo <i class="bi bi-chevron-right"></i></button>
+                            <button class="pagination-btn" id="btnNext" onclick="changePage(1)">Próximo <i class="bi bi-chevron-right"></i></button>
                         </div>
                     </div>
                   </div>
@@ -381,37 +472,34 @@
               <div id="viewChart3" class="view-section"><div class="viz-box"><h5 class="chart-header">Volume Total de Itens</h5><div class="chart-container"><canvas id="chartVolumeMovel"></canvas></div></div></div>
               
               <div id="viewProcon" class="view-section">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                      <h5 class="fw-bold" style="color:var(--text-sec)">PROCON | ESTAÇÃO TECH</h5>
-                  </div>
                   
-                  <div class="row mb-4 g-4">
-                      <div class="col-md-6">
-                          <div class="card card-custom p-4" style="border-left: 6px solid var(--st-sol); background-color: var(--card-bg);">
-                              <h5 class="fw-bolder mb-4 text-uppercase text-center" style="color: var(--text-pri); letter-spacing: 2px;">PROCON</h5>
+                  <div class="row mb-3 g-2 g-lg-4 w-100 m-0">
+                      <div class="col-6 col-md-6 p-0 pe-1">
+                          <div class="card card-custom p-3 p-lg-4" style="border-left: 5px solid var(--st-sol); background-color: var(--card-bg);">
+                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-pri); font-size: 0.8rem;">PROCON</h6>
                               <div class="d-flex justify-content-around text-center">
                                   <div>
-                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">FINALIZADOS</div>
-                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="proconKpiFin">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">FINALIZADOS</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="proconKpiFin">0</div>
                                   </div>
                                   <div>
-                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">PENDENTES</div>
-                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="proconKpiPen">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">PENDENTES</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="proconKpiPen">0</div>
                                   </div>
                               </div>
                           </div>
                       </div>
-                      <div class="col-md-6">
-                          <div class="card card-custom p-4" style="border-left: 6px solid var(--st-sol); background-color: var(--card-bg);">
-                              <h5 class="fw-bolder mb-4 text-uppercase text-center" style="color: var(--text-pri); letter-spacing: 2px;">ESTAÇÃO TECH</h5>
+                      <div class="col-6 col-md-6 p-0 ps-1">
+                          <div class="card card-custom p-3 p-lg-4" style="border-left: 5px solid var(--st-sol); background-color: var(--card-bg);">
+                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-pri); font-size: 0.8rem;">ESTAÇÃO TECH</h6>
                               <div class="d-flex justify-content-around text-center">
                                   <div>
-                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">FINALIZADOS</div>
-                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="techKpiFin">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">FINALIZADOS</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="techKpiFin">0</div>
                                   </div>
                                   <div>
-                                      <div class="fw-bold mb-2 text-uppercase" style="color: var(--text-pri); font-size: 0.95rem; letter-spacing: 1px;">PENDENTES</div>
-                                      <div style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="techKpiPen">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">PENDENTES</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="techKpiPen">0</div>
                                   </div>
                               </div>
                           </div>
@@ -419,50 +507,55 @@
                   </div>
                   
                   <div class="card card-custom mb-4">
-                    <div class="card-body p-4">
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                          <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.8rem;"><i class="bi bi-funnel-fill me-2"></i>Filtros & Pesquisa</h6>
-                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetProconFilters()">Limpar</button>
+                    <div class="card-body p-3 p-lg-4">
+                      <div class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapseProconFilters" aria-expanded="false" style="cursor: pointer;">
+                          <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.85rem;">
+                              <i class="bi bi-funnel-fill me-1"></i>Filtros & Pesquisa <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
+                          </h6>
+                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetProconFilters(); event.stopPropagation();">Limpar</button>
                       </div>
-                      <div class="row g-3">
-                          <div class="col-md-4">
-                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisar Cidade/Local</label>
-                              <div class="input-group">
-                                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                                  <input type="text" id="proconSearchInput" class="form-control border-start-0" placeholder="Ex: Centro, Bacabal..." onkeyup="filterProconData()">
+                      
+                      <div class="collapse mt-3" id="collapseProconFilters">
+                          <div class="row g-3">
+                              <div class="col-md-4">
+                                  <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Cidade/Local</label>
+                                  <div class="input-group">
+                                      <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                                      <input type="text" id="proconSearchInput" class="form-control border-start-0" placeholder="Ex: Centro, Bacabal..." onkeyup="filterProconData()">
+                                  </div>
                               </div>
-                          </div>
-                          <div class="col-md-4">
-                             <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Tipo</label>
-                             <div class="dropdown">
-                                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_tipo">Todos</button>
-                                <div class="dropdown-menu dropdown-menu-custom">
-                                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
-                                        <input class="form-check-input" type="checkbox" id="selectAll_proc_tipo" onchange="toggleSelectAllProcon('tipo', this)">
-                                        <span class="text-truncate">SELECIONAR TODOS</span>
-                                    </label>
-                                    <div class="dropdown-list-container" id="list_proc_tipo"></div>
-                                </div>
-                             </div>
-                          </div>
-                          <div class="col-md-4">
-                             <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Status</label>
-                             <div class="dropdown">
-                                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_status">Todos</button>
-                                <div class="dropdown-menu dropdown-menu-custom">
-                                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
-                                        <input class="form-check-input" type="checkbox" id="selectAll_proc_status" onchange="toggleSelectAllProcon('status', this)">
-                                        <span class="text-truncate">SELECIONAR TODOS</span>
-                                    </label>
-                                    <div class="dropdown-list-container" id="list_proc_status"></div>
-                                </div>
-                             </div>
+                              <div class="col-md-4">
+                                 <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Tipo</label>
+                                 <div class="dropdown">
+                                    <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_tipo">Todos</button>
+                                    <div class="dropdown-menu dropdown-menu-custom">
+                                        <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                            <input class="form-check-input" type="checkbox" id="selectAll_proc_tipo" onchange="toggleSelectAllProcon('tipo', this)">
+                                            <span class="text-truncate">SELECIONAR TODOS</span>
+                                        </label>
+                                        <div class="dropdown-list-container" id="list_proc_tipo"></div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="col-md-4">
+                                 <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Status</label>
+                                 <div class="dropdown">
+                                    <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_status">Todos</button>
+                                    <div class="dropdown-menu dropdown-menu-custom">
+                                        <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                            <input class="form-check-input" type="checkbox" id="selectAll_proc_status" onchange="toggleSelectAllProcon('status', this)">
+                                            <span class="text-truncate">SELECIONAR TODOS</span>
+                                        </label>
+                                        <div class="dropdown-list-container" id="list_proc_status"></div>
+                                    </div>
+                                 </div>
+                              </div>
                           </div>
                       </div>
                     </div>
                   </div>
 
-                  <div class="row" id="proconContainer">
+                  <div class="row m-0" id="proconContainer">
                       </div>
               </div>
           </div>
@@ -472,7 +565,7 @@
   <div class="notif-overlay" id="notifOverlay">
       <div class="notif-box">
           <div class="notif-header">
-              <h5 class="m-0 fw-bold"><i class="bi bi-calendar-week-fill me-2"></i>Entregas Pendentes da Semana</h5>
+              <h5 class="m-0 fw-bold"><i class="bi bi-calendar-week-fill me-2"></i>Pendentes da Semana</h5>
               <button type="button" class="btn-close btn-close-white" onclick="closeNotifications()"></button>
           </div>
           <div class="notif-body" id="notifBody">
@@ -480,7 +573,7 @@
           </div>
           <div class="notif-footer">
               <button class="btn btn-outline-secondary" onclick="closeNotifications()">Fechar</button>
-              <button class="btn btn-success fw-bold" id="btnCopyNotif" onclick="copyWhatsAppText()"><i class="bi bi-whatsapp me-2"></i>Copiar para WhatsApp</button>
+              <button class="btn btn-success fw-bold" id="btnCopyNotif" onclick="copyWhatsAppText()"><i class="bi bi-whatsapp"></i> Copiar</button>
           </div>
       </div>
   </div>
@@ -544,8 +637,23 @@
 
     $(document).ready(function() {
         createFilterInputs(); 
-        loadData(false); // Carrega usando INITIAL_DATA em vez de fetch
+        loadData(false);
+        
+        // Abre os filtros automaticamente apenas se estiver no PC
+        if (window.innerWidth >= 1200) {
+            $('#collapseFilters').addClass('show');
+            $('[data-bs-target="#collapseFilters"]').attr('aria-expanded', 'true');
+            
+            $('#collapseProconFilters').addClass('show');
+            $('[data-bs-target="#collapseProconFilters"]').attr('aria-expanded', 'true');
+        }
     });
+
+    // --- FUNÇÃO PARA ABRIR/FECHAR MENU MOBILE ---
+    window.toggleSidebar = function() {
+        $('#sidebar').toggleClass('open');
+        $('#sidebar-overlay').toggleClass('show');
+    }
 
     window.refreshCurrent = function(forceRefresh = false) {
         if(currentViewId === 'viewProcon') {
@@ -560,6 +668,12 @@
         $('.view-section').removeClass('active'); $('#' + viewId).addClass('active');
         $('.nav-btn').removeClass('active'); $(btn).addClass('active');
         
+        // No celular, fecha o menu automaticamente ao escolher uma opção
+        if ($(window).width() <= 1199) {
+            $('#sidebar').removeClass('open');
+            $('#sidebar-overlay').removeClass('show');
+        }
+
         if(viewId === 'viewProcon') {
             $('#mainSectionGroup').hide();
             loadProconData(false);
@@ -599,7 +713,7 @@
       const container = $('#filterContainer'); container.empty();
       filterFields.forEach(f => {
         const div = `
-          <div class="col-md-3">
+          <div class="col-md-6 col-lg-3">
             <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">${f.label}</label>
             <div class="dropdown" id="dd_${f.key}">
                 <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_${f.key}">Todos</button>
@@ -994,7 +1108,7 @@
                 </div>`;
             }).join('');
             
-            container.append(`<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12"><div class="procon-card">
+            container.append(`<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 p-2"><div class="procon-card">
                 <div class="procon-header" data-bs-toggle="collapse" data-bs-target="#collapse_${cardId}">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="origin-badge ${originClass}">${originLabel}</span>
@@ -1199,9 +1313,10 @@
           return sLower.includes('arquivado') || (sLower.includes('não') && sLower.includes('aut'));
       });
 
-      let labelText = "TOTAL SOLICITADO (SIM)";
+      // No mobile reduz a label
+      let labelText = window.innerWidth <= 1199 ? "SOLIC." : "TOTAL SOLICITADO (SIM)";
       if (!hasRestrictedSelection) {
-         labelText = "TOTAL AUTORIZADO (SIM)";
+         labelText = window.innerWidth <= 1199 ? "AUTORIZ." : "TOTAL AUTORIZADO (SIM)";
          dataForKPI = dataForKPI.filter(r => {
              const st = r.status.toLowerCase();
              const isRestricted = st.includes('arquivado') || (st.includes('não') && st.includes('aut'));
@@ -1257,7 +1372,6 @@
 
                 if (isAFin && !isBFin) return 1;  // 'a' é finalizada, joga pro fim
                 if (!isAFin && isBFin) return -1; // 'b' é finalizada, joga pro fim
-                // Se as duas forem finalizadas (ou nenhuma for), a ordenação continua normalmente pela data abaixo
                 // --------------------------------------------------
 
                 let dateA, dateB;
@@ -1287,7 +1401,7 @@
                 }
             }
 
-            // Ordenação padrão (quando o usuário não clicou em nenhuma coluna)
+            // Ordenação padrão
             const getStIdx = (s) => {
                 s = (s || '').toUpperCase();
                 let idx = tableCustomOrder.findIndex(o => s.includes(o));
@@ -1408,26 +1522,30 @@
                 `;
             }
 
+            // --- AQUI ESTÃO OS DATA-LABELS INJETADOS NAS TDS ---
             htmlBuilder += `
                 <tr class="parent-row">
-                    <td class="text-center align-middle" onclick="event.stopPropagation()">
+                    <td data-label="Selecionar" class="text-center align-middle" onclick="event.stopPropagation()">
                         <input type="checkbox" class="form-check-input m-0 process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)">
                     </td>
-                    <td class="fw-bold text-nowrap" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" style="cursor: pointer;">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-chevron-down me-2 small" style="color:var(--highlight);"></i>
-                            ${processoExibicao}
-                            ${obsMestreHtml}
+                    <td data-label="Processo" class="fw-bold text-nowrap" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" style="cursor: pointer;">
+                        <div class="d-flex align-items-center justify-content-between w-100">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-chevron-down me-2 small d-none d-lg-inline-block" style="color:var(--highlight);"></i>
+                                ${processoExibicao}
+                                ${obsMestreHtml}
+                            </div>
+                            <i class="bi bi-chevron-down small d-lg-none" style="color:var(--highlight);"></i>
                         </div>
                     </td>
-                    <td style="font-size:0.85rem;">${r.convenio}</td>
-                    <td><div style="font-size:0.85rem; white-space:normal; line-height:1.2;">${r.local}</div></td>
-                    <td class="text-center fw-bold" style="color:var(--text-sec);">${totalSol}</td>
-                    <td class="text-center">${prioBadge}</td>
-                    <td class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
-                    <td><div class="text-truncate ${dateClass}" style="max-width:200px;">${r.previsao}</div></td>
-                    <td>${r.data_autorizacao}</td>
-                    <td>${r.data_entrega || '-'}</td>
+                    <td data-label="Convênio" style="font-size:0.85rem;">${r.convenio}</td>
+                    <td data-label="Local"><div style="font-size:0.85rem; white-space:normal; line-height:1.2;">${r.local}</div></td>
+                    <td data-label="Solicitado" class="text-center fw-bold" style="color:var(--text-sec);">${totalSol}</td>
+                    <td data-label="Prioridade" class="text-center">${prioBadge}</td>
+                    <td data-label="Status" class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
+                    <td data-label="Previsão"><div><span class="text-truncate ${dateClass}" style="max-width:200px;">${r.previsao}</span></div></td>
+                    <td data-label="Data Aut.">${r.data_autorizacao}</td>
+                    <td data-label="Data Ent.">${r.data_entrega || '-'}</td>
                 </tr>
             `;
 
@@ -1447,42 +1565,45 @@
                     `;
                 }
 
+                // DATA LABELS NA SUB-TABELA
                 return `
                 <tr>
-                    <td class="text-center align-middle">
+                    <td data-label="Sel." class="text-center align-middle">
                         <input type="checkbox" class="form-check-input m-0" ${itemCheck} onchange="toggleItem(${item._uniqueId}, this)">
                     </td>
-                    <td>
-                        <strong>${item.mobilia}</strong>
-                        ${itemObsHtml}
-                        <a href="${item.link_planilha}" target="_blank" rel="noopener noreferrer" title="Abrir linha no Google Planilhas" class="ms-2" style="color: #0f9d58; font-size: 1.1rem; vertical-align: middle;" onclick="event.stopPropagation()">
-                            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                        </a>
+                    <td data-label="Mobília">
+                        <div class="d-flex align-items-center">
+                            <strong>${item.mobilia}</strong>
+                            ${itemObsHtml}
+                            <a href="${item.link_planilha}" target="_blank" rel="noopener noreferrer" title="Abrir linha no Google Planilhas" class="ms-2" style="color: #0f9d58; font-size: 1.1rem; vertical-align: middle;" onclick="event.stopPropagation()">
+                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                            </a>
+                        </div>
                     </td>
-                    <td>${item.material || '-'}</td>
-                    <td>${item.dimensoes || '-'}</td>
-                    <td class="text-center">
+                    <td data-label="Material">${item.material || '-'}</td>
+                    <td data-label="Dimensões">${item.dimensoes || '-'}</td>
+                    <td data-label="Qtd. Sol." class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_sol}" onchange="updateSimQty('sol', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td class="text-center">
+                    <td data-label="Qtd. Ent." class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_ent}" onchange="updateSimQty('ent', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td class="text-center">
+                    <td data-label="Qtd. Pen." class="text-center">
                         <span id="sim_pen_${item._uniqueId}" class="sim-val-pen">${calcPen}</span>
                     </td>
                 </tr>
-            `}).join('');
+            `;}).join('');
 
             htmlBuilder += `<tr class="detail-row">
                 <td colspan="10">
                     <div class="collapse" id="${collapseId}">
-                        <div class="p-3">
+                        <div class="p-lg-3 p-1">
                             <div class="card shadow-sm border-0">
                                 <div class="card-body p-0">
                                    <table class="table table-sm table-borderless sub-table mb-0">
                                      <thead style="background-color: #f8f9fa;">
                                        <tr>
-                                         <th width="3%" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias deste processo"></th>
+                                         <th width="3%" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias"></th>
                                          <th width="30%">MOBÍLIA</th><th width="20%">MATERIAL</th><th width="20%">DIMENSÕES</th><th class="text-center">SOL. </th><th class="text-center">ENT. </th><th class="text-center">PEN. </th>
                                        </tr>
                                      </thead>
