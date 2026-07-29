@@ -1249,6 +1249,17 @@
         
         let sortedRaw = [...filteredData].sort((a, b) => {
             if (currentSortCol) {
+                // --- NOVA LÓGICA: FINALIZADAS SEMPRE POR ÚLTIMO ---
+                const stA = (a.status || '').toUpperCase().trim();
+                const stB = (b.status || '').toUpperCase().trim();
+                const isAFin = stA === 'FINALIZADA' || stA === 'FINALIZADO';
+                const isBFin = stB === 'FINALIZADA' || stB === 'FINALIZADO';
+
+                if (isAFin && !isBFin) return 1;  // 'a' é finalizada, joga pro fim
+                if (!isAFin && isBFin) return -1; // 'b' é finalizada, joga pro fim
+                // Se as duas forem finalizadas (ou nenhuma for), a ordenação continua normalmente pela data abaixo
+                // --------------------------------------------------
+
                 let dateA, dateB;
                 if (currentSortCol === 'previsao') {
                     dateA = parseDate(a.previsao);
@@ -1276,6 +1287,7 @@
                 }
             }
 
+            // Ordenação padrão (quando o usuário não clicou em nenhuma coluna)
             const getStIdx = (s) => {
                 s = (s || '').toUpperCase();
                 let idx = tableCustomOrder.findIndex(o => s.includes(o));
