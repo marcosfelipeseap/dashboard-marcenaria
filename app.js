@@ -17,13 +17,11 @@ let auth;
 let sheets;
 try {
     if (process.env.GOOGLE_CREDENTIALS) {
-        // Quando rodar no Vercel (Puxa da aba Environment Variables)
         auth = new google.auth.GoogleAuth({
             credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
         });
     } else {
-        // Quando rodar no seu computador (Puxa do arquivo)
         auth = new google.auth.GoogleAuth({
             keyFile: 'credentials.json',
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
@@ -38,6 +36,7 @@ try {
 async function fetchDataFromSheets() {
     if (!sheets) throw new Error("API do Google não inicializada. Verifique as credenciais.");
 
+    // Removemos o GID fixo. O sistema vai descobrir sozinho agora.
     const sources = [
         { type: 'SEDE', id: '17WAyG3sGud8441tlQR2E0gxWp15Ogd26zDoViv2PisE', sheetName: 'MÓVEIS ATUALIZADOS' },
         { type: 'REGIONAL', id: '1RtsILkt3MJ-djQAXSGvKOWN1VNOCCdNVNIGFYA5WrnE', sheetName: 'MARCENARIA | REGIONAL' }
@@ -48,10 +47,42 @@ async function fetchDataFromSheets() {
 
     await Promise.all(sources.map(async (src) => {
         try {
-            const [resMain, resLink] = await Promise.all([
-                sheets.spreadsheets.values.get({ spreadsheetId: src.id, range: src.sheetName, valueRenderOption: 'FORMATTED_VALUE' }).catch(() => ({ data: { values: [] } })),
-                sheets.spreadsheets.values.get({ spreadsheetId: src.id, range: 'LINK DO SEI', valueRenderOption: 'FORMATTED_VALUE' }).catch(() => ({ data: { values: [] } }))
+            // Agora fazemos 3 perguntas ao Google ao mesmo tempo (incluindo os metadados para pegar o GID)
+            const [resMain, resLink, resMeta] = await Promise.all([
+                sheets.spreadsheets.values.get({ 
+                    spreadsheetId: src.id, 
+                    range: src.sheetName, 
+                    valueRenderOption: 'FORMATTED_VALUE' 
+                }).catch((err) => {
+                    console.error(`[ERRO G-API] Falha ao ler a aba principal de ${src.type}:`, err.message);
+                    return { data: { values: [] } };
+                }),
+                
+                sheets.spreadsheets.values.get({ 
+                    spreadsheetId: src.id, 
+                    range: 'LINK DO SEI', 
+                    valueRenderOption: 'FORMATTED_VALUE' 
+                }).catch((err) => {
+                    console.warn(`[AVISO] Aba 'LINK DO SEI' não encontrada ou erro na ${src.type}.`);
+                    return { data: { values: [] } };
+                }),
+
+                sheets.spreadsheets.get({
+                    spreadsheetId: src.id
+                }).catch((err) => {
+                    console.warn(`[AVISO] Não foi possível carregar os metadados da ${src.type} para pegar o GID.`);
+                    return null;
+                })
             ]);
+
+            // Descobre o GID dinamicamente buscando pelo nome da aba
+            let currentGid = '0';
+            if (resMeta && resMeta.data && resMeta.data.sheets) {
+                const sheetInfo = resMeta.data.sheets.find(s => s.properties.title === src.sheetName);
+                if (sheetInfo) {
+                    currentGid = sheetInfo.properties.sheetId;
+                }
+            }
 
             const linkMap = {};
             if (resLink.data.values) {
@@ -106,11 +137,14 @@ async function fetchDataFromSheets() {
                 let localVal = (row[idxLocal] || 'Não Identificado').toString().trim();
                 let localCheck = localVal.toLowerCase();
 
+                let linhaExata = r + 2;
+
                 let item = {
                     origem: src.type,
                     processo: numProcesso,
                     link_sei: linkMap[numProcesso] || '',
-                    link_planilha: `https://docs.google.com/spreadsheets/d/${src.id}/edit`,
+                    // Utiliza o currentGid descoberto automaticamente!
+                    link_planilha: `https://docs.google.com/spreadsheets/d/${src.id}/edit#gid=${currentGid}&range=${linhaExata}:${linhaExata}`,
                     local: localVal,
                     tipo: (row[idxTipoReal] || '').toString().trim(),
                     mobilia: (row[idxMobilia] || '').toString().trim(),
