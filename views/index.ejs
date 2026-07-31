@@ -99,7 +99,8 @@
     }
     .form-check-input:checked { background-color: var(--highlight); border-color: var(--highlight); }
     
-    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); max-width: 100%; overflow: hidden; }
+    /* REMOVIDO OVERFLOW HIDDEN PARA PERMITIR FILTROS */
+    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); max-width: 100%; overflow: visible; }
     
     .oficina-selector {
         background-color: var(--input-bg); color: var(--input-text); border: 2px solid var(--border-color);
@@ -367,7 +368,7 @@
           <div id="mainSectionGroup">
               
               <!-- CARD DOS FILTROS (GAVETA / ACORDEÃO) -->
-              <div class="card card-custom mb-3">
+              <div class="card card-custom mb-3" style="position: relative; z-index: 100;">
                 <div class="card-body p-3 p-lg-4">
                   <!-- Cabeçalho Clickável -->
                   <div class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" style="cursor: pointer;">
@@ -422,9 +423,9 @@
 
               <!-- KPIs ESPREMIDOS LADO A LADO NO CELULAR (col-4) -->
               <div class="row mb-3 g-2 g-lg-4 w-100 m-0">
-                <div class="col-4 col-md-4 p-0 pe-1"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">SOLIC. </div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
-                <div class="col-4 col-md-4 p-0 px-1"><div class="kpi-card green"><div class="kpi-label">ENTR. </div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
-                <div class="col-4 col-md-4 p-0 ps-1"><div class="kpi-card yellow"><div class="kpi-label">PEND. </div><div class="kpi-val" id="kpiPendente">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 pe-1"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">SOLICITADO</div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 px-1"><div class="kpi-card green"><div class="kpi-label">ENTREGUE</div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 ps-1"><div class="kpi-card yellow"><div class="kpi-label">PENDENTE</div><div class="kpi-val" id="kpiPendente">0</div></div></div>
               </div>
           </div>
 
@@ -446,8 +447,8 @@
                               <th class="text-center">Prioridade</th>
                               <th class="text-center">Status</th>
                               <th class="sortable-header" onclick="handleSort('previsao')" title="Clique para ordenar">Previsão <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_previsao"></i></th>
-                              <th class="sortable-header" onclick="handleSort('data_aut')" title="Clique para ordenar">Data Aut. <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
-                              <th class="sortable-header" onclick="handleSort('data_ent')" title="Clique para ordenar">Data Ent. <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
+                              <th class="sortable-header" onclick="handleSort('data_aut')" title="Clique para ordenar">Data Autorização <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
+                              <th class="sortable-header" onclick="handleSort('data_ent')" title="Clique para ordenar">Data Entrega <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
                             </tr>
                           </thead>
                           <tbody id="tableBody"></tbody>
@@ -506,7 +507,8 @@
                       </div>
                   </div>
                   
-                  <div class="card card-custom mb-4">
+                  <!-- FILTROS PROCON TECH - ADICIONADO Z-INDEX E POSITION PARA CORRIGIR SOBREPOSIÇÃO -->
+                  <div class="card card-custom mb-4" style="position: relative; z-index: 99;">
                     <div class="card-body p-3 p-lg-4">
                       <div class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapseProconFilters" aria-expanded="false" style="cursor: pointer;">
                           <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.85rem;">
@@ -1104,7 +1106,7 @@
                 return `<div class="procon-item-row">
                     <div class="d-flex justify-content-between align-items-center mb-2"><h6 class="fw-bold m-0 text-uppercase" style="font-size:0.9rem; color:var(--highlight);">${item.mobilia}</h6><span class="status-badge" style="transform:scale(0.9)">${item.status}</span></div>
                     <div class="detail-grid"><div class="detail-item"><strong>MATERIAL</strong><span>${item.material || '-'}</span></div><div class="detail-item"><strong>DIMENSÕES</strong><span>${item.dimensoes || '-'}</span></div></div>
-                    <div class="d-flex justify-content-between gap-2"><div class="qty-badge"><span class="qty-val" style="color:var(--st-sol)">${item.qtd_sol}</span><span class="qty-lbl">SOLIC.</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-ent)">${item.qtd_ent}</span><span class="qty-lbl">ENT.</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-pen);">${item.qtd_pen}</span><span class="qty-lbl">PEND.</span></div></div>
+                    <div class="d-flex justify-content-between gap-2"><div class="qty-badge"><span class="qty-val" style="color:var(--st-sol)">${item.qtd_sol}</span><span class="qty-lbl">SOLICITADO</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-ent)">${item.qtd_ent}</span><span class="qty-lbl">ENTREGUE</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-pen);">${item.qtd_pen}</span><span class="qty-lbl">PENDENTE</span></div></div>
                 </div>`;
             }).join('');
             
@@ -1117,7 +1119,7 @@
                     <div class="d-flex justify-content-between align-items-center"><span class="status-badge ${stClass}">${group.mainStatus || 'SEM STATUS'}</span></div>
                     <div class="procon-title text-truncate mt-2">${group.local}</div>
                     <div style="font-size: 0.75rem; color: var(--text-sec); font-weight: 700; margin-top: 2px;">PROCESSO: <span style="color: var(--highlight);">${group.processo || '-'}</span></div>
-                    <div class="header-totals"><span class="h-badge" style="color:var(--st-sol)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--st-ent)">ENT: ${group.totalEnt}</span><span class="h-badge" style="color:var(--st-pen)">PEN: ${group.totalPen}</span></div>
+                    <div class="header-totals"><span class="h-badge" style="color:var(--st-sol)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--st-ent)">ENTREGUE: ${group.totalEnt}</span><span class="h-badge" style="color:var(--st-pen)">PENDENTE: ${group.totalPen}</span></div>
                 </div>
                 <div class="collapse" id="collapse_${cardId}"><div class="procon-details">${itemsHtml}</div></div>
             </div></div>`);
@@ -1314,9 +1316,9 @@
       });
 
       // No mobile reduz a label
-      let labelText = window.innerWidth <= 1199 ? "SOLIC." : "TOTAL SOLICITADO (SIM)";
+      let labelText = window.innerWidth <= 1199 ? "SOLICITADO" : "TOTAL SOLICITADO (SIM)";
       if (!hasRestrictedSelection) {
-         labelText = window.innerWidth <= 1199 ? "AUTORIZ." : "TOTAL AUTORIZADO (SIM)";
+         labelText = window.innerWidth <= 1199 ? "AUTORIZADO" : "TOTAL AUTORIZADO (SIM)";
          dataForKPI = dataForKPI.filter(r => {
              const st = r.status.toLowerCase();
              const isRestricted = st.includes('arquivado') || (st.includes('não') && st.includes('aut'));
@@ -1544,8 +1546,8 @@
                     <td data-label="Prioridade" class="text-center">${prioBadge}</td>
                     <td data-label="Status" class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
                     <td data-label="Previsão"><div><span class="text-truncate ${dateClass}" style="max-width:200px;">${r.previsao}</span></div></td>
-                    <td data-label="Data Aut.">${r.data_autorizacao}</td>
-                    <td data-label="Data Ent.">${r.data_entrega || '-'}</td>
+                    <td data-label="Data Autorização">${r.data_autorizacao}</td>
+                    <td data-label="Data Entrega">${r.data_entrega || '-'}</td>
                 </tr>
             `;
 
@@ -1568,7 +1570,7 @@
                 // DATA LABELS NA SUB-TABELA
                 return `
                 <tr>
-                    <td data-label="Sel." class="text-center align-middle">
+                    <td data-label="Selecionar" class="text-center align-middle">
                         <input type="checkbox" class="form-check-input m-0" ${itemCheck} onchange="toggleItem(${item._uniqueId}, this)">
                     </td>
                     <td data-label="Mobília">
@@ -1582,13 +1584,13 @@
                     </td>
                     <td data-label="Material">${item.material || '-'}</td>
                     <td data-label="Dimensões">${item.dimensoes || '-'}</td>
-                    <td data-label="Qtd. Sol." class="text-center">
+                    <td data-label="Quantidade Solicitada" class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_sol}" onchange="updateSimQty('sol', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td data-label="Qtd. Ent." class="text-center">
+                    <td data-label="Quantidade Entregue" class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_ent}" onchange="updateSimQty('ent', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td data-label="Qtd. Pen." class="text-center">
+                    <td data-label="Quantidade Pendente" class="text-center">
                         <span id="sim_pen_${item._uniqueId}" class="sim-val-pen">${calcPen}</span>
                     </td>
                 </tr>
@@ -1604,7 +1606,7 @@
                                      <thead style="background-color: #f8f9fa;">
                                        <tr>
                                          <th width="3%" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias"></th>
-                                         <th width="30%">MOBÍLIA</th><th width="20%">MATERIAL</th><th width="20%">DIMENSÕES</th><th class="text-center">SOL. </th><th class="text-center">ENT. </th><th class="text-center">PEN. </th>
+                                         <th width="30%">MOBÍLIA</th><th width="20%">MATERIAL</th><th width="20%">DIMENSÕES</th><th class="text-center">SOLICITADO</th><th class="text-center">ENTREGUE</th><th class="text-center">PENDENTE</th>
                                        </tr>
                                      </thead>
                                      <tbody>${subRows}</tbody>
