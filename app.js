@@ -143,7 +143,6 @@ async function fetchDataFromSheets() {
                     origem: src.type,
                     processo: numProcesso,
                     link_sei: linkMap[numProcesso] || '',
-                    // Utiliza o currentGid descoberto automaticamente!
                     link_planilha: `https://docs.google.com/spreadsheets/d/${src.id}/edit#gid=${currentGid}&range=${linhaExata}:${linhaExata}`,
                     local: localVal,
                     tipo: (row[idxTipoReal] || '').toString().trim(),
@@ -209,6 +208,114 @@ app.get('/api/data', async (req, res) => {
         res.json(data);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// --- GERAÇÃO DE EXCEL ---
+app.post('/api/excel', async (req, res) => {
+    try {
+        const { type, items } = req.body;
+        
+        let exceljs;
+        try {
+            exceljs = require('exceljs');
+        } catch (e) {
+            return res.status(500).send("Biblioteca exceljs não instalada. Execute 'npm install exceljs'.");
+        }
+
+        const workbook = new exceljs.Workbook();
+        const worksheet = workbook.addWorksheet('Relatório Marcenaria');
+
+        // Estilos
+        const headerStyle = {
+            font: { bold: true, color: { argb: 'FFFFFFFF' } },
+            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5D4037' } },
+            alignment: { vertical: 'middle', horizontal: 'center' }
+        };
+
+        let title = (type === 3 || type === 4) ? "RELATÓRIO CONSOLIDADO GERAL - MARCENARIA" : "RELATÓRIO DE PROCESSOS - MARCENARIA";
+        worksheet.addRow([title]).font = { size: 14, bold: true };
+        worksheet.addRow(['Data de Emissão:', new Date().toLocaleString('pt-BR')]);
+        worksheet.addRow([]); // Espaço
+
+        if (type === 1 || type === 2) {
+            let grouped = {};
+            items.forEach(item => {
+                let proc = item.processo || "S/N";
+                if (!grouped[proc]) grouped[proc] = { local: item.local, items: [] };
+                grouped[proc].items.push(item);
+            });
+
+            for (let proc in grouped) {
+                let g = grouped[proc];
+                worksheet.addRow([`PROCESSO: ${proc} | LOCAL: ${g.local}`]).font = { bold: true, color: { argb: 'FF3E2723' } };
+
+                let headers = [];
+                if (type === 1) headers = ["Mobília", "Material", "Dimensões", "Sol.", "Ent.", "Pend."];
+                else headers = ["Mobília (Agrupada)", "Sol.", "Ent.", "Pend."];
+
+                let headerRow = worksheet.addRow(headers);
+                headerRow.eachCell(cell => Object.assign(cell, headerStyle));
+
+                if (type === 1) {
+                    g.items.forEach(item => {
+                        let pend = Math.max(0, (item.qtd_solicitada || 0) - (item.qtd_entregue || 0));
+                        worksheet.addRow([item.mobilia || "-", item.material || "-", item.dimensoes || "-", item.qtd_solicitada || 0, item.qtd_entregue || 0, pend]);
+                    });
+                } else {
+                    let aggProcesso = {};
+                    g.items.forEach(item => {
+                        let m = (item.mobilia || "-").toUpperCase().trim();
+                        if (!aggProcesso[m]) aggProcesso[m] = { sol: 0, ent: 0 };
+                        aggProcesso[m].sol += (item.qtd_solicitada || 0);
+                        aggProcesso[m].ent += (item.qtd_entregue || 0);
+                    });
+                    for (let m in aggProcesso) {
+                        let pend = Math.max(0, aggProcesso[m].sol - aggProcesso[m].ent);
+                        worksheet.addRow([m, aggProcesso[m].sol, aggProcesso[m].ent, pend]);
+                    }
+                }
+                worksheet.addRow([]);
+            }
+        } else {
+            let headers = [];
+            if (type === 3) headers = ["Mobília", "Material", "Dimensões", "Sol.", "Ent.", "Pend."];
+            else headers = ["Mobília", "Sol.", "Ent.", "Pend."];
+
+            let headerRow = worksheet.addRow(headers);
+            headerRow.eachCell(cell => Object.assign(cell, headerStyle));
+
+            let aggGlobal = {};
+            items.forEach(item => {
+                let key = type === 3 
+                    ? `${(item.mobilia||"-").toUpperCase().trim()}|${(item.material||"-").toUpperCase().trim()}|${(item.dimensoes||"-").toUpperCase().trim()}`
+                    : (item.mobilia||"-").toUpperCase().trim();
+                
+                if (!aggGlobal[key]) aggGlobal[key] = { mobilia: item.mobilia||"-", material: item.material||"-", dimensoes: item.dimensoes||"-", sol: 0, ent: 0 };
+                aggGlobal[key].sol += (item.qtd_solicitada || 0);
+                aggGlobal[key].ent += (item.qtd_entregue || 0);
+            });
+
+            Object.keys(aggGlobal).sort().forEach(k => {
+                let obj = aggGlobal[k];
+                let pend = Math.max(0, obj.sol - obj.ent);
+                if (type === 3) worksheet.addRow([obj.mobilia, obj.material, obj.dimensoes, obj.sol, obj.ent, pend]);
+                else worksheet.addRow([obj.mobilia, obj.sol, obj.ent, pend]);
+            });
+        }
+
+        // Ajustar largura padrão
+        worksheet.columns.forEach(column => { column.width = 22; });
+
+        let fType = (type <= 2) ? "Processos" : "Consolidado";
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="Marcenaria_${fType}.xlsx"`);
+        
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Erro na geração do Excel");
     }
 });
 
