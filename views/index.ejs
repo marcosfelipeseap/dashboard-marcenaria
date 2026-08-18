@@ -715,6 +715,18 @@
             $('#collapseProconFilters').addClass('show');
             $('[data-bs-target="#collapseProconFilters"]').attr('aria-expanded', 'true');
         }
+
+        // Função para atualizar o relógio em tempo real
+        function startClock() {
+            $('#lastUpdate').text(new Date().toLocaleTimeString('pt-BR', {
+                timeZone: 'America/Sao_Paulo', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit'
+            }));
+        }
+        startClock(); // Aciona imediatamente
+        setInterval(startClock, 1000); // Atualiza a cada 1 segundo
     });
 
     window.toggleSidebar = function() {
@@ -826,7 +838,7 @@
           });
           
           applyFilters(null); 
-          $('#lastUpdate').text(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+          // Relógio atualizado separadamente via setInterval agora
           
           buildNotifications();
       } catch (err) {
@@ -984,7 +996,7 @@
             proconRawData = dataToProcess.procon;
             initProconFilters(); 
             filterProconData();  
-            $('#lastUpdate').text(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+            // Relógio atualizado separadamente via setInterval agora
         } catch (err) {
             alert("Erro ao carregar Procon: " + err.message);
         } finally {
