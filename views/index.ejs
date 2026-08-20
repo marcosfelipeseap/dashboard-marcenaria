@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   
+  <!-- FAVICON: Logo na aba do navegador -->
+  <link rel="icon" type="image/png" href="/images/logo.png">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -196,7 +199,7 @@
     .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .pagination-btn:hover:not(:disabled) { background-color: var(--hover-item); border-color: var(--highlight); }
 
-    .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-page); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; }
+    .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-page); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; overflow: hidden; }
     .btn-action {
         width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color);
         background: var(--card-bg); color: var(--text-pri); display: flex; justify-content: center; align-items: center; cursor: pointer;
@@ -371,17 +374,20 @@
 </head>
 <body>
 
+  <!-- AQUI FOI ALTERADO: A imagem da logo virou uma marca d'água de fundo gigante -->
   <div id="loader" class="loader-overlay">
-    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem; color: var(--highlight); border-width: 4px;"></div>
-    <h6 style="color: var(--text-sec); font-weight: 700; letter-spacing: 1px;">CARREGANDO...</h6>
+    <img src="/images/logo.png" alt="Background Logo" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; height: 90vh; object-fit: contain; opacity: 0.08; pointer-events: none; z-index: 0;">
+    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem; color: var(--highlight); border-width: 4px; position: relative; z-index: 1;"></div>
+    <h6 style="color: var(--text-sec); font-weight: 700; letter-spacing: 1px; position: relative; z-index: 1;">CARREGANDO...</h6>
   </div>
 
   <div class="layout-wrapper">
       <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
       
       <div class="sidebar" id="sidebar">
-          <div class="mb-4 d-flex align-items-center gap-3">
-              <i class="bi bi-box-seam fs-1" style="color: var(--highlight);"></i>
+          <!-- AQUI FOI ALTERADO: A caixa do menu lateral foi trocada pela logo, mantendo os alertas de sino ao lado -->
+          <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 20px 20px 20px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+              <img src="/images/logo.png" alt="Logo" style="height: 80px; max-width: 70%; object-fit: contain;">
               <div class="position-relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                   <i class="bi bi-bell-fill fs-4" style="color: var(--highlight);"></i>
                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow" id="notifBadge" style="display:none; font-size: 0.6rem; border: 2px solid var(--card-bg);">0</span>
