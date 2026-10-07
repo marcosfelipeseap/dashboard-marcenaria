@@ -2,6 +2,7 @@ const express = require('express');
 const { google } = require('googleapis');
 const NodeCache = require('node-cache');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -39,7 +40,6 @@ try {
 async function fetchDataFromSheets() {
     if (!sheets) throw new Error("API do Google não inicializada. Verifique as credenciais.");
 
-    // Removemos o GID fixo. O sistema vai descobrir sozinho agora.
     const sources = [
         { type: 'SEDE', id: '17WAyG3sGud8441tlQR2E0gxWp15Ogd26zDoViv2PisE', sheetName: 'MÓVEIS ATUALIZADOS' },
         { type: 'REGIONAL', id: '1RtsILkt3MJ-djQAXSGvKOWN1VNOCCdNVNIGFYA5WrnE', sheetName: 'MARCENARIA | REGIONAL' }
@@ -50,7 +50,6 @@ async function fetchDataFromSheets() {
 
     await Promise.all(sources.map(async (src) => {
         try {
-            // Agora fazemos 3 perguntas ao Google ao mesmo tempo (incluindo os metadados para pegar o GID)
             const [resMain, resLink, resMeta] = await Promise.all([
                 sheets.spreadsheets.values.get({ 
                     spreadsheetId: src.id, 
@@ -78,7 +77,6 @@ async function fetchDataFromSheets() {
                 })
             ]);
 
-            // Descobre o GID dinamicamente buscando pelo nome da aba
             let currentGid = '0';
             if (resMeta && resMeta.data && resMeta.data.sheets) {
                 const sheetInfo = resMeta.data.sheets.find(s => s.properties.title === src.sheetName);
@@ -229,7 +227,6 @@ app.post('/api/excel', async (req, res) => {
         const workbook = new exceljs.Workbook();
         const worksheet = workbook.addWorksheet('Relatório Marcenaria');
 
-        // Estilos
         const headerStyle = {
             font: { bold: true, color: { argb: 'FFFFFFFF' } },
             fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5D4037' } },
@@ -239,19 +236,20 @@ app.post('/api/excel', async (req, res) => {
         let title = (type === 3 || type === 4) ? "RELATÓRIO CONSOLIDADO GERAL - MARCENARIA" : "RELATÓRIO DE PROCESSOS - MARCENARIA";
         worksheet.addRow([title]).font = { size: 14, bold: true };
         worksheet.addRow(['Data de Emissão:', new Date().toLocaleString('pt-BR')]);
-        worksheet.addRow([]); // Espaço
+        worksheet.addRow([]);
 
         if (type === 1 || type === 2) {
             let grouped = {};
             items.forEach(item => {
                 let proc = item.processo || "S/N";
-                if (!grouped[proc]) grouped[proc] = { local: item.local, items: [] };
+                if (!grouped[proc]) grouped[proc] = { local: item.local, data_entrega: item.data_entrega, items: [] };
                 grouped[proc].items.push(item);
             });
 
             for (let proc in grouped) {
                 let g = grouped[proc];
-                worksheet.addRow([`PROCESSO: ${proc} | LOCAL: ${g.local}`]).font = { bold: true, color: { argb: 'FF3E2723' } };
+                let entregaStr = g.data_entrega ? ` | DATA ENTREGA: ${g.data_entrega}` : '';
+                worksheet.addRow([`PROCESSO: ${proc} | LOCAL: ${g.local}${entregaStr}`]).font = { bold: true, color: { argb: 'FF3E2723' } };
 
                 let headers = [];
                 if (type === 1) headers = ["Mobília", "Material", "Dimensões", "Sol.", "Ent.", "Pend."];
@@ -307,7 +305,6 @@ app.post('/api/excel', async (req, res) => {
             });
         }
 
-        // Ajustar largura padrão
         worksheet.columns.forEach(column => { column.width = 22; });
 
         let fType = (type <= 2) ? "Processos" : "Consolidado";
@@ -322,8 +319,9 @@ app.post('/api/excel', async (req, res) => {
     }
 });
 
-// --- GERAÇÃO DE PDF (COM IMPORTAÇÃO DINÂMICA) ---
+// --- GERAÇÃO DE PDF (COMPATÍVEL LOCAL & VERCEL VIA PUPPETEER-CORE) ---
 app.post('/api/pdf', async (req, res) => {
+    let browser;
     try {
         const { type, items } = req.body;
         
@@ -357,13 +355,14 @@ app.post('/api/pdf', async (req, res) => {
             let grouped = {};
             items.forEach(item => {
                 let proc = item.processo || "S/N";
-                if (!grouped[proc]) grouped[proc] = { local: item.local, items: [] };
+                if (!grouped[proc]) grouped[proc] = { local: item.local, data_entrega: item.data_entrega, items: [] };
                 grouped[proc].items.push(item);
             });
 
             for (let proc in grouped) {
                 let g = grouped[proc];
-                html += `<div class='processo-box'><div class='proc-title'>PROCESSO: ${proc} &nbsp;|&nbsp; LOCAL: ${g.local}</div><table><thead><tr>`;
+                let entregaStr = g.data_entrega ? ` &nbsp;|&nbsp; DATA ENTREGA: ${g.data_entrega}` : '';
+                html += `<div class='processo-box'><div class='proc-title'>PROCESSO: ${proc} &nbsp;|&nbsp; LOCAL: ${g.local}${entregaStr}</div><table><thead><tr>`;
                 if (type === 1) html += "<th width='35%'>Mobília</th><th width='20%'>Material</th><th width='15%'>Dimensões</th>";
                 else html += "<th width='70%'>Mobília (Agrupada)</th>";
                 html += "<th width='10%' class='text-center'>Sol.</th><th width='10%' class='text-center'>Ent.</th><th width='10%' class='text-center'>Pend.</th></tr></thead><tbody>";
@@ -415,21 +414,38 @@ app.post('/api/pdf', async (req, res) => {
         }
         html += "</body></html>";
 
-        // Importação Dinâmica DUPLA
-        const puppeteerModule = await import('puppeteer-core');
-        const puppeteer = puppeteerModule.default || puppeteerModule;
+        // Inicialização condicional: Vercel vs Local (usando sempre puppeteer-core)
+        if (process.env.VERCEL) {
+            const puppeteerCore = await import('puppeteer-core');
+            const puppeteer = puppeteerCore.default || puppeteerCore;
+            const chromiumModule = await import('@sparticuz/chromium');
+            const chromium = chromiumModule.default || chromiumModule;
 
-        const chromiumModule = await import('@sparticuz/chromium');
-        const chromium = chromiumModule.default || chromiumModule;
-
-        // Lança o Chromium leve suportado pelo Vercel
-        const browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
-        });
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless,
+                ignoreHTTPSErrors: true,
+            });
+        } else {
+            const puppeteerCore = require('puppeteer-core');
+            const possiblePaths = [
+                'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+                'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+                'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+            ];
+            let executablePath = possiblePaths.find(p => fs.existsSync(p));
+            if (!executablePath) {
+                throw new Error("Nenhum navegador (Google Chrome ou Microsoft Edge) foi encontrado na máquina.");
+            }
+            browser = await puppeteerCore.launch({
+                executablePath,
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
         
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -443,8 +459,9 @@ app.post('/api/pdf', async (req, res) => {
         });
         res.send(pdfBuffer);
     } catch (e) {
+        if (browser) await browser.close();
         console.error(e);
-        res.status(500).send("Erro na geração do PDF");
+        res.status(500).send("Erro na geração do PDF: " + e.message);
     }
 });
 
