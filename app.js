@@ -3,9 +3,12 @@ const { google } = require('googleapis');
 const NodeCache = require('node-cache');
 const path = require('path');
 const fs = require('fs');
+const cookieParser = require('cookie-parser');
+const axios = require('axios');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
 
 // Define o caminho absoluto para as views
 app.set('view engine', 'ejs');
@@ -15,6 +18,82 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const myCache = new NodeCache({ stdTTL: 600 });
+
+const PORTAL_URL = 'https://menuugtr.vercel.app';
+const ROTA_PORTAL_SSO = `${PORTAL_URL}/ir/marcenaria_painel`; // Rota oficial correspondente no seu Portal Central
+
+// --- MIDDLEWARE DE PROTEÇÃO SSO (8 HORAS) ---
+async function verificarSSO(req, res, next) {
+    const ssoToken = req.query.sso_token;
+    const currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+    // 1. Se veio um token fresco na URL (veio do Menu ou redirecionado do login)
+    if (ssoToken) {
+        try {
+            const response = await axios.get(`${PORTAL_URL}/api/sso/verificar?token=${encodeURIComponent(ssoToken)}`);
+            const dados = response.data;
+
+            if (dados && dados.valido) {
+                res.cookie('seap_sso_marcenaria', ssoToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'lax',
+                    maxAge: 8 * 60 * 60 * 1000 // 8 horas
+                });
+
+                const cleanUrl = req.protocol + '://' + req.get('host') + req.path;
+                return res.redirect(cleanUrl);
+            }
+        } catch (e) {
+            console.error("Erro ao validar SSO:", e.message);
+        }
+    }
+
+    // 2. Se não tem na URL, verifica se o cookie de sessão de 8 horas existe
+    const cookieToken = req.cookies.seap_sso_marcenaria;
+    if (cookieToken) {
+        try {
+            const response = await axios.get(`${PORTAL_URL}/api/sso/verificar?token=${encodeURIComponent(cookieToken)}`);
+            const dados = response.data;
+            if (dados && dados.valido) {
+                return next(); // Sessão válida!
+            }
+        } catch (e) {}
+    }
+
+    // 3. Não autenticado: Exibe a página elegante de Acesso Restrito com o botão de Login
+    const urlLogin = `${PORTAL_URL}/login?redirect=${encodeURIComponent(ROTA_PORTAL_SSO)}`;
+    
+    return res.status(401).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Acesso Restrito - SEAP</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ecf0f3; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+                .box { background: #fff; padding: 40px 35px; border-radius: 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.12); text-align: center; max-width: 400px; width: 90%; }
+                h3 { color: #044c14; margin-top: 0; font-size: 22px; }
+                p { color: #64748B; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+                .btn { display: inline-block; padding: 13px 28px; background: linear-gradient(120deg, #044c14, #0a7d2a); color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; transition: transform 0.2s, box-shadow 0.2s; }
+                .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(10, 125, 42, 0.3); }
+            </style>
+            <script>
+                setTimeout(function() {
+                    window.top.location.href = "${urlLogin}";
+                }, 1500);
+            </script>
+        </head>
+        <body>
+            <div class="box">
+                <h3>🔒 Acesso Restrito</h3>
+                <p>Você precisa estar autenticado no Portal de Sistemas SEAP para visualizar este painel. Redirecionando para o login...</p>
+                <a class="btn" href="${urlLogin}" target="_top">Ir para o Login</a>
+            </div>
+        </body>
+        </html>
+    `);
+}
 
 // --- AUTENTICAÇÃO ANTI-CRASH PARA O VERCEL ---
 let auth;
@@ -184,8 +263,8 @@ async function fetchDataFromSheets() {
     return { marcenaria: combinedMarcenaria, procon: combinedProcon };
 }
 
-// --- ROTAS DO SERVIDOR ---
-app.get('/', async (req, res) => {
+// --- ROTAS DO SERVIDOR (PROTEGIDAS PELO SSO) ---
+app.get('/', verificarSSO, async (req, res) => {
     try {
         const forceRefresh = req.query.refresh === 'true';
         let data = myCache.get('DASHBOARD_DATA');
@@ -202,7 +281,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/api/data', async (req, res) => {
+app.get('/api/data', verificarSSO, async (req, res) => {
     try {
         const data = await fetchDataFromSheets();
         myCache.set('DASHBOARD_DATA', data);
@@ -213,7 +292,7 @@ app.get('/api/data', async (req, res) => {
 });
 
 // --- GERAÇÃO DE EXCEL ---
-app.post('/api/excel', async (req, res) => {
+app.post('/api/excel', verificarSSO, async (req, res) => {
     try {
         const { type, items } = req.body;
         
@@ -319,8 +398,8 @@ app.post('/api/excel', async (req, res) => {
     }
 });
 
-// --- GERAÇÃO DE PDF (COMPATÍVEL LOCAL & VERCEL VIA PUPPETEER-CORE) ---
-app.post('/api/pdf', async (req, res) => {
+// --- GERAÇÃO DE PDF ---
+app.post('/api/pdf', verificarSSO, async (req, res) => {
     let browser;
     try {
         const { type, items } = req.body;
@@ -414,7 +493,6 @@ app.post('/api/pdf', async (req, res) => {
         }
         html += "</body></html>";
 
-        // Inicialização condicional: Vercel vs Local (usando sempre puppeteer-core)
         if (process.env.VERCEL) {
             const puppeteerCore = await import('puppeteer-core');
             const puppeteer = puppeteerCore.default || puppeteerCore;
