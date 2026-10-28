@@ -1,5 +1,5 @@
 <style>
-  /* --- ESTILOS DO FULLCALENDAR --- */
+  /* --- ESTILOS DO FULLCALENDAR SERRALHERIA --- */
   
   .fc-event {
     border: none !important;
@@ -9,8 +9,8 @@
   }
 
   .custom-event-box {
-    border-radius: 4px;
-    padding: 3px 6px;
+    border-radius: 8px;
+    padding: 6px 8px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
     display: flex;
@@ -22,26 +22,27 @@
   }
 
   .fc-event:hover .custom-event-box {
-    transform: translateY(-1px) scale(1.01);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--shadow);
     z-index: 50;
   }
 
   .evt-badge {
     background-color: rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 0.7rem;
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 0.75rem;
     font-weight: 800;
     white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 4px;
+    text-transform: uppercase;
   }
 
   .evt-title {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -51,75 +52,90 @@
   
   /* CINZA: Sem itens (Erro ou Vazio) */
   .bg-empty {
-      background-color: #6c757d; 
-      border-left: 3px solid #495057;
+      background-color: var(--text-muted); 
+      border-left: 3px solid rgba(0,0,0,0.2);
   }
 
   /* VERMELHO: Atrasado */
   .bg-late { 
-      background-color: #dc3545; 
-      border-left: 3px solid #b02a37; 
+      background-color: var(--danger); 
+      border-left: 3px solid rgba(0,0,0,0.2); 
   }
   
   /* AMARELO: Próximos 5 dias */
   .bg-near { 
-      background-color: #ffc107; 
-      border-left: 3px solid #d39e00; 
-      color: #3e2723 !important; 
+      background-color: var(--warning-text-dark); 
+      border-left: 3px solid rgba(0,0,0,0.2); 
+      color: #ffffff !important; 
   }
   .bg-near .evt-badge {
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(0, 0, 0, 0.2);
   }
 
   /* AZUL: Futuro */
   .bg-future { 
-      background-color: #0d6efd; 
-      border-left: 3px solid #0a58ca; 
+      background-color: var(--accent); 
+      border-left: 3px solid rgba(0,0,0,0.2); 
   }
 
   /* VERDE: Concluído */
   .bg-done { 
-      background-color: #198754; 
-      border-left: 3px solid #146c43; 
+      background-color: var(--success); 
+      border-left: 3px solid rgba(0,0,0,0.2); 
   }
 
   /* --- MODAL --- */
   .modal-custom .modal-content {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
-    color: var(--text-pri);
+    color: var(--text-main);
   }
   .modal-custom .modal-header {
-    background-color: var(--highlight);
+    background-color: var(--accent);
     color: #fff;
-    border-radius: 15px 15px 0 0;
+    border-radius: 19px 19px 0 0;
+    padding: 20px 25px;
+    border-bottom: none;
+  }
+  .modal-custom .modal-header h5 {
+      font-size: 1.2rem;
+      font-weight: 800;
+  }
+  .modal-custom .btn-close-white {
+      opacity: 0.8; transition: 0.2s;
+  }
+  .modal-custom .btn-close-white:hover {
+      opacity: 1; transform: scale(1.1); color: var(--danger);
   }
   .detail-label {
-    font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; font-weight: 700; margin-bottom: 2px;
+    font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 2px;
   }
   .detail-value {
-    font-size: 0.95rem; color: var(--text-pri); font-weight: 600; margin-bottom: 12px;
-    border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;
+    font-size: 1.1rem; color: var(--text-main); font-weight: 700; margin-bottom: 12px;
+    border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;
+  }
+  .modal-table {
+      background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow);
   }
   .modal-table th {
-    background-color: rgba(0,0,0,0.05); color: var(--text-sec); font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border-color);
+    background-color: var(--input-bg); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); font-weight: 800; padding: 12px;
   }
   .modal-table td {
-    color: var(--text-pri); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); vertical-align: middle;
+    color: var(--text-main); font-size: 0.85rem; border-bottom: 1px dashed var(--border-color); vertical-align: middle; padding: 12px; font-weight: 500;
   }
 </style>
 
 <div class="viz-box h-100 d-flex flex-column">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="chart-header m-0">Calendário de Entregas</h5>
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: var(--border-color) !important;">
+        <h5 class="chart-header m-0" style="font-size: 1.4rem;">Calendário de Entregas</h5>
         <div class="small d-flex gap-2 flex-wrap">
-            <span class="badge" style="background:#dc3545; font-weight:normal;">Atrasado</span>
-            <span class="badge" style="background:#ffc107; color:#000; font-weight:normal;">Próx. 5 Dias</span>
-            <span class="badge" style="background:#0d6efd; font-weight:normal;">Futuro</span>
-            <span class="badge" style="background:#198754; font-weight:normal;">Concluído</span>
-            <span class="badge" style="background:#6c757d; font-weight:normal;">Verificar (0 Itens)</span>
+            <span class="badge" style="background:var(--danger); font-weight:700; padding: 6px 12px; border-radius: 8px;">Atrasado</span>
+            <span class="badge" style="background:var(--warning-text-dark); color:#fff; font-weight:700; padding: 6px 12px; border-radius: 8px;">Próx. 5 Dias</span>
+            <span class="badge" style="background:var(--accent); font-weight:700; padding: 6px 12px; border-radius: 8px;">Futuro</span>
+            <span class="badge" style="background:var(--success); font-weight:700; padding: 6px 12px; border-radius: 8px;">Concluído</span>
+            <span class="badge" style="background:var(--text-muted); font-weight:700; padding: 6px 12px; border-radius: 8px;">Verificar (0 Itens)</span>
         </div>
     </div>
     <div id="calendar" style="flex:1; min-height:600px;"></div>
@@ -132,12 +148,12 @@
         <h5 class="modal-title fw-bold text-uppercase"><i class="bi bi-info-circle-fill me-2"></i>Detalhes da Entrega</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-4">
+      <div class="modal-body p-4" style="background: var(--card-bg);">
           
           <div class="row mb-3">
               <div class="col-md-8">
                   <div class="detail-label">Local / Órgão</div>
-                  <div class="detail-value fs-5" id="mdlLocal">...</div>
+                  <div class="detail-value fs-5" id="mdlLocal" style="color: var(--accent);">...</div>
               </div>
               <div class="col-md-4 text-end">
                    <div class="detail-label">Data Previsão</div>
@@ -148,7 +164,7 @@
           <div class="row g-3 mb-4">
               <div class="col-md-4">
                   <div class="detail-label">Nº Processo</div>
-                  <div class="detail-value" id="mdlProcesso">...</div>
+                  <div class="detail-value" id="mdlProcesso" style="font-weight: 700;">...</div>
               </div>
               <div class="col-md-4">
                   <div class="detail-label">Status Geral</div>
@@ -160,7 +176,7 @@
               </div>
           </div>
 
-          <h6 class="fw-bold text-uppercase mb-2" style="color:var(--highlight); font-size:0.85rem; border-bottom: 2px solid var(--highlight); display:inline-block; padding-bottom:2px;">Lista de Itens</h6>
+          <h6 class="fw-bold text-uppercase mb-3" style="color:var(--accent); font-size:0.95rem; border-bottom: 2px solid var(--accent); display:inline-block; padding-bottom:4px;">Lista de Itens</h6>
           <div class="table-responsive">
               <table class="table modal-table mb-0">
                   <thead>
@@ -176,8 +192,8 @@
           </div>
 
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+      <div class="modal-footer" style="border-top: 1px solid var(--border-color); background: var(--input-bg); border-radius: 0 0 19px 19px;">
+        <button type="button" class="btn-notif btn-notif-sec" data-bs-dismiss="modal">Fechar</button>
       </div>
     </div>
   </div>
@@ -332,13 +348,13 @@
         const totalSol = data.totalSol;
 
         if(totalSol === 0) {
-            $('#mdlStatus').html('<span class="badge bg-secondary">SEM ITENS</span>');
+            $('#mdlStatus').html('<span class="status-badge st-default">SEM ITENS</span>');
             $('#mdlResumo').text(`Não há itens solicitados para este processo.`);
         } else if(totalPend === 0) {
-            $('#mdlStatus').html('<span class="badge bg-success">FINALIZADO</span>');
+            $('#mdlStatus').html('<span class="status-badge st-finalizado">FINALIZADO</span>');
             $('#mdlResumo').text(`Todos os ${totalItens} itens foram entregues.`);
         } else {
-            $('#mdlStatus').html('<span class="badge bg-danger">PENDENTE</span>');
+            $('#mdlStatus').html('<span class="status-badge st-pendente">PENDENTE</span>');
             $('#mdlResumo').text(`${totalPend} itens pendentes de um total de ${totalSol}.`);
         }
 
@@ -353,26 +369,25 @@
             let pendText = '';
             
             if (sol === 0) {
-                 pendStyle = 'color:var(--text-sec); font-style:italic;';
+                 pendStyle = 'color:var(--text-muted); font-style:italic;';
                  pendText = '-';
             } else if (pend > 0) {
-                 pendStyle = 'color:#dc3545; font-weight:800;';
+                 pendStyle = 'color:var(--danger); font-weight:800;';
                  pendText = `${pend}`;
             } else {
-                 pendStyle = 'color:#198754; font-weight:600;';
+                 pendStyle = 'color:var(--success); font-weight:700;';
                  pendText = `<i class="bi bi-check"></i> OK`;
             }
 
-            // --- AQUI: INJEÇÃO DOS DATA LABELS NA TABELA DO MODAL ---
             const row = `
                 <tr>
                     <td data-label="Mobília/Produto">
-                        <div class="fw-bold">${item.mobilia}</div>
+                        <div class="fw-bold" style="color: var(--accent); font-size: 0.95rem;">${item.mobilia}</div>
                         <div class="small text-muted" style="font-size:0.75rem">${item.material || ''}</div>
                     </td>
-                    <td data-label="Dimensões">${item.dimensoes || '-'}</td>
-                    <td data-label="Qtd. Sol." class="text-center">${item.qtd_solicitada}</td>
-                    <td data-label="Qtd. Pendente" class="text-center" style="${pendStyle}">${pendText}</td>
+                    <td data-label="Dimensões" style="font-weight: 600;">${item.dimensoes || '-'}</td>
+                    <td data-label="Qtd. Sol." class="text-center" style="font-weight: 800; font-size: 1rem;">${item.qtd_solicitada}</td>
+                    <td data-label="Qtd. Pendente" class="text-center" style="font-size: 1rem; ${pendStyle}">${pendText}</td>
                 </tr>
             `;
             tbody.append(row);

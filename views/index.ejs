@@ -9,9 +9,12 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  
+  <!-- FONTES E ÍCONES SERRALHERIA -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   
-  <!-- FAVICON: Logo na aba do navegador -->
   <link rel="icon" type="image/png" href="/images/logo.png">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,24 +22,53 @@
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
   
   <style>
+    /* PADRÃO GLOBAL SERRALHERIA */
     :root {
-      --bg-page: #f4f1ea; --text-pri: #3e2723; --text-sec: #8d6e63;
-      --accent: #a1887f; --highlight: #6d4c41; --card-bg: #ffffff;
-      --border-color: #d7ccc8; --input-bg: #ffffff; --input-text: #3e2723;
-      --dropdown-bg: #ffffff; --hover-item: #f5f5f5;
-      --shadow: 0 8px 24px rgba(62, 39, 35, 0.08);
-      --st-sol: #1e88e5; --st-ent: #43a047; --st-pen: #ffb300; 
+      --bg-color: #f8fafc; 
+      --card-bg: #ffffff; 
+      --sidebar-bg: #001E7A;
+      --text-main: #1e293b; 
+      --text-muted: #64748b; 
+      --accent: #001E7A; 
+      --accent-dark: #001557;
+      --accent-light: #e0e7ff;
+      --border-color: #e2e8f0; 
+      --input-bg: #f1f5f9;
+      --shadow: 0 4px 15px rgba(0,0,0,0.05);
+      
+      --success: #1b5e20; --success-bg: #e8f5e9;
+      --warning: #e65100; --warning-bg: #fff3e0; --warning-text-dark: #e65100;
+      --danger: #b71c1c; --danger-bg: #ffebee;
+      --neutral: #424242; --neutral-bg: #f5f5f5;
+      --table-row-hover: #fcfdfe;
+      --chart-grid: #e2e8f0;
+
+      /* Mapeamento das variáveis antigas para não quebrar o JS */
+      --bg-page: var(--bg-color); --text-pri: var(--text-main); --text-sec: var(--text-muted);
+      --highlight: var(--accent); --dropdown-bg: var(--card-bg); --hover-item: var(--input-bg);
+      --input-text: var(--text-main);
+      --st-sol: var(--accent); --st-ent: var(--success); --st-pen: var(--warning-text-dark); 
     }
+
     body.dark-mode {
-      --bg-page: #1a1a1a; --text-pri: #e0e0e0; --text-sec: #bdbdbd;
-      --highlight: #a1887f; --card-bg: #2d2d2d; --border-color: #444444;
-      --input-bg: #333333; --input-text: #ffffff; --dropdown-bg: #333333;
-      --hover-item: #444444; --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --bg-color: #121416; --card-bg: #1c2126; --sidebar-bg: #1c2126;
+      --text-main: #f0f2f5; --text-muted: #a0abb5;
+      --accent: #b0bec5; --accent-dark: #78909c;
+      --accent-light: #23292e;
+      --border-color: #2a3138; --input-bg: #23292e;
+      --shadow: 0 10px 30px rgba(0,0,0,0.3);
+      --chart-grid: #333333;
+      --success-bg: rgba(46, 125, 50, 0.2); --warning-bg: rgba(255, 152, 0, 0.1); --danger-bg: rgba(198, 40, 40, 0.2);
+      --table-row-hover: #2a3138;
+
+      --bg-page: var(--bg-color); --text-pri: var(--text-main); --text-sec: var(--text-muted);
+      --highlight: var(--accent); --dropdown-bg: var(--card-bg); --hover-item: var(--input-bg);
+      --input-text: var(--text-main);
     }
     
     html, body { 
       background-color: var(--bg-page); color: var(--text-pri); 
-      font-family: 'Segoe UI', system-ui, sans-serif; transition: 0.3s; 
+      font-family: 'Poppins', sans-serif; transition: 0.3s; 
       max-width: 100vw; overflow-x: hidden; margin: 0; padding: 0;
     }
     * { box-sizing: border-box; }
@@ -49,205 +81,202 @@
     .sidebar-overlay.show { display: block; }
 
     .sidebar {
-        width: 220px; background-color: var(--card-bg); border-right: 1px solid var(--border-color);
-        display: flex; flex-direction: column; align-items: center; padding-top: 20px; transition: left 0.3s;
-        z-index: 100; position: fixed; top: 0; bottom: 0; left: 0;
+        width: 320px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+        display: flex; flex-direction: column; align-items: flex-start; padding-top: 25px; transition: left 0.3s;
+        z-index: 1000; position: fixed; top: 0; bottom: 0; left: 0; overflow-x: hidden; white-space: nowrap; gap: 10px;
     }
-    .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 30px; transition: margin-left 0.3s, width 0.3s; overflow-x: hidden; }
+    .main-content { margin-left: 320px; width: calc(100vw - 320px); padding: 30px; transition: margin-left 0.3s, width 0.3s; overflow-x: hidden; }
+    
     .nav-btn {
-        width: 100%; padding: 15px 20px; background: transparent; border: none;
-        color: var(--text-sec); text-align: left; display: flex; align-items: center;
-        cursor: pointer; transition: 0.2s; white-space: nowrap; overflow: hidden;
+        width: calc(100% - 40px); margin: 0 20px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: flex-start; padding-left: 15px; color: #ffffff; cursor: pointer; transition: 0.3s all ease; border: none; text-decoration: none; background: transparent; font-family: 'Poppins', sans-serif;
     }
-    .nav-btn i { font-size: 1.5rem; min-width: 40px; text-align: center; }
-    .nav-btn span { opacity: 1; transition: opacity 0.2s; font-weight: 600; margin-left: 10px; }
-    .nav-btn:hover { background-color: var(--hover-item); color: var(--highlight); }
-    .nav-btn.active { background-color: var(--highlight); color: #fff; }
+    .nav-btn i { font-size: 24px; min-width: 34px; text-align: left; }
+    .nav-btn span { font-size: 1.05rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 5px; }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+    .nav-btn.active { background: #ffffff !important; color: var(--sidebar-bg) !important; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25); }
     
     .filter-chevron { transition: transform 0.3s ease; display: inline-block; }
     [aria-expanded="true"] .filter-chevron { transform: rotate(180deg); }
 
+    /* REDESIGN DROPDOWNS SERRALHERIA */
     .custom-dropdown-btn {
-        background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--input-text);
+        background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main);
         text-align: left; display: flex; justify-content: space-between; align-items: center;
-        width: 100%; padding: 10px 15px; border-radius: 10px; font-weight: 500; transition: 0.2s;
-        text-transform: uppercase;
+        width: 100%; padding: 12px 18px; border-radius: 12px; font-weight: 500; transition: 0.2s;
+        text-transform: uppercase; font-size: 0.95rem; font-family: 'Poppins', sans-serif;
     }
-    .custom-dropdown-btn:hover { border-color: var(--highlight); }
+    .custom-dropdown-btn:hover { border-color: var(--highlight); color: var(--highlight); }
     .dropdown-menu-custom {
-        background-color: var(--dropdown-bg); border: 1px solid var(--border-color);
-        padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        background-color: var(--card-bg); border: 1px solid var(--border-color);
+        padding: 10px; border-radius: 16px; box-shadow: var(--shadow);
         max-height: 400px; width: 100%; min-width: 250px; z-index: 1050; max-width: 90vw;
     }
     .dropdown-search {
-        background-color: var(--bg-page); border: 1px solid var(--border-color); color: var(--input-text);
-        border-radius: 6px; padding: 8px; margin-bottom: 10px; width: 100%; text-transform: uppercase;
+        background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);
+        border-radius: 8px; padding: 10px; margin-bottom: 8px; width: 100%; text-transform: uppercase; font-family: 'Poppins', sans-serif; font-size: 0.9rem;
     }
     .dropdown-search:focus { outline: none; border-color: var(--highlight); }
     .dropdown-list-container { max-height: 250px; overflow-y: auto; overflow-x: hidden; }
     .dropdown-list-container::-webkit-scrollbar { width: 6px; }
     .dropdown-list-container::-webkit-scrollbar-thumb { background-color: var(--highlight); border-radius: 3px; }
+    
     .dropdown-item-custom {
         display: flex; align-items: center; padding: 8px; border-radius: 6px;
-        cursor: pointer; color: var(--input-text); transition: 0.1s; text-transform: uppercase; font-size: 0.85rem;
+        cursor: pointer; color: var(--text-main); transition: 0.2s; text-transform: uppercase; font-size: 0.9rem; border-bottom: none; font-weight: 500;
     }
-    .dropdown-item-custom:hover { background-color: var(--hover-item); }
+    .dropdown-item-custom:hover { background-color: var(--input-bg); }
     .form-check-input {
-        width: 18px; height: 18px; margin-right: 10px; cursor: pointer;
-        background-color: var(--bg-page); border-color: var(--border-color);
+        width: 16px; height: 16px; margin-right: 10px; cursor: pointer;
+        background-color: var(--card-bg); border-color: var(--border-color); accent-color: var(--accent);
     }
     .form-check-input:checked { background-color: var(--highlight); border-color: var(--highlight); }
     
-    .card-custom { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); max-width: 100%; overflow: visible; }
+    /* CARDS */
+    .card-custom { background: var(--card-bg); border: none; border-radius: 20px; box-shadow: var(--shadow); max-width: 100%; overflow: visible; }
     
     .oficina-selector {
-        background-color: var(--input-bg); color: var(--input-text); border: 2px solid var(--border-color);
-        font-weight: 700; border-radius: 10px; padding: 10px; width: 100%; cursor: pointer; max-width: 100%;
+        background-color: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color);
+        font-weight: 500; border-radius: 12px; padding: 12px 18px; width: 100%; cursor: pointer; max-width: 100%;
+        font-family: 'Poppins', sans-serif; font-size: 0.95rem; text-transform: uppercase;
     }
-    .oficina-selector option { background-color: var(--input-bg); color: var(--input-text); }
+    .oficina-selector:focus { border-color: var(--accent); box-shadow: none; }
+    .oficina-selector option { background-color: var(--card-bg); color: var(--text-main); }
     
     .kpi-card { 
-      background: var(--card-bg); border-radius: 16px; padding: 25px 20px; 
-      box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border-color); position: relative;
+      background: var(--card-bg); border-radius: 20px; padding: 25px 20px; 
+      box-shadow: var(--shadow); text-align: center; border: none; position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .kpi-card.blue { border-left: 5px solid var(--st-sol); }
-    .kpi-card.green { border-left: 5px solid var(--st-ent); }
-    .kpi-card.yellow { border-left: 5px solid var(--st-pen); }
-    .kpi-label { font-size: 0.8rem; color: var(--text-sec); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
-    .kpi-val { font-size: 2.5rem; font-weight: 800; color: var(--text-pri); }
+    .kpi-card.blue { border-left: 5px solid var(--accent); }
+    .kpi-card.green { border-left: 5px solid var(--success); }
+    .kpi-card.yellow { border-left: 5px solid var(--warning-text-dark); }
+    .kpi-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+    .kpi-val { font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1.1; }
     
     .viz-box { 
-      background: var(--card-bg); border-radius: 16px; padding: 25px; 
-      box-shadow: var(--shadow); border: 1px solid var(--border-color);
+      background: var(--card-bg); border-radius: 20px; padding: 25px; 
+      box-shadow: var(--shadow); border: none;
       position: relative; height: 100%; min-height: 550px; display: flex; flex-direction: column; width: 100%; overflow: hidden;
     }
     .chart-container { flex: 1; position: relative; min-width: 0; min-height: 0; width: 100%; }
-    .chart-header { font-weight: 700; color: var(--text-sec); text-align: center; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 15px; }
+    .chart-header { font-weight: 800; color: var(--text-main); text-transform: uppercase; font-size: 1.2rem; margin-bottom: 15px; }
     
-    .table-box { flex: 1; overflow-x: hidden; width: 100%; max-width: 100%; }
+    .table-box { flex: 1; overflow-x: auto; width: 100%; max-width: 100%; }
     
-    .custom-table, .sub-table { 
-        width: 100%; 
-        border-collapse: separate; 
-        border-spacing: 0; 
-        table-layout: auto; 
-    }
+    /* TABELAS SERRALHERIA */
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .custom-table th { background: var(--accent); color: #fff; position: sticky; top: 0; padding: 15px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: 1px solid var(--border-color); z-index: 10; white-space: nowrap; text-align: left; vertical-align: middle; }
+    .custom-table td { padding: 12px 15px; font-size: 0.85rem; color: var(--text-main); border: 1px solid var(--border-color); vertical-align: middle; font-weight: 500; }
+    .custom-table tbody tr.parent-row { cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color); }
+    .custom-table tbody tr.parent-row:hover { background-color: var(--table-row-hover); }
+    .custom-table tbody tr.parent-row[aria-expanded="true"] { background-color: var(--input-bg); border-left: 4px solid var(--accent); }
     
-    .custom-table th, .sub-table th { 
-        background-color: var(--highlight); color: #fff; position: sticky; top: 0; 
-        padding: 12px 6px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; border: none; z-index: 10;
-        white-space: normal; line-height: 1.3; text-align: center; vertical-align: middle;
-        word-break: normal;
-    }
-    
-    .custom-table td, .sub-table td { 
-        padding: 12px 6px; font-size: 0.85rem; color: var(--text-pri); border-bottom: 1px solid var(--border-color); 
-        vertical-align: middle; text-align: center;
-        word-break: normal; 
-        overflow-wrap: normal; 
-        white-space: normal; 
-    }
-    .custom-table td[data-label="Local"], .custom-table td[data-label="Processo"] { text-align: left; }
-    .custom-table tbody tr.parent-row:hover td { background-color: var(--hover-item); cursor: pointer; }
+    .sub-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin: 15px 0;}
+    .sub-table th { background: var(--input-bg) !important; color: var(--text-muted); padding: 12px 15px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--border-color) !important; font-size: 0.75rem; text-align: left; }
+    .sub-table td { font-size: 0.85rem; color: var(--text-main); padding: 12px 15px; border-bottom: 1px dashed var(--border-color) !important; vertical-align: middle; text-align: left; font-weight: 500;}
+    .sub-table td.text-center { text-align: center; }
     
     .sim-input {
-        width: 100%; max-width: 70px; padding: 4px; border: 1px solid var(--border-color); border-radius: 6px;
-        background-color: var(--bg-page); color: var(--text-pri); text-align: center;
-        font-weight: bold; font-size: 0.85rem; display: inline-block; margin: 0;
+        width: 100%; max-width: 70px; padding: 6px; border: 1px solid var(--border-color); border-radius: 8px;
+        background-color: var(--input-bg); color: var(--text-main); text-align: center;
+        font-weight: 700; font-size: 0.9rem; display: inline-block; margin: 0; font-family: 'Poppins', sans-serif; transition: 0.2s;
     }
-    .sim-input:focus { outline: none; border-color: var(--highlight); background-color: var(--card-bg); }
-    .sim-val-pen { font-weight: 800; color: var(--st-pen); font-size: 0.9rem; }
+    .sim-input:focus { outline: none; border-color: var(--accent); background-color: var(--card-bg); }
+    .sim-val-pen { font-weight: 800; color: var(--danger); font-size: 1rem; }
 
-    .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; border: 1px solid; display: inline-block; text-transform: uppercase; text-align: center; word-break: normal; overflow-wrap: normal; }
-    .st-prod { background: rgba(33, 150, 243, 0.1); color: #2196F3; border-color: #2196F3; } 
-    .st-montagem { background: rgba(156, 39, 176, 0.1); color: #9C27B0; border-color: #9C27B0; }
-    .st-planejamento { background: rgba(233, 30, 99, 0.1); color: #E91E63; border-color: #E91E63; }
-    .st-aguardando { background: rgba(253, 126, 20, 0.1); color: #fd7e14; border-color: #fd7e14; }
-    .st-pendente { background: rgba(255, 193, 7, 0.1); color: #ffc107; border-color: #ffc107; }
-    .st-estoque { background: rgba(0, 188, 212, 0.1); color: #00BCD4; border-color: #00BCD4; }
-    .st-orcamento { background: rgba(121, 85, 72, 0.1); color: #795548; border-color: #795548; }
-    .st-nao-aut { background: rgba(220, 53, 69, 0.1); color: #dc3545; border-color: #dc3545; }
-    .st-arquivado { background: rgba(108, 117, 125, 0.1); color: #6c757d; border-color: #6c757d; }
-    .st-finalizado { background: rgba(25, 135, 84, 0.1); color: #198754; border-color: #198754; }
-    .st-default { background: rgba(158, 158, 158, 0.1); color: #9E9E9E; border-color: #9E9E9E; }
+    /* STATUS SERRALHERIA */
+    .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: none; display: inline-block; text-transform: uppercase; text-align: center; }
+    .st-prod { background: var(--warning-bg); color: var(--warning-text-dark); } 
+    .st-montagem { background: var(--warning-bg); color: var(--warning-text-dark); }
+    .st-planejamento { background: var(--input-bg); color: var(--text-muted); }
+    .st-aguardando { background: var(--input-bg); color: var(--text-muted); }
+    .st-pendente { background: var(--danger-bg); color: var(--danger); }
+    .st-estoque { background: var(--success-bg); color: var(--success); }
+    .st-orcamento { background: var(--input-bg); color: var(--text-muted); }
+    .st-nao-aut { background: var(--danger-bg); color: var(--danger); }
+    .st-arquivado { background: var(--input-bg); color: var(--text-muted); }
+    .st-finalizado { background: var(--success-bg); color: var(--success); }
+    .st-default { background: var(--input-bg); color: var(--text-muted); }
 
-    .prio-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; border: 1px solid; font-size: 0.8rem; }
-    .prio-1 { background: rgba(220, 53, 69, 0.1); color: #dc3545; border-color: #dc3545; }
-    .prio-2 { background: rgba(253, 126, 20, 0.1); color: #fd7e14; border-color: #fd7e14; }
-    .prio-3 { background: rgba(255, 193, 7, 0.1); color: #ffc107; border-color: #ffc107; }
-    .prio-4 { background: rgba(25, 135, 84, 0.1); color: #198754; border-color: #198754; }
-    .prio-5 { background: rgba(13, 110, 253, 0.1); color: #0d6efd; border-color: #0d6efd; }
-    .prio-default { color: var(--text-sec); border-color: var(--border-color); }
+    .prio-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; border: none; font-size: 0.8rem; }
+    .prio-1 { background: var(--danger-bg); color: var(--danger); }
+    .prio-2 { background: var(--warning-bg); color: var(--warning-text-dark); }
+    .prio-3 { background: var(--warning-bg); color: var(--warning-text-dark); }
+    .prio-4 { background: var(--success-bg); color: var(--success); }
+    .prio-5 { background: var(--input-bg); color: var(--text-muted); }
+    .prio-default { background: var(--input-bg); color: var(--text-muted); }
 
-    .date-alert { color: #dc3545 !important; font-weight: 800 !important; }
+    .date-alert { color: var(--danger) !important; font-weight: 800 !important; }
 
     .detail-row > td { padding: 0 !important; border: none !important; }
     .detail-row > td::before { display: none !important; }
     
-    .sub-table th { background: transparent !important; color: var(--text-sec); font-size: 0.75rem; border-bottom: 2px solid var(--border-color); }
-    .sub-table td { font-size: 0.8rem; color: var(--text-pri); padding: 8px; vertical-align: middle; text-align: left; }
-    .sub-table td.text-center { text-align: center; }
-    
-    .parent-row .bi-chevron-down { transition: transform 0.3s; }
+    .parent-row .bi-chevron-down { transition: transform 0.3s; color: var(--accent); }
     .parent-row[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
 
-    .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-top: 1px solid var(--border-color); }
-    .pagination-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-pri); padding: 5px 15px; border-radius: 8px; cursor: pointer; }
+    .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 0 0 0; margin-top: 15px; border-top: 1px solid var(--border-color); }
+    .pagination-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; transition: 0.2s;}
     .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .pagination-btn:hover:not(:disabled) { background-color: var(--hover-item); border-color: var(--highlight); }
+    .pagination-btn:hover:not(:disabled) { background-color: var(--input-bg); border-color: var(--accent); color: var(--accent); }
 
-    .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-page); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; overflow: hidden; }
-    .btn-action {
-        width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color);
-        background: var(--card-bg); color: var(--text-pri); display: flex; justify-content: center; align-items: center; cursor: pointer;
-    }
-    .btn-action:hover { background: var(--highlight); color: #fff; border-color: var(--highlight); }
-    .view-section { display: none; height: 100%; }
-    .view-section.active { display: block; animation: fadeIn 0.4s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .fc { --fc-border-color: var(--border-color); --fc-page-bg-color: var(--card-bg); --fc-neutral-bg-color: var(--bg-page); --fc-list-event-hover-bg-color: var(--hover-item); color: var(--text-pri); min-width: 0; width: 100%; }
-    .fc-toolbar-title { font-size: 1.2rem !important; text-transform: uppercase; color: var(--text-pri); }
-    .fc-button-primary { background-color: var(--highlight) !important; border-color: var(--highlight) !important; }
-    .fc-button-primary:hover { background-color: var(--text-sec) !important; border-color: var(--text-sec) !important; }
-    .fc-daygrid-day-number { color: var(--text-pri); text-decoration: none; }
-    .fc-col-header-cell-cushion { color: var(--text-sec); text-decoration: none; text-transform: uppercase; font-size: 0.8rem; }
+    .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-color); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; overflow: hidden; transition: opacity 0.5s ease-out;}
+    body.loaded .loader-overlay { opacity: 0; pointer-events: none; }
+    .spinner-border { width: 60px; height: 60px; border: 5px solid var(--border-color); border-top: 5px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;}
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    .procon-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 20px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; width: 100%; }
-    .procon-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-    .procon-header { padding: 15px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
-    .header-totals { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border-color); }
-    .h-badge { padding: 4px 8px; border-radius: 4px; font-weight: 700; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); text-transform: uppercase; }
-    .origin-badge { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; display: inline-block; width: fit-content; text-transform: uppercase; }
-    .date-badge { font-size: 0.75rem; font-weight: 700; color: var(--text-sec); margin-left: auto; display: flex; align-items: center; gap: 4px; }
-    .origin-sede { background-color: #3e2723; color: #fff; }
+    .btn-action {
+        width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border-color);
+        background: var(--card-bg); color: var(--text-muted); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;
+    }
+    .btn-action:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .view-section { display: none; height: 100%; }
+    .view-section.active { display: block; animation: fadeEffect 0.4s; }
+    @keyframes fadeEffect { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .fc { --fc-border-color: var(--border-color); --fc-page-bg-color: var(--card-bg); --fc-neutral-bg-color: var(--bg-color); --fc-list-event-hover-bg-color: var(--input-bg); color: var(--text-main); min-width: 0; width: 100%; font-family: 'Poppins', sans-serif; }
+    .fc-toolbar-title { font-size: 1.4rem !important; text-transform: uppercase; color: var(--text-main); font-weight: 800; }
+    .fc-button-primary { background-color: var(--input-bg) !important; border-color: var(--border-color) !important; color: var(--text-muted) !important; font-weight: 700 !important; text-transform: uppercase; border-radius: 8px !important; }
+    .fc-button-primary:hover { background-color: var(--accent) !important; border-color: var(--accent) !important; color: white !important; }
+    .fc-daygrid-day-number { color: var(--text-main); text-decoration: none; font-weight: 600; }
+    .fc-col-header-cell-cushion { color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-size: 0.85rem; font-weight: 700; }
+    
+    /* PROCON CARDS SERRALHERIA */
+    .procon-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; margin-bottom: 20px; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; width: 100%; box-shadow: var(--shadow); }
+    .procon-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .procon-header { padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; background: var(--input-bg); transition: 0.2s; }
+    .procon-header:hover { filter: brightness(0.97); }
+    .header-totals { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
+    .h-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: var(--card-bg); border: 1px solid var(--border-color); text-transform: uppercase; }
+    .origin-badge { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 6px; display: inline-block; width: fit-content; text-transform: uppercase; border: none;}
+    .date-badge { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .origin-sede { background-color: var(--accent); color: #fff; }
     .origin-regional { background-color: #8d6e63; color: #fff; }
-    .procon-title { font-weight: 700; color: var(--text-pri); font-size: 1rem; line-height: 1.3; text-transform: uppercase; }
-    .procon-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; font-size: 0.85rem; color: var(--text-sec); text-transform: uppercase; }
-    .procon-details { background-color: var(--hover-item); border-top: 1px solid var(--border-color); padding: 0; }
-    .procon-item-row { padding: 15px; border-bottom: 1px solid var(--border-color); }
+    .procon-title { font-weight: 800; color: var(--text-main); font-size: 1.1rem; line-height: 1.3; text-transform: uppercase; }
+    
+    .procon-details { background-color: var(--card-bg); padding: 0; }
+    .procon-item-row { padding: 20px; border-bottom: 1px solid var(--border-color); }
     .procon-item-row:last-child { border-bottom: none; }
-    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem; margin-bottom: 10px; }
-    .detail-item strong { display: block; color: var(--text-sec); font-size: 0.7rem; text-transform: uppercase; }
-    .detail-item span { color: var(--text-pri); font-weight: 600; text-transform: uppercase; word-break: break-word; }
-    .qty-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); min-width: 50px; flex: 1; }
-    .qty-val { font-weight: 800; font-size: 1rem; }
-    .qty-lbl { font-size: 0.6rem; text-transform: uppercase; color: var(--text-sec); }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem; margin-bottom: 15px; }
+    .detail-item strong { display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; font-weight: 700;}
+    .detail-item span { color: var(--text-main); font-weight: 600; text-transform: uppercase; word-break: break-word; }
+    .qty-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); min-width: 50px; flex: 1; }
+    .qty-val { font-weight: 800; font-size: 1.2rem; }
+    .qty-lbl { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
 
     .post-it-container { position: relative; display: inline-flex; align-items: center; margin-left: 6px; vertical-align: middle; }
-    .post-it-icon { color: #ffca28; font-size: 1.1rem; cursor: help; transition: transform 0.2s; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2)); }
-    .post-it-icon:hover { transform: scale(1.2); color: #ffb300; }
+    .post-it-icon { color: var(--warning-text-dark); font-size: 1.2rem; cursor: help; transition: transform 0.2s; }
+    .post-it-icon:hover { transform: scale(1.2); }
     .post-it-tooltip {
         visibility: hidden; opacity: 0; position: absolute; bottom: 140%; left: 50%;
         transform: translateX(-50%) translateY(10px); width: max-content; max-width: 280px;
-        background: linear-gradient(135deg, #fff9c4 80%, #f0e68c 100%); color: #3e2723 !important;
-        text-align: left; padding: 10px 14px; box-shadow: 3px 5px 15px rgba(0,0,0,0.3); z-index: 1060;
-        font-size: 0.85rem; line-height: 1.4; border-radius: 2px 10px 10px 10px; border: 1px solid #e6c513;
-        transition: all 0.2s ease-in-out; pointer-events: none; white-space: normal;
+        background: var(--warning-bg); color: var(--warning-text-dark) !important;
+        text-align: left; padding: 10px 14px; box-shadow: var(--shadow); z-index: 1060;
+        font-size: 0.85rem; line-height: 1.4; border-radius: 12px; border: 1px solid var(--warning-text-dark);
+        transition: all 0.2s ease-in-out; pointer-events: none; white-space: normal; font-weight: 500;
     }
     .post-it-tooltip::after {
         content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px;
-        border-style: solid; border-color: #f0e68c transparent transparent transparent;
+        border-style: solid; border-color: var(--warning-bg) transparent transparent transparent;
     }
     .post-it-container:hover .post-it-tooltip { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -255,38 +284,57 @@
     .sortable-header:hover { filter: brightness(0.85); }
     .sort-icon { font-size: 0.8rem; margin-left: 2px; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; display: inline-block; }
 
-    @keyframes slideDownFadIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-    .notif-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10500; display: none; align-items: center; justify-content: center; }
-    .notif-box { background: var(--card-bg); width: 95%; max-width: 600px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid var(--border-color); animation: slideDownFadIn 0.3s ease-out forwards; }
-    .notif-header { padding: 20px; background: var(--highlight); color: #fff; display: flex; justify-content: space-between; align-items: center; }
-    .notif-body { padding: 20px; overflow-y: auto; color: var(--text-pri); flex: 1; }
-    .notif-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background: var(--bg-page); }
+    /* NOTIFICAÇÕES SERRALHERIA */
+    .notif-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 10500; display: none; align-items: center; justify-content: center; animation: fadeEffect 0.3s; }
+    .notif-box { background: var(--card-bg); width: 95%; max-width: 600px; max-height: 85vh; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid var(--border-color); color: var(--text-main); }
+    .notif-header { padding: 20px; background: var(--accent); color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .notif-header h5 { margin: 0; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px;}
+    .notif-close { cursor: pointer; background: none; border: none; color: white; font-size: 24px; transition: 0.2s; }
+    .notif-close:hover { transform: scale(1.1); color: var(--danger); }
+    .notif-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .notif-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background: var(--input-bg); }
     
-    .notif-item { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
-    .notif-item:last-child { margin-bottom: 0; }
-    .notif-item-header { padding: 15px; background: var(--hover-item); cursor: pointer; transition: background 0.2s; }
-    .notif-item-header:hover { background: var(--bg-page); }
-    .notif-item-header .bi-chevron-down { transition: transform 0.3s; }
-    .notif-item-header[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
-    .notif-item-body { padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); }
-    .notif-item-list { list-style: none; padding-left: 0; margin-bottom: 0; }
-    .notif-item-list li { background: var(--bg-page); padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border: 1px solid var(--border-color); }
+    .notif-item { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+    .notif-item-header { padding: 15px; background: var(--input-bg); cursor: pointer; transition: background 0.2s; }
+    .notif-item-header:hover { filter: brightness(0.95); }
+    .notif-item-header .header-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+    .notif-item-header .header-row-2 { display: flex; justify-content: space-between; align-items: center; font-size: 13px;}
+    .notif-item-header .material-icons { transition: transform 0.3s; color: var(--text-muted); }
+    .notif-item-header.expanded .material-icons { transform: rotate(180deg); }
+    .notif-item-body { display: none; padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); }
+    .notif-item-body.show { display: block; }
+    .notif-item-list { list-style: none; padding: 0; margin: 0; }
+    .notif-item-list li { background: var(--input-bg); padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px dashed var(--border-color); }
+
+    .btn-notif { padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-family: 'Poppins', sans-serif;}
+    .btn-notif-sec { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-notif-sec:hover { background: var(--border-color); }
+    .btn-notif-pri { background: #4CAF50; color: white; }
+    .btn-notif-pri:hover { background: #388E3C; }
+
+    /* TOP BAR SERRALHERIA */
+    .top-bar { padding: 15px 25px; margin-bottom: 30px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); }
+    .title-box { display: flex; align-items: center; gap: 10px; }
+    .title-box h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; } 
+    .clock-display { font-size: 1.2rem; font-weight: 700; color: var(--accent); background: var(--input-bg); padding: 8px 16px; border-radius: 14px; display: flex; align-items: center; gap: 8px; }
 
     @media (max-width: 1199px) {
-        .sidebar { left: -250px; width: 250px; }
+        .sidebar { left: -320px; width: 320px; }
         .sidebar.open { left: 0; }
-        .main-content { margin-left: 0; width: 100vw; max-width: 100vw; padding: 10px; overflow-x: hidden; }
+        .main-content { margin-left: 0; width: 100vw; max-width: 100vw; padding: 15px; overflow-x: hidden; }
 
-        .top-title h2 { font-size: 1.1rem !important; }
-        .chart-header { font-size: 0.85rem; margin-bottom: 10px; }
+        .clock-display { display: none; }
+        .top-bar { flex-direction: column; align-items: flex-start; }
+        .top-bar > div:last-child {width: 100%; flex-wrap: wrap !important; justify-content: space-between;}
+        #mobile-menu-btn { display: block !important; background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 5px 10px; cursor: pointer;}
         
-        .kpi-card { padding: 8px 4px !important; border-left-width: 3px !important; border-radius: 8px;}
-        .kpi-val { font-size: 1.3rem !important; word-break: break-all; }
-        .procon-kpi-val { font-size: 1.5rem !important; word-break: break-all; }
-        .kpi-label { font-size: 0.55rem !important; margin-bottom: 2px; letter-spacing: -0.5px; }
+        .kpi-card { padding: 15px 10px !important; border-radius: 12px;}
+        .kpi-val { font-size: 1.8rem !important; word-break: break-all; }
+        .procon-kpi-val { font-size: 1.8rem !important; word-break: break-all; }
+        .kpi-label { font-size: 0.7rem !important; margin-bottom: 4px; }
         
-        .card-body { padding: 12px !important; }
-        .pagination-container { flex-direction: column; gap: 15px; text-align: center; padding: 10px;}
+        .card-body { padding: 15px !important; }
+        .pagination-container { flex-direction: column; gap: 15px; text-align: center; padding: 15px;}
 
         .custom-table, .sub-table, .modal-table { table-layout: auto !important; }
         .custom-table, .sub-table, .modal-table,
@@ -295,66 +343,44 @@
         }
         .custom-table thead, .sub-table thead, .modal-table thead { display: none; }
         
-        .custom-table tbody tr:not(.detail-row) {
-            display: block; margin-bottom: 12px; background: var(--card-bg);
-            border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .custom-table tbody tr.parent-row {
+            display: block; margin-bottom: 15px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--shadow);
             padding: 0; width: 100%;
         }
         
         .custom-table tbody td, .sub-table tbody td, .modal-table tbody td {
             display: flex; justify-content: space-between; align-items: center; text-align: right;
-            padding: 10px 12px !important; border-bottom: 1px solid var(--border-color) !important; border-top: none;
+            padding: 10px 15px !important; border-bottom: 1px solid var(--border-color) !important; border-top: none;
             gap: 10px; font-size: 0.85rem; width: 100%; word-break: normal; overflow-wrap: break-word;
         }
         .custom-table tbody td:last-child, .sub-table tbody td:last-child, .modal-table tbody td:last-child { border-bottom: none !important; }
         
         .custom-table tbody td::before, .sub-table tbody td::before, .modal-table tbody td::before {
             content: attr(data-label); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; 
-            color: var(--text-sec); text-align: left; flex-shrink: 0; max-width: 45%; margin-right: 5px;
+            color: var(--text-muted); text-align: left; flex-shrink: 0; max-width: 45%; margin-right: 5px;
         }
         .custom-table tbody td > * { flex-shrink: 1; min-width: 0; }
 
         .sub-table tbody tr { 
             display: block;
-            margin: 8px 0 12px 0; 
-            background-color: var(--hover-item); 
+            margin: 10px 0 15px 0; 
+            background-color: var(--card-bg); 
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--highlight); 
-            border-radius: 8px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--accent); 
+            border-radius: 12px; 
+            box-shadow: var(--shadow);
             width: 100%;
         }
         .sub-table tbody td {
-            padding: 8px 12px !important;
+            padding: 10px 15px !important;
             border-bottom: 1px dashed var(--border-color) !important;
         }
         
-        .sim-input { width: 100%; max-width: 70px; font-size: 0.85rem; padding: 4px; text-align: center;}
+        .sim-input { width: 100%; max-width: 70px; font-size: 0.85rem; padding: 6px; text-align: center;}
         
-        .viz-box { padding: 10px; min-height: auto; width: 100%; max-width: 100%; }
+        .viz-box { padding: 15px; min-height: auto; width: 100%; max-width: 100%; }
         .table-box { width: 100%; overflow-x: hidden; }
-    }
-
-    @media (min-width: 1600px) {
-        .layout-wrapper { display: flex; justify-content: center; }
-        .main-content { margin-left: 220px; width: calc(100% - 220px); max-width: 100%; padding: 30px 40px; }
-        .kpi-card { padding: 40px 30px; }
-        .kpi-val { font-size: 3.5rem; }
-        .procon-kpi-val { font-size: 3.5rem !important; }
-        .kpi-label { font-size: 1rem; }
-        .viz-box { min-height: 700px; padding: 40px; }
-        .chart-header { font-size: 1.3rem; margin-bottom: 25px; }
-        .custom-table th { font-size: 0.9rem; padding: 15px; }
-        .custom-table td { font-size: 0.95rem; padding: 15px; }
-        .custom-dropdown-btn { padding: 15px 20px; font-size: 1.1rem; }
-        .oficina-selector { font-size: 1.1rem; padding: 15px; }
-        .top-title h2 { font-size: 2rem !important; }
-    }
-    
-    @media (min-width: 2500px) {
-        html { font-size: 120%; } 
-        .main-content { padding: 40px 50px; }
-        .viz-box { min-height: 900px; }
     }
 
   </style>
@@ -362,91 +388,87 @@
 <body>
 
   <div id="loader" class="loader-overlay">
-    <img src="/images/logo.png" alt="Background Logo" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; height: 90vh; object-fit: contain; opacity: 0.08; pointer-events: none; z-index: 0;">
-    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem; color: var(--highlight); border-width: 4px; position: relative; z-index: 1;"></div>
-    <h6 style="color: var(--text-sec); font-weight: 700; letter-spacing: 1px; position: relative; z-index: 1;">CARREGANDO...</h6>
+    <div class="spinner"></div>
+    <div style="font-weight: 800; color: var(--text-muted); font-size: 1.2rem; letter-spacing: 1px;">CARREGANDO...</div>
   </div>
 
   <div class="layout-wrapper">
       <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
       
       <div class="sidebar" id="sidebar">
-          <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 20px 20px 20px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color);">
-              <img src="/images/logo.png" alt="Logo" style="height: 80px; max-width: 70%; object-fit: contain;">
-              <div class="position-relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                  <i class="bi bi-bell-fill fs-4" style="color: var(--highlight);"></i>
-                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow" id="notifBadge" style="display:none; font-size: 0.6rem; border: 2px solid var(--card-bg);">0</span>
+          <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding-bottom: 20px; margin-bottom: 5px; border-bottom: 1px solid var(--border-color); position: relative;">
+              <img src="/images/logo.png" alt="Logo" style="height: 100px; max-width: 85%; object-fit: contain;">
+              <div style="position: absolute; top: 10px; right: 15px; cursor: pointer; display: flex; align-items: center; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                  <span class="material-icons" style="font-size: 26px; color: #ffffff;">notifications</span>
+                  <span id="notifBadge" style="display:none; position: absolute; top: -5px; right: -5px; background: #E53935; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; text-align: center; line-height: 16px; border: 2px solid var(--sidebar-bg);">0</span>
               </div>
           </div>
 
-          <button class="nav-btn active" onclick="switchView('viewTable', this)"><i class="bi bi-table"></i> <span>Tabela</span></button>
-          <button class="nav-btn" onclick="switchView('viewCalendar', this)"><i class="bi bi-calendar-event"></i> <span>Calendário</span></button>
-          <button class="nav-btn" onclick="switchView('viewChart1', this)"><i class="bi bi-bar-chart-fill"></i> <span>Status</span></button>
-          <button class="nav-btn" onclick="switchView('viewChart2', this)"><i class="bi bi-geo-alt-fill"></i> <span>Parceiros</span></button>
-          <button class="nav-btn" onclick="switchView('viewChart3', this)"><i class="bi bi-boxes"></i> <span>Volume</span></button>
-          <button class="nav-btn" onclick="switchView('viewProcon', this)"><i class="bi bi-building-gear"></i> <span>PROCON | TECH</span></button>
+          <button class="nav-item nav-btn active" onclick="switchView('viewTable', this)"><i class="bi bi-table"></i> <span>Tabela</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewCalendar', this)"><i class="bi bi-calendar-event"></i> <span>Calendário</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewChart1', this)"><i class="bi bi-bar-chart-fill"></i> <span>Status</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewChart2', this)"><i class="bi bi-geo-alt-fill"></i> <span>Parceiros</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewChart3', this)"><i class="bi bi-boxes"></i> <span>Volume</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewProcon', this)"><i class="bi bi-building-gear"></i> <span>PROCON | TECH</span></button>
       </div>
 
       <div class="main-content">
-          <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
-            <div class="d-flex align-items-center gap-2 top-title">
-              <button id="mobile-menu-btn" class="btn btn-outline-secondary d-xl-none px-2 py-1" onclick="toggleSidebar()" style="color: var(--text-pri); border-color: var(--border-color);">
-                <i class="bi bi-list fs-4"></i>
-              </button>
+          <div class="top-bar">
+            <div class="title-box">
+              <button id="mobile-menu-btn" style="display:none;" onclick="toggleSidebar()"><i class="material-icons">menu</i></button>
               <div>
-                <h2 class="fw-bold m-0" style="color: var(--text-pri); font-size: 1.3rem;">DASHBOARD - MARCENARIA</h2>
-                <p class="m-0 small" style="color: var(--text-sec); font-size:0.75rem;">Marcenaria & Serralheria</p>
+                <h1 style="line-height: 1.1;">DASHBOARD - MARCENARIA</h1>
+                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">Marcenaria & Serralheria</div>
               </div>
             </div>
-            
-            <div class="d-flex gap-2 align-items-center ms-auto">
-              <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar dados"><i class="bi bi-arrow-repeat fs-5"></i></button>
-              <button class="btn-action" onclick="toggleTheme()" title="Modo Escuro"><i class="bi bi-moon-stars-fill fs-6" id="themeIcon"></i></button>
-              <div class="ms-2 d-none d-md-block text-end"><span class="badge" style="background: rgba(128,128,128,0.1); color: var(--text-sec); border: 1px solid var(--border-color);"><i class="bi bi-clock me-1"></i> <span id="lastUpdate">...</span></span></div>
+            <div style="display:flex; gap:15px; align-items:center; width: 100%; justify-content: flex-end;">
+              <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar dados"><span class="material-icons">sync</span></button>
+              <button class="btn-action" onclick="toggleTheme()" title="Modo Escuro"><span class="material-icons" id="themeIcon">dark_mode</span></button>
+              <div class="clock-display" title="Hora atual"><span class="material-icons" style="font-size:22px;">schedule</span><span id="lastUpdate" style="font-variant-numeric: tabular-nums; min-width: 80px; text-align: center; display: inline-block;">...</span></div>
             </div>
           </div>
 
           <div id="mainSectionGroup">
               
-              <div class="card card-custom mb-3" style="position: relative; z-index: 100;">
-                <div class="card-body p-3 p-lg-4">
-                  <div class="d-flex justify-content-between align-items-center">
+              <div class="card-custom mb-4" style="position: relative; z-index: 100;">
+                <div style="padding: 20px 25px;">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                       <div class="flex-grow-1" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" style="cursor: pointer; padding-block: 5px;">
-                          <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.85rem;">
-                              <i class="bi bi-funnel-fill me-1"></i>Filtros Gerais <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
+                          <h6 class="fw-bold m-0" style="color: var(--accent); text-transform: uppercase; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                              <span class="material-icons" style="font-size: 20px;">filter_alt</span> Filtros Gerais <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
                           </h6>
                       </div>
                       
                       <div class="d-flex gap-2 flex-wrap ms-2 align-items-center">
-                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="resetFilters()">Limpar</button>
+                          <button class="btn-notif btn-notif-sec" onclick="resetFilters()" style="padding: 8px 16px; border-radius: 12px;"><i class="bi bi-eraser-fill"></i> Limpar</button>
                           
                           <div class="dropdown">
-                              <button class="btn btn-sm text-white rounded-pill px-2 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #2e7d32; border: none;" id="btnExportExcelMain">
+                              <button class="btn-notif btn-notif-pri dropdown-toggle" type="button" data-bs-toggle="dropdown" style="border-radius: 12px;" id="btnExportExcelMain">
                                   <i class="bi bi-file-earmark-excel-fill"></i> EXCEL
                               </button>
-                              <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999;">
-                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Separado por Processo</h6></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToExcel(1)">Com Material e Dimensão</a></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToExcel(2)">Apenas Mobília</a></li>
-                                  <li><hr class="dropdown-divider"></li>
-                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Sem Processo (Consolidado)</h6></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToExcel(3)">Com Material e Dimensão</a></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToExcel(4)">Apenas Mobília (Geral)</a></li>
+                              <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999; border-radius: 12px; border: 1px solid var(--border-color); background: var(--card-bg);">
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--accent)">Separado por Processo</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToExcel(1)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToExcel(2)">Apenas Mobília</a></li>
+                                  <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--accent)">Sem Processo (Consolidado)</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToExcel(3)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToExcel(4)">Apenas Mobília (Geral)</a></li>
                               </ul>
                           </div>
 
                           <div class="dropdown">
-                              <button class="btn btn-sm text-white rounded-pill px-2 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #d32f2f; border: none;" id="btnExportPDFMain">
+                              <button class="btn-notif text-white dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: #d32f2f; border-radius: 12px;" id="btnExportPDFMain">
                                   <i class="bi bi-file-earmark-pdf-fill"></i> PDF
                               </button>
-                              <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999;">
-                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Separado por Processo</h6></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(1)">Com Material e Dimensão</a></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(2)">Apenas Mobília</a></li>
-                                  <li><hr class="dropdown-divider"></li>
-                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--highlight)">Sem Processo (Consolidado)</h6></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(3)">Com Material e Dimensão</a></li>
-                                  <li><a class="dropdown-item py-2" style="cursor: pointer;" onclick="exportToPDF(4)">Apenas Mobília (Geral)</a></li>
+                              <ul class="dropdown-menu dropdown-menu-end shadow" style="font-size: 0.85rem; z-index: 9999; border-radius: 12px; border: 1px solid var(--border-color); background: var(--card-bg);">
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--accent)">Separado por Processo</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToPDF(1)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToPDF(2)">Apenas Mobília</a></li>
+                                  <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
+                                  <li><h6 class="dropdown-header fw-bold text-uppercase" style="color:var(--accent)">Sem Processo (Consolidado)</h6></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToPDF(3)">Com Material e Dimensão</a></li>
+                                  <li><a class="dropdown-item py-2" style="cursor: pointer; color: var(--text-main);" onclick="exportToPDF(4)">Apenas Mobília (Geral)</a></li>
                               </ul>
                           </div>
                       </div>
@@ -455,20 +477,20 @@
                   <div class="collapse mt-3" id="collapseFilters">
                       <div class="row g-3">
                           <div class="col-lg-3 border-end" style="border-color: var(--border-color) !important;">
-                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">1. Selecione a Oficina</label>
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">1. Selecione a Oficina</label>
                               <select id="selOficina" class="form-select oficina-selector mb-3" onchange="applyFilters('oficina')">
                                   <option value="TODAS" selected>TODAS AS OFICINAS</option>
                                   <option value="SEDE">MARCENARIA SEDE</option>
                                   <option value="REGIONAL">MARCENARIA REGIONAL</option>
                               </select>
                               
-                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Data de Entrega</label>
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Data de Entrega</label>
                               <div class="d-flex gap-2 mb-3">
-                                  <input type="date" id="filterDateStart" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
-                                  <input type="date" id="filterDateEnd" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.8rem; padding: 8px;" onchange="applyFilters('date')">
+                                  <input type="date" id="filterDateStart" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.85rem; padding: 10px;" onchange="applyFilters('date')">
+                                  <input type="date" id="filterDateEnd" class="form-control oficina-selector" style="font-weight: normal; font-size: 0.85rem; padding: 10px;" onchange="applyFilters('date')">
                               </div>
 
-                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Pesquisa por Palavra</label>
+                              <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Pesquisa por Palavra</label>
                               <input type="text" id="globalSearchInput" class="form-control oficina-selector" placeholder="Digite para filtrar..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="applyFilters('global')">
                           </div>
                           <div class="col-lg-9">
@@ -479,17 +501,19 @@
                 </div>
               </div>
 
-              <div class="row mb-3 g-2 g-lg-4 w-100 m-0">
-                <div class="col-4 col-md-4 p-0 pe-1"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">SOLICITADO</div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
+              <div class="row mb-4 g-3 w-100 m-0">
+                <div class="col-4 col-md-4 p-0 pe-2"><div class="kpi-card blue"><div class="kpi-label" id="lblKpiSolicitada">SOLICITADO</div><div class="kpi-val" id="kpiSolicitada">0</div></div></div>
                 <div class="col-4 col-md-4 p-0 px-1"><div class="kpi-card green"><div class="kpi-label">ENTREGUE</div><div class="kpi-val" id="kpiEntregue">0</div></div></div>
-                <div class="col-4 col-md-4 p-0 ps-1"><div class="kpi-card yellow"><div class="kpi-label">PENDENTE</div><div class="kpi-val" id="kpiPendente">0</div></div></div>
+                <div class="col-4 col-md-4 p-0 ps-2"><div class="kpi-card yellow"><div class="kpi-label">PENDENTE</div><div class="kpi-val" id="kpiPendente">0</div></div></div>
               </div>
           </div>
 
           <div style="min-height: 600px;">
               <div id="viewTable" class="view-section active">
                   <div class="viz-box">
-                    <h5 class="chart-header">Detalhamento dos Processos</h5>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                        <h5 class="chart-header m-0">Detalhamento dos Processos</h5>
+                    </div>
                     <div class="table-box">
                         <table class="custom-table">
                           <thead>
@@ -504,15 +528,15 @@
                               <th class="text-center">Prioridade</th>
                               <th class="text-center">Status</th>
                               <th class="sortable-header text-center" onclick="handleSort('previsao')" title="Clique para ordenar">Previsão <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_previsao"></i></th>
-                              <th class="sortable-header text-center" onclick="handleSort('data_aut')" title="Clique para ordenar">Data Autorização <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
-                              <th class="sortable-header text-center" onclick="handleSort('data_ent')" title="Clique para ordenar">Data Entrega <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
+                              <th class="sortable-header text-center" onclick="handleSort('data_aut')" title="Clique para ordenar">Autorização <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
+                              <th class="sortable-header text-center" onclick="handleSort('data_ent')" title="Clique para ordenar">Entrega <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
                             </tr>
                           </thead>
                           <tbody id="tableBody"></tbody>
                         </table>
                     </div>
                     <div class="pagination-container" id="paginationControls">
-                        <span class="small fw-bold" style="color:var(--text-sec)" id="pageInfo">Página 1</span>
+                        <span class="small fw-bold" style="color:var(--text-muted)" id="pageInfo">Página 1</span>
                         <div class="d-flex gap-2">
                             <button class="pagination-btn" id="btnPrev" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
                             <button class="pagination-btn" id="btnNext" onclick="changePage(1)">Próximo <i class="bi bi-chevron-right"></i></button>
@@ -531,65 +555,62 @@
               
               <div id="viewProcon" class="view-section">
                   
-                  <div class="row mb-3 g-2 g-lg-4 w-100 m-0">
-                      <div class="col-6 col-md-6 p-0 pe-1">
-                          <div class="card card-custom p-3 p-lg-4" style="border-left: 5px solid var(--st-sol); background-color: var(--card-bg);">
-                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-pri); font-size: 0.8rem;">PROCON</h6>
+                  <div class="row mb-4 g-3 w-100 m-0">
+                      <div class="col-12 col-lg-6 p-0 pe-lg-2">
+                          <div class="card-custom p-4" style="border-left: 5px solid var(--accent);">
+                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-main); font-size: 1rem;">PROCON</h6>
                               <div class="d-flex justify-content-around text-center">
                                   <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">FINALIZADOS</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="proconKpiFin">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">FINALIZADOS</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--success);" id="proconKpiFin">0</div>
                                   </div>
                                   <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">PENDENTES</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="proconKpiPen">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">PENDENTES</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="proconKpiPen">0</div>
                                   </div>
                               </div>
                           </div>
                       </div>
-                      <div class="col-6 col-md-6 p-0 ps-1">
-                          <div class="card card-custom p-3 p-lg-4" style="border-left: 5px solid var(--st-sol); background-color: var(--card-bg);">
-                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-pri); font-size: 0.8rem;">ESTAÇÃO TECH</h6>
+                      <div class="col-12 col-lg-6 p-0 ps-lg-2 mt-3 mt-lg-0">
+                          <div class="card-custom p-4" style="border-left: 5px solid var(--accent);">
+                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-main); font-size: 1rem;">ESTAÇÃO TECH</h6>
                               <div class="d-flex justify-content-around text-center">
                                   <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">FINALIZADOS</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-ent);" id="techKpiFin">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">FINALIZADOS</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--success);" id="techKpiFin">0</div>
                                   </div>
                                   <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-pri); font-size: 0.65rem;">PENDENTES</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--st-pen);" id="techKpiPen">0</div>
+                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">PENDENTES</div>
+                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="techKpiPen">0</div>
                                   </div>
                               </div>
                           </div>
                       </div>
                   </div>
                   
-                  <div class="card card-custom mb-4" style="position: relative; z-index: 99;">
-                    <div class="card-body p-3 p-lg-4">
+                  <div class="card-custom mb-4" style="position: relative; z-index: 99;">
+                    <div style="padding: 20px 25px;">
                       <div class="d-flex justify-content-between align-items-center">
                           <div class="flex-grow-1" data-bs-toggle="collapse" data-bs-target="#collapseProconFilters" aria-expanded="false" style="cursor: pointer; padding-block: 5px;">
-                              <h6 class="fw-bold m-0" style="color: var(--highlight); text-transform: uppercase; font-size: 0.85rem;">
-                                  <i class="bi bi-funnel-fill me-1"></i>Filtros & Pesquisa <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
+                              <h6 class="fw-bold m-0" style="color: var(--accent); text-transform: uppercase; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                                  <span class="material-icons" style="font-size: 20px;">filter_alt</span> Filtros & Pesquisa <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
                               </h6>
                           </div>
-                          <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold ms-2" onclick="resetProconFilters();">Limpar</button>
+                          <button class="btn-notif btn-notif-sec ms-2" style="border-radius: 12px;" onclick="resetProconFilters();"><i class="bi bi-eraser-fill"></i> Limpar</button>
                       </div>
                       
                       <div class="collapse mt-3" id="collapseProconFilters">
                           <div class="row g-3">
                               <div class="col-md-4">
-                                  <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Cidade/Local</label>
-                                  <div class="input-group">
-                                      <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                                      <input type="text" id="proconSearchInput" class="form-control border-start-0" placeholder="Ex: Centro, Bacabal..." onkeyup="filterProconData()">
-                                  </div>
+                                  <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Cidade/Local</label>
+                                  <input type="text" id="proconSearchInput" class="form-control oficina-selector" placeholder="Ex: Centro, Bacabal..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="filterProconData()">
                               </div>
                               <div class="col-md-4">
-                               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Tipo</label>
+                               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Tipo</label>
                                <div class="dropdown">
                                   <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_tipo">Todos</button>
                                   <div class="dropdown-menu dropdown-menu-custom">
-                                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--accent); border-bottom: 1px dashed var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
                                           <input class="form-check-input" type="checkbox" id="selectAll_proc_tipo" onchange="toggleSelectAllProcon('tipo', this)">
                                           <span class="text-truncate">SELECIONAR TODOS</span>
                                       </label>
@@ -598,11 +619,11 @@
                                </div>
                               </div>
                               <div class="col-md-4">
-                               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">Status</label>
+                               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Status</label>
                                <div class="dropdown">
                                   <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_status">Todos</button>
                                   <div class="dropdown-menu dropdown-menu-custom">
-                                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--accent); border-bottom: 1px dashed var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
                                           <input class="form-check-input" type="checkbox" id="selectAll_proc_status" onchange="toggleSelectAllProcon('status', this)">
                                           <span class="text-truncate">SELECIONAR TODOS</span>
                                       </label>
@@ -625,22 +646,22 @@
   <div class="notif-overlay" id="notifOverlay">
       <div class="notif-box">
           <div class="notif-header">
-              <h5 class="m-0 fw-bold"><i class="bi bi-calendar-week-fill me-2"></i>Pendentes da Semana</h5>
-              <button type="button" class="btn-close btn-close-white" onclick="closeNotifications()"></button>
+              <h5><span class="material-icons">event</span> Entregas Pendentes da Semana</h5>
+              <button type="button" class="notif-close" onclick="closeNotifications()">&times;</button>
           </div>
           <div class="notif-body" id="notifBody">
-              <div class="text-center py-4"><div class="spinner-border text-secondary" role="status"></div></div>
+              <div class="text-center py-4"><div class="spinner"></div><div style="font-weight: 700; color: var(--text-muted);">Carregando demandas...</div></div>
           </div>
           <div class="notif-footer">
-              <button class="btn btn-outline-secondary" onclick="closeNotifications()">Fechar</button>
-              <button class="btn btn-success fw-bold" id="btnCopyNotif" onclick="copyWhatsAppText()"><i class="bi bi-whatsapp"></i> Copiar</button>
+              <button class="btn-notif btn-notif-sec" onclick="closeNotifications()">Fechar</button>
+              <button class="btn-notif btn-notif-pri" id="btnCopyNotif" onclick="copyWhatsAppText()"><i class="bi bi-whatsapp"></i> Copiar para WhatsApp</button>
           </div>
       </div>
   </div>
 
   <script>
     Chart.register(ChartDataLabels);
-    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+    Chart.defaults.font.family = "'Poppins', sans-serif";
     
     let isDark = false;
     let currentPage = 1;
@@ -655,13 +676,14 @@
     const INITIAL_DATA = <%- INITIAL_DATA %>;
 
     function getColors() {
+        let isDarkMode = document.body.classList.contains('dark-mode');
         return {
-            text: isDark ? '#e0e0e0' : '#3e2723',
-            grid: isDark ? '#333333' : '#f0f0f0',
-            pend: '#dc3545', 
-            ent: '#43a047', 
-            sol: '#1e88e5', 
-            vol: isDark ? '#a1887f' : '#5d4037'
+            text: isDarkMode ? '#f0f2f5' : '#1e293b',
+            grid: isDarkMode ? '#333333' : '#e2e8f0',
+            pend: '#b71c1c', 
+            ent: '#1b5e20', 
+            sol: '#001E7A', 
+            vol: '#001E7A'
         };
     }
 
@@ -671,10 +693,10 @@
             responsive: true, maintainAspectRatio: false,
             layout: { padding: { top: 25, right: 30, left: 10, bottom: 10 } },
             plugins: {
-                datalabels: { color: c.text, anchor: 'end', align: 'end', offset: 4, font: { weight: 'bold', size: 11 }, formatter: v => v > 0 ? v : '', clip: false },
-                legend: { labels: { color: c.text } }
+                datalabels: { color: c.text, anchor: 'end', align: 'end', offset: 4, font: { weight: 'bold', size: 12, family: 'Poppins' }, formatter: v => v > 0 ? v : '', clip: false },
+                legend: { labels: { color: c.text, font: { family: 'Poppins', weight: '600' } } }
             },
-            scales: { x: { grid: { display: false }, ticks: { color: c.text } }, y: { grid: { color: c.grid }, ticks: { color: c.text }, beginAtZero: true } }
+            scales: { x: { grid: { display: false }, ticks: { color: c.text, font: { family: 'Poppins', weight: '600' } } }, y: { grid: { color: c.grid }, ticks: { color: c.text, font: { family: 'Poppins', weight: '600' } }, beginAtZero: true } }
         };
     };
 
@@ -705,17 +727,6 @@
             $('#collapseProconFilters').addClass('show');
             $('[data-bs-target="#collapseProconFilters"]').attr('aria-expanded', 'true');
         }
-
-        function startClock() {
-            $('#lastUpdate').text(new Date().toLocaleTimeString('pt-BR', {
-                timeZone: 'America/Sao_Paulo', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit'
-            }));
-        }
-        startClock(); 
-        setInterval(startClock, 1000); 
     });
 
     window.toggleSidebar = function() {
@@ -734,7 +745,7 @@
     window.switchView = function(viewId, btn) {
         currentViewId = viewId;
         $('.view-section').removeClass('active'); $('#' + viewId).addClass('active');
-        $('.nav-btn').removeClass('active'); $(btn).addClass('active');
+        $('.nav-item').removeClass('active'); $(btn).addClass('active');
         
         if ($(window).width() <= 1199) {
             $('#sidebar').removeClass('open');
@@ -755,9 +766,10 @@
     }
 
     window.toggleTheme = function() {
-        isDark = !isDark;
-        if(isDark) { $('body').addClass('dark-mode'); $('#themeIcon').removeClass('bi-moon-stars-fill').addClass('bi-sun-fill'); } 
-        else { $('body').removeClass('dark-mode'); $('#themeIcon').removeClass('bi-sun-fill').addClass('bi-moon-stars-fill'); }
+        $('body').toggleClass('dark-mode');
+        let isDark = $('body').hasClass('dark-mode');
+        if(isDark) { $('#themeIcon').text('light_mode'); } 
+        else { $('#themeIcon').text('dark_mode'); }
         updateCharts();
         if(typeof calendarInstance !== 'undefined' && calendarInstance) calendarInstance.render();
     }
@@ -781,12 +793,12 @@
       filterFields.forEach(f => {
         const div = `
           <div class="col-md-6 col-lg-3">
-            <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-sec);">${f.label}</label>
-            <div class="dropdown" id="dd_${f.key}">
-                <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_${f.key}">Todos</button>
+            <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">${f.label}</label>
+            <div class="custom-dropdown" id="dd_${f.key}" style="width: 100%;">
+                <button class="custom-dropdown-btn dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" id="btn_${f.key}">Todos</button>
                 <div class="dropdown-menu dropdown-menu-custom">
                     <input type="text" class="dropdown-search" placeholder="Pesquisar..." onkeyup="filterList('${f.key}')" id="search_${f.key}">
-                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--highlight); border-bottom: 1px solid var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                    <label class="dropdown-item-custom" style="font-weight: 700; color: var(--accent); border-bottom: 1px dashed var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
                         <input class="form-check-input" type="checkbox" id="selectAll_${f.key}" onchange="toggleSelectAll('${f.key}', this)">
                         <span class="text-truncate">SELECIONAR TODOS</span>
                     </label>
@@ -799,7 +811,7 @@
     }
 
     window.loadData = async function(forceRefresh = false) {
-      if(forceRefresh || fullData.length === 0) $('#loader').fadeIn();
+      if(forceRefresh || fullData.length === 0) $('#loader').css('opacity', '1').show();
       
       activeFilters = {}; 
       $('#globalSearchInput').val('');
@@ -831,7 +843,8 @@
       } catch (err) {
           alert("Erro: " + err.message); 
       } finally {
-          $('#loader').fadeOut(); 
+          $('#loader').css('opacity', '0'); 
+          setTimeout(() => $('#loader').hide(), 500);
       }
     }
 
@@ -874,7 +887,7 @@
         let whatsappText = '*⚠️ ENTREGAS PENDENTES DA SEMANA* 📅\n\n';
 
         if(pendingThisWeek.length === 0) {
-            notifHtml = '<div class="text-center py-4 text-muted"><i class="bi bi-check-circle fs-1 text-success d-block mb-3"></i>Nenhuma entrega pendente para esta semana! 🎉</div>';
+            notifHtml = '<div class="text-center py-4" style="color: var(--text-muted);"><span class="material-icons" style="font-size: 48px; color: var(--success); display: block; margin-bottom: 15px;">check_circle</span>Nenhuma entrega pendente para esta semana! 🎉</div>';
             whatsappText += 'Nenhuma entrega pendente para esta semana! 🎉';
             $('#notifBadge').hide();
         } else {
@@ -904,19 +917,19 @@
                 });
                 
                 let uiItemsHtml = Object.keys(sumUI).map(nome => {
-                    return `<li><span class="fw-bold text-truncate" style="max-width:70%;">${nome}</span> <span class="badge bg-warning text-dark">${sumUI[nome]} pendentes</span></li>`;
+                    return `<li><span class="fw-bold text-truncate" style="max-width:70%;">${nome}</span> <span class="st-badge warn">${sumUI[nome]} pendentes</span></li>`;
                 }).join('');
                 
                 notifHtml += `
                 <div class="notif-item">
                     <div class="notif-item-header" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="fw-bold text-uppercase" style="color:var(--highlight); font-size:1.0rem;">${g.local}</div>
-                            <i class="bi bi-chevron-down fs-5 text-muted"></i>
+                        <div class="header-row-1">
+                            <strong style="color:var(--accent); font-size: 1rem; text-transform: uppercase;">${g.local}</strong>
+                            <span class="material-icons filter-chevron">expand_more</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center small">
+                        <div class="header-row-2">
                             <span>Processo: <strong>${g.processo || 'N/A'}</strong></span>
-                            <span class="text-danger fw-bold bg-danger bg-opacity-10 px-2 py-1 rounded"><i class="bi bi-calendar-event"></i> ${g.previsao}</span>
+                            <span class="st-badge fail" style="text-transform:none;"><span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 3px;">event</span> ${g.previsao}</span>
                         </div>
                     </div>
                     <div class="collapse" id="${collapseId}">
@@ -964,16 +977,16 @@
             const btn = $('#btnCopyNotif');
             const origHtml = btn.html();
             btn.html('<i class="bi bi-check-lg me-2"></i> Copiado!');
-            btn.removeClass('btn-success').addClass('btn-outline-success');
+            btn.removeClass('btn-notif-pri').addClass('btn-notif-sec');
             setTimeout(() => {
                 btn.html(origHtml);
-                btn.removeClass('btn-outline-success').addClass('btn-success');
+                btn.removeClass('btn-notif-sec').addClass('btn-notif-pri');
             }, 2500);
         });
     }
 
     window.loadProconData = async function(forceRefresh = false) {
-        if(forceRefresh || proconRawData.length === 0) $('#loader').fadeIn();
+        if(forceRefresh || proconRawData.length === 0) $('#loader').css('opacity', '1').show();
         try {
             let dataToProcess = INITIAL_DATA;
             if (forceRefresh) {
@@ -986,7 +999,8 @@
         } catch (err) {
             alert("Erro ao carregar Procon: " + err.message);
         } finally {
-            $('#loader').fadeOut();
+            $('#loader').css('opacity', '0'); 
+            setTimeout(() => $('#loader').hide(), 500);
         }
     }
 
@@ -1042,8 +1056,8 @@
         const selStatus = [];
         $('#list_proc_status input:checked').each(function() { selStatus.push($(this).val()); });
 
-        $('#btn_proc_tipo').text(selTipos.length ? `${selTipos.length} SELECIONADO(S)` : 'TODOS').css('color', selTipos.length ? 'var(--highlight)' : 'var(--input-text)').css('font-weight', selTipos.length ? 'bold' : 'normal');
-        $('#btn_proc_status').text(selStatus.length ? `${selStatus.length} SELECIONADO(S)` : 'TODOS').css('color', selStatus.length ? 'var(--highlight)' : 'var(--input-text)').css('font-weight', selStatus.length ? 'bold' : 'normal');
+        $('#btn_proc_tipo').text(selTipos.length ? `${selTipos.length} SELECIONADO(S)` : 'TODOS').css('color', selTipos.length ? 'var(--accent)' : 'var(--text-main)').css('font-weight', selTipos.length ? 'bold' : '500');
+        $('#btn_proc_status').text(selStatus.length ? `${selStatus.length} SELECIONADO(S)` : 'TODOS').css('color', selStatus.length ? 'var(--accent)' : 'var(--text-main)').css('font-weight', selStatus.length ? 'bold' : '500');
 
         const filtered = proconRawData.filter(item => {
             if (searchTerm && !item.local.toLowerCase().includes(searchTerm)) return false;
@@ -1071,7 +1085,7 @@
     function renderProconCards(data) {
         const container = $('#proconContainer'); container.empty();
         if(!data || data.length === 0) {
-            container.html('<div class="col-12 text-center text-muted py-5 text-uppercase">Nenhum processo encontrado.</div>'); return;
+            container.html('<div class="col-12 text-center text-muted py-5 text-uppercase fw-bold">Nenhum processo encontrado.</div>'); return;
         }
         const parseDateLocal = (str) => {
             if (!str || typeof str !== 'string') return new Date(9999, 11, 31); 
@@ -1164,22 +1178,22 @@
             const cardId = `proconCard_${index}`;
             const itemsHtml = group.items.map(item => {
                 return `<div class="procon-item-row">
-                    <div class="d-flex justify-content-between align-items-center mb-2"><h6 class="fw-bold m-0 text-uppercase" style="font-size:0.9rem; color:var(--highlight);">${item.mobilia}</h6><span class="status-badge" style="transform:scale(0.9)">${item.status}</span></div>
+                    <div class="d-flex justify-content-between align-items-center mb-3"><h6 class="fw-bold m-0 text-uppercase" style="font-size:0.95rem; color:var(--accent);">${item.mobilia}</h6><span class="status-badge ${stClass}" style="transform:scale(0.9)">${item.status}</span></div>
                     <div class="detail-grid"><div class="detail-item"><strong>MATERIAL</strong><span>${item.material || '-'}</span></div><div class="detail-item"><strong>DIMENSÕES</strong><span>${item.dimensoes || '-'}</span></div></div>
-                    <div class="d-flex justify-content-between gap-2"><div class="qty-badge"><span class="qty-val" style="color:var(--st-sol)">${item.qtd_sol}</span><span class="qty-lbl">SOLICITADO</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-ent)">${item.qtd_ent}</span><span class="qty-lbl">ENTREGUE</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--st-pen);">${item.qtd_pen}</span><span class="qty-lbl">PENDENTE</span></div></div>
+                    <div class="d-flex justify-content-between gap-2 mt-3"><div class="qty-badge"><span class="qty-val" style="color:var(--accent)">${item.qtd_sol}</span><span class="qty-lbl">SOLICITADO</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--success)">${item.qtd_ent}</span><span class="qty-lbl">ENTREGUE</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--warning-text-dark);">${item.qtd_pen}</span><span class="qty-lbl">PENDENTE</span></div></div>
                 </div>`;
             }).join('');
             
             container.append(`<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 p-2"><div class="procon-card">
                 <div class="procon-header" data-bs-toggle="collapse" data-bs-target="#collapse_${cardId}">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="origin-badge ${originClass}">${originLabel}</span>
                         <div class="date-badge"><i class="bi bi-calendar"></i> ${group.mainDate || '-'}</div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center"><span class="status-badge ${stClass}">${group.mainStatus || 'SEM STATUS'}</span></div>
-                    <div class="procon-title text-truncate mt-2">${group.local}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-sec); font-weight: 700; margin-top: 2px;">PROCESSO: <span style="color: var(--highlight);">${group.processo || '-'}</span></div>
-                    <div class="header-totals"><span class="h-badge" style="color:var(--st-sol)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--st-ent)">ENTREGUE: ${group.totalEnt}</span><span class="h-badge" style="color:var(--st-pen)">PENDENTE: ${group.totalPen}</span></div>
+                    <div class="procon-title text-truncate mt-3 mb-1">${group.local}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">PROCESSO: <span style="color: var(--accent);">${group.processo || '-'}</span></div>
+                    <div class="header-totals mt-3"><span class="h-badge" style="color:var(--accent)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--success)">ENTREGUE: ${group.totalEnt}</span><span class="h-badge" style="color:var(--warning-text-dark)">PENDENTE: ${group.totalPen}</span></div>
                 </div>
                 <div class="collapse" id="collapse_${cardId}"><div class="procon-details">${itemsHtml}</div></div>
             </div></div>`);
@@ -1247,8 +1261,8 @@
 
     function updateBtnLabel(key, count) {
         const btn = $(`#btn_${key}`);
-        if (!count || count === 0) btn.text("TODOS").css('font-weight', 'normal').css('color', 'var(--input-text)');
-        else btn.text(`${count} SELECIONADO(S)`).css('font-weight', 'bold').css('color', 'var(--highlight)');
+        if (!count || count === 0) btn.text("TODOS").css('font-weight', '500').css('color', 'var(--text-main)');
+        else btn.text(`${count} SELECIONADO(S)`).css('font-weight', 'bold').css('color', 'var(--accent)');
     }
 
     function updateLists(triggerKey) {
@@ -1507,7 +1521,7 @@
 
         tbody.empty();
         if (groupedDataForTable.length === 0) {
-            tbody.html(`<tr><td colspan="10" class="text-center p-4" style="color:var(--text-sec);">NENHUM DADO ENCONTRADO.</td></tr>`);
+            tbody.html(`<tr><td colspan="10" class="text-center p-4 fw-bold" style="color:var(--text-muted); font-size: 1rem; text-transform: uppercase;">NENHUM DADO ENCONTRADO.</td></tr>`);
             $('#paginationControls').hide(); return;
         }
         $('#paginationControls').show();
@@ -1558,11 +1572,11 @@
             const linkTratado = r.link_sei && r.link_sei.startsWith('http') ? r.link_sei : 'https://' + r.link_sei;
             
             const processoExibicao = r.link_sei 
-                ? `<a href="${linkTratado}" target="_blank" rel="noopener noreferrer" onclick="window.open('${linkTratado}', '_blank'); event.stopPropagation(); return false;" style="color:var(--highlight); text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Abrir processo no SEI">
+                ? `<a href="${linkTratado}" target="_blank" rel="noopener noreferrer" onclick="window.open('${linkTratado}', '_blank'); event.stopPropagation(); return false;" style="color:var(--accent); text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Abrir processo no SEI">
                       <span style="text-decoration:underline;">${r.processo}</span>
                       <span class="material-symbols-outlined" style="font-size: 1.1rem; flex-shrink: 0;">open_in_new</span>
                    </a>`
-                : `<span style="color:#dc3545;">${r.processo}</span>`;
+                : `<span style="color:var(--danger);">${r.processo}</span>`;
 
             let obsList = subItems.map(i => i.observacao).filter(o => o && o !== '');
             let uniqueObs = [...new Set(obsList)];
@@ -1574,7 +1588,7 @@
                     <div class="post-it-container" onclick="event.stopPropagation()">
                         <i class="bi bi-sticky-fill post-it-icon" title="O Processo possui observações (passe o mouse)"></i>
                         <div class="post-it-tooltip">
-                            <strong style="display:block; margin-bottom:4px; font-size:0.75rem; text-transform:uppercase; color:#f57f17; font-family:'Segoe UI', sans-serif;">Observações do Processo</strong>
+                            <strong style="display:block; margin-bottom:4px; font-size:0.75rem; text-transform:uppercase; color:var(--warning-text-dark); font-family:'Poppins', sans-serif;">Observações do Processo</strong>
                             ${obsText}
                         </div>
                     </div>
@@ -1589,16 +1603,16 @@
                     <td data-label="Processo" class="fw-bold" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" style="cursor: pointer;">
                         <div class="d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center" style="gap: 4px;">
-                                <i class="bi bi-chevron-down small d-none d-lg-inline-block" style="color:var(--highlight);"></i>
+                                <i class="bi bi-chevron-down small d-none d-lg-inline-block" style="color:var(--accent);"></i>
                                 ${processoExibicao}
                                 ${obsMestreHtml}
                             </div>
-                            <i class="bi bi-chevron-down small d-lg-none" style="color:var(--highlight);"></i>
+                            <i class="bi bi-chevron-down small d-lg-none" style="color:var(--accent);"></i>
                         </div>
                     </td>
                     <td data-label="Convênio">${r.convenio}</td>
                     <td data-label="Local">${r.local}</td>
-                    <td data-label="Solicitado" class="text-center fw-bold" style="color:var(--text-sec);">${totalSol}</td>
+                    <td data-label="Solicitado" class="text-center fw-bold" style="color:var(--text-muted);">${totalSol}</td>
                     <td data-label="Prioridade" class="text-center">${prioBadge}</td>
                     <td data-label="Status" class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
                     <td data-label="Previsão" class="text-center"><span class="${dateClass}">${r.previsao}</span></td>
@@ -1639,13 +1653,13 @@
                     </td>
                     <td data-label="Material">${item.material || '-'}</td>
                     <td data-label="Dimensões">${item.dimensoes || '-'}</td>
-                    <td data-label="Quantidade Solicitada" class="text-center">
+                    <td data-label="Qtd Solicitada" class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_sol}" onchange="updateSimQty('sol', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td data-label="Quantidade Entregue" class="text-center">
+                    <td data-label="Qtd Entregue" class="text-center">
                         <input type="number" class="sim-input" value="${item._sim_ent}" onchange="updateSimQty('ent', ${item._uniqueId}, this)" min="0">
                     </td>
-                    <td data-label="Quantidade Pendente" class="text-center">
+                    <td data-label="Qtd Pendente" class="text-center">
                         <span id="sim_pen_${item._uniqueId}" class="sim-val-pen">${calcPen}</span>
                     </td>
                 </tr>
@@ -1655,19 +1669,15 @@
                 <td colspan="10">
                     <div class="collapse" id="${collapseId}">
                         <div class="p-lg-3 p-1">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-body p-0">
-                                 <table class="table table-sm table-borderless sub-table mb-0">
-                                   <thead style="background-color: #f8f9fa;">
-                                     <tr>
-                                       <th style="width: 40px;" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias"></th>
-                                       <th>MOBÍLIA</th><th>MATERIAL</th><th>DIMENSÕES</th><th class="text-center">QUANTIDADE SOLICITADA</th><th class="text-center">QUANTIDADE ENTREGUE</th><th class="text-center">QUANTIDADE PENDENTE</th>
-                                     </tr>
-                                   </thead>
-                                   <tbody>${subRows}</tbody>
-                                 </table>
-                                </div>
-                            </div>
+                            <table class="sub-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias"></th>
+                                        <th>MOBÍLIA</th><th>MATERIAL</th><th>DIMENSÕES</th><th class="text-center">QUANTIDADE SOLICITADA</th><th class="text-center">QUANTIDADE ENTREGUE</th><th class="text-center">QUANTIDADE PENDENTE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${subRows}</tbody>
+                            </table>
                         </div>
                     </div>
                 </td>
@@ -1729,20 +1739,20 @@
       const labelsWrappedMovel = dataMovel.labels.map(l => wrapLabel(l));
       if(document.getElementById('chartMovelStatus')) {
           chartInstances['chartMovelStatus'] = new Chart(document.getElementById('chartMovelStatus'), { 
-            type: 'bar', data: { labels: labelsWrappedMovel, datasets: [{ label: 'PENDENTE', data: dataMovel.datasets[0], backgroundColor: c.pend, borderRadius: 4 }, { label: 'ENTREGUE', data: dataMovel.datasets[1], backgroundColor: c.ent, borderRadius: 4 }] }, 
-            options: { ...opts, scales: { ...opts.scales, x: { stacked: false, grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false } } } } 
+            type: 'bar', data: { labels: labelsWrappedMovel, datasets: [{ label: 'PENDENTE', data: dataMovel.datasets[0], backgroundColor: c.pend, borderRadius: 6 }, { label: 'ENTREGUE', data: dataMovel.datasets[1], backgroundColor: c.ent, borderRadius: 6 }] }, 
+            options: { ...opts, scales: { ...opts.scales, x: { stacked: false, grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false, font:{family:'Poppins', weight:'600'} } } } } 
           });
       }
 
       const dataParceiro = groupAndTop(filteredData, 'local', ['qtd_solicitada']);
-      if(document.getElementById('chartParceiro')) chartInstances['chartParceiro'] = new Chart(document.getElementById('chartParceiro'), { type: 'bar', data: { labels: dataParceiro.labels, datasets: [{ label: 'SOLICITADOS', data: dataParceiro.datasets[0], backgroundColor: c.sol, borderRadius: 4 }] }, options: { ...opts, indexAxis: 'y' } });
+      if(document.getElementById('chartParceiro')) chartInstances['chartParceiro'] = new Chart(document.getElementById('chartParceiro'), { type: 'bar', data: { labels: dataParceiro.labels, datasets: [{ label: 'SOLICITADOS', data: dataParceiro.datasets[0], backgroundColor: c.sol, borderRadius: 6 }] }, options: { ...opts, indexAxis: 'y' } });
       
       const dataVol = groupAndTop(filteredData, 'mobilia', ['qtd_solicitada']);
       const labelsWrappedVol = dataVol.labels.map(l => wrapLabel(l));
       if(document.getElementById('chartVolumeMovel')) {
           chartInstances['chartVolumeMovel'] = new Chart(document.getElementById('chartVolumeMovel'), { 
-            type: 'bar', data: { labels: labelsWrappedVol, datasets: [{ label: 'TOTAL ITENS', data: dataVol.datasets[0], backgroundColor: c.vol, borderRadius: 4 }] }, 
-            options: { ...opts, scales: { ...opts.scales, x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false } } } } 
+            type: 'bar', data: { labels: labelsWrappedVol, datasets: [{ label: 'TOTAL ITENS', data: dataVol.datasets[0], backgroundColor: c.vol, borderRadius: 6 }] }, 
+            options: { ...opts, scales: { ...opts.scales, x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false, font:{family:'Poppins', weight:'600'} } } } } 
           });
       }
     }
@@ -1751,7 +1761,7 @@
         var btn = $('#btnExportExcelMain');
         var originalHTML = btn.html();
         
-        btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando...').prop('disabled', true);
+        btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.2em;"></span> Gerando...').prop('disabled', true);
 
         var dataToExport = filteredData.filter(d => d._active === true);
 
@@ -1805,7 +1815,7 @@
         var btn = $('#btnExportPDFMain');
         var originalHTML = btn.html();
         
-        btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando...').prop('disabled', true);
+        btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.2em;"></span> Gerando...').prop('disabled', true);
 
         var dataToExport = filteredData.filter(d => d._active === true);
 
