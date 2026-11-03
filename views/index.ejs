@@ -383,6 +383,105 @@
         .table-box { width: 100%; overflow-x: hidden; }
     }
 
+    /* =========================================================
+   AJUSTE DE RESPONSIVIDADE DOS FILTROS GERAIS E DATAS
+========================================================= */
+
+/* Permite que todos os inputs, dropdowns e pesquisas diminuam a fonte automaticamente (carta branca para não quebrar) */
+.oficina-selector,
+.custom-dropdown-btn,
+.dropdown-search,
+#globalSearchInput,
+#filterDateStart,
+#filterDateEnd {
+    min-width: 0 !important; /* Impede que o input force uma largura maior que o contêiner pai */
+    font-size: clamp(0.65rem, 2vw, 0.95rem) !important; /* Reduz a fonte dinamicamente se o espaço for menor */
+    text-overflow: ellipsis; /* Adiciona "..." se o texto for absurdamente grande */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Ajuste focado nos dois inputs de data de entrega para que dividam o espaço sem estourar a lateral */
+#collapseFilters .d-flex.gap-2.mb-3 {
+    flex-wrap: nowrap !important;
+}
+#collapseFilters .d-flex.gap-2.mb-3 input[type="date"] {
+    flex: 1 1 50%; /* Divide o espaço de forma exatamente igual */
+    min-width: 0 !important;
+    padding: 8px 4px !important; /* Reduz o espaçamento interno para os números da data e o ícone caberem */
+    letter-spacing: -0.3px; /* Comprime os caracteres levemente para otimizar espaço */
+}
+
+/* =========================================================
+   NOVO ESTILO DOS SLIDES/CARDS DE TOTAIS (KPIs)
+========================================================= */
+
+/* Preenche o fundo dos slides com as cores que antes estavam apenas na borda lateral esquerda */
+.kpi-card.blue { 
+    background-color: var(--accent) !important; 
+    border-left: none !important; 
+}
+.kpi-card.green { 
+    background-color: var(--success) !important; 
+    border-left: none !important; 
+}
+.kpi-card.yellow { 
+    background-color: var(--warning-text-dark) !important; 
+    border-left: none !important; 
+}
+
+/* Força a cor do texto e dos números (labels e valores) para ficarem em branco, garantindo a leitura no fundo colorido */
+.kpi-card.blue .kpi-label, .kpi-card.blue .kpi-val,
+.kpi-card.green .kpi-label, .kpi-card.green .kpi-val,
+.kpi-card.yellow .kpi-label, .kpi-card.yellow .kpi-val {
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   AJUSTE DE RESPONSIVIDADE E TEXTO FLUIDO NAS TABELAS
+========================================================= */
+
+/* 1. Texto fluido (diminui proporcionalmente) e quebra de linha forçada no Desktop e Mobile */
+.custom-table td, .sub-table td {
+    font-size: clamp(0.65rem, 1.2vw, 0.85rem) !important; /* O texto varia entre 0.65rem e 0.85rem baseado na largura da tela */
+    word-break: break-word !important; 
+    overflow-wrap: break-word !important;
+    white-space: normal !important; /* Impede que o texto force a expansão horizontal da tabela */
+}
+
+.custom-table th, .sub-table th {
+    font-size: clamp(0.65rem, 1vw, 0.8rem) !important;
+    white-space: normal !important;
+}
+
+/* 2. Ajustes agressivos específicos para o layout de "Cards" em dispositivos móveis (< 1199px) */
+@media (max-width: 1199px) {
+    .custom-table tbody td, .sub-table tbody td, .modal-table tbody td {
+        font-size: clamp(0.65rem, 3vw, 0.85rem) !important;
+        padding: 8px 10px !important; /* Reduz o padding para ganhar área útil */
+    }
+
+    /* Reduz a largura do rótulo da coluna para dar mais espaço ao dado real */
+    .custom-table tbody td::before, .sub-table tbody td::before, .modal-table tbody td::before {
+        max-width: 35% !important; 
+        font-size: clamp(0.6rem, 2.5vw, 0.75rem) !important;
+        margin-right: 8px;
+    }
+
+    /* Garante que os containers internos flexíveis permitam pular linha se faltar espaço */
+    .custom-table tbody td .d-flex {
+        max-width: 100%;
+        flex-wrap: wrap !important; 
+    }
+
+    /* Quebra forçada para textos contínuos que costumam estourar a tela (como números de Processo SEI) */
+    .custom-table tbody td a, 
+    .custom-table tbody td strong {
+        word-break: break-all !important;
+        white-space: normal !important;
+    }
+}
+
   </style>
 </head>
 <body>
@@ -555,38 +654,53 @@
               
               <div id="viewProcon" class="view-section">
                   
-                  <div class="row mb-4 g-3 w-100 m-0">
-                      <div class="col-12 col-lg-6 p-0 pe-lg-2">
-                          <div class="card-custom p-4" style="border-left: 5px solid var(--accent);">
-                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-main); font-size: 1rem;">PROCON</h6>
-                              <div class="d-flex justify-content-around text-center">
-                                  <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">FINALIZADOS</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--success);" id="proconKpiFin">0</div>
-                                  </div>
-                                  <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">PENDENTES</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="proconKpiPen">0</div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                      <div class="col-12 col-lg-6 p-0 ps-lg-2 mt-3 mt-lg-0">
-                          <div class="card-custom p-4" style="border-left: 5px solid var(--accent);">
-                              <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: var(--text-main); font-size: 1rem;">ESTAÇÃO TECH</h6>
-                              <div class="d-flex justify-content-around text-center">
-                                  <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">FINALIZADOS</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--success);" id="techKpiFin">0</div>
-                                  </div>
-                                  <div>
-                                      <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem;">PENDENTES</div>
-                                      <div class="procon-kpi-val" style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="techKpiPen">0</div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
+                <div class="row mb-4 w-100 m-0 align-items-stretch">
+                    <!-- Card PROCON -->
+                    <div class="col-12 col-lg-6 p-0 pe-lg-2 mb-3 mb-lg-0">
+                        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column" style="background-color: var(--accent); border-radius: 16px; border: none;">
+                            <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: #ffffff; font-size: 1.1rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-building me-1"></i> PROCON
+                            </h6>
+                            <div class="row g-2 flex-grow-1">
+                                <div class="col-6">
+                                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15);">
+                                        <div class="fw-bold mb-1 text-center" style="color: var(--success); font-size: 0.75rem;"><i class="bi bi-check-circle-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>FINALIZADOS</div>
+                                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--success);" id="proconKpiFin">0</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--warning-bg); border: 1px solid rgba(230, 81, 0, 0.15);">
+                                        <div class="fw-bold mb-1 text-center" style="color: var(--warning-text-dark); font-size: 0.75rem;"><i class="bi bi-clock-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>PENDENTES</div>
+                                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="proconKpiPen">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card ESTAÇÃO TECH -->
+                    <div class="col-12 col-lg-6 p-0 ps-lg-2">
+                        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column" style="background-color: var(--accent); border-radius: 16px; border: none;">
+                            <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: #ffffff; font-size: 1.1rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-pc-display me-1"></i> ESTAÇÃO TECH
+                            </h6>
+                            <div class="row g-2 flex-grow-1">
+                                <div class="col-6">
+                                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15);">
+                                        <div class="fw-bold mb-1 text-center" style="color: var(--success); font-size: 0.75rem;"><i class="bi bi-check-circle-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>FINALIZADOS</div>
+                                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--success);" id="techKpiFin">0</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--warning-bg); border: 1px solid rgba(230, 81, 0, 0.15);">
+                                        <div class="fw-bold mb-1 text-center" style="color: var(--warning-text-dark); font-size: 0.75rem;"><i class="bi bi-clock-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>PENDENTES</div>
+                                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="techKpiPen">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                   
                   <div class="card-custom mb-4" style="position: relative; z-index: 99;">
                     <div style="padding: 20px 25px;">
@@ -673,7 +787,7 @@
     let currentSortDir = 'asc';
     let hasShownNotif = false; 
 
-    const INITIAL_DATA = <%- INITIAL_DATA %>;
+        const INITIAL_DATA = <%- INITIAL_DATA %>;
 
     function getColors() {
         let isDarkMode = document.body.classList.contains('dark-mode');
