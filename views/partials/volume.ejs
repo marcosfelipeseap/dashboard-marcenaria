@@ -1,0 +1,43 @@
+<div class="viz-box">
+    <h5 class="chart-header">Volume Total de Itens</h5>
+    <div class="chart-container">
+        <canvas id="chartVolumeMovel"></canvas>
+    </div>
+</div>
+
+<script>
+  window.updateChartVolume = function() {
+      if (chartInstances['chartVolumeMovel']) {
+          chartInstances['chartVolumeMovel'].destroy();
+          chartInstances['chartVolumeMovel'] = null;
+      }
+
+      const canvas = document.getElementById('chartVolumeMovel');
+      if (!canvas) return;
+
+      const c = getColors();
+      const opts = getOpts();
+      const dataVol = groupAndTop(filteredData, 'mobilia', ['qtd_solicitada']);
+      const labelsWrappedVol = dataVol.labels.map(l => wrapLabel(l));
+
+      chartInstances['chartVolumeMovel'] = new Chart(canvas, { 
+          type: 'bar', 
+          data: { 
+              labels: labelsWrappedVol, 
+              datasets: [
+                  { label: 'TOTAL ITENS', data: dataVol.datasets[0], backgroundColor: c.vol, borderRadius: 6 }
+              ] 
+          }, 
+          options: { 
+              ...opts, 
+              scales: { 
+                  ...opts.scales, 
+                  x: { 
+                      grid: { display: false }, 
+                      ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false, font: { family: 'Poppins', weight: '600' } } 
+                  } 
+              } 
+          } 
+      });
+  };
+</script>

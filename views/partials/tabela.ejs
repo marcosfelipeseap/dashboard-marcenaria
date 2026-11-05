@@ -1,0 +1,511 @@
+<style>
+  /* --- ESTILOS EXCLUSIVOS DA TABELA DE PROCESSOS --- */
+  .table-box { flex: 1; overflow-x: auto; width: 100%; max-width: 100%; }
+  
+  .custom-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .custom-table th { background: var(--accent); color: #fff; position: sticky; top: 0; padding: 15px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: 1px solid var(--border-color); z-index: 10; white-space: nowrap; text-align: left; vertical-align: middle; }
+  
+  .custom-table td, .sub-table td {
+      font-size: clamp(0.65rem, 1.2vw, 0.85rem) !important; 
+      word-break: break-word !important; 
+      overflow-wrap: break-word !important;
+      white-space: normal !important; 
+  }
+  .custom-table th, .sub-table th {
+      font-size: clamp(0.65rem, 1vw, 0.8rem) !important;
+      white-space: normal !important;
+  }
+
+  .custom-table td { padding: 12px 15px; color: var(--text-main); border: 1px solid var(--border-color); vertical-align: middle; font-weight: 500; }
+  .custom-table tbody tr.parent-row { cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color); }
+  .custom-table tbody tr.parent-row:hover { background-color: var(--table-row-hover); }
+  .custom-table tbody tr.parent-row[aria-expanded="true"] { background-color: var(--input-bg); border-left: 4px solid var(--accent); }
+  
+  .sub-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin: 15px 0;}
+  .sub-table th { background: var(--input-bg) !important; color: var(--text-muted); padding: 12px 15px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--border-color) !important; font-size: 0.75rem; text-align: left; }
+  .sub-table td { font-size: 0.85rem; color: var(--text-main); padding: 12px 15px; border-bottom: 1px dashed var(--border-color) !important; vertical-align: middle; text-align: left; font-weight: 500;}
+  .sub-table td.text-center { text-align: center; }
+  
+  .sim-input {
+      width: 100%; max-width: 70px; padding: 6px; border: 1px solid var(--border-color); border-radius: 8px;
+      background-color: var(--input-bg); color: var(--text-main); text-align: center;
+      font-weight: 700; font-size: 0.9rem; display: inline-block; margin: 0; font-family: 'Poppins', sans-serif; transition: 0.2s;
+  }
+  .sim-input:focus { outline: none; border-color: var(--accent); background-color: var(--card-bg); }
+  .sim-val-pen { font-weight: 800; color: var(--danger); font-size: 1rem; }
+
+  .prio-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; border: none; font-size: 0.8rem; }
+  .prio-1 { background: var(--danger-bg); color: var(--danger); }
+  .prio-2 { background: var(--warning-bg); color: var(--warning-text-dark); }
+  .prio-3 { background: var(--warning-bg); color: var(--warning-text-dark); }
+  .prio-4 { background: var(--success-bg); color: var(--success); }
+  .prio-5 { background: var(--input-bg); color: var(--text-muted); }
+  .prio-default { background: var(--input-bg); color: var(--text-muted); }
+
+  .date-alert { color: var(--danger) !important; font-weight: 800 !important; }
+
+  .detail-row > td { padding: 0 !important; border: none !important; }
+  .detail-row > td::before { display: none !important; }
+  
+  .parent-row .bi-chevron-down { transition: transform 0.3s; color: var(--accent); }
+  .parent-row[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
+
+  .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 0 0 0; margin-top: 15px; border-top: 1px solid var(--border-color); }
+  .pagination-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; transition: 0.2s;}
+  .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pagination-btn:hover:not(:disabled) { background-color: var(--input-bg); border-color: var(--accent); color: var(--accent); }
+
+  .post-it-container { position: relative; display: inline-flex; align-items: center; margin-left: 6px; vertical-align: middle; }
+  .post-it-icon { color: var(--warning-text-dark); font-size: 1.2rem; cursor: help; transition: transform 0.2s; }
+  .post-it-icon:hover { transform: scale(1.2); }
+  .post-it-tooltip {
+      visibility: hidden; opacity: 0; position: absolute; bottom: 140%; left: 50%;
+      transform: translateX(-50%) translateY(10px); width: max-content; max-width: 280px;
+      background: var(--warning-bg); color: var(--warning-text-dark) !important;
+      text-align: left; padding: 10px 14px; box-shadow: var(--shadow); z-index: 1060;
+      font-size: 0.85rem; line-height: 1.4; border-radius: 12px; border: 1px solid var(--warning-text-dark);
+      transition: all 0.2s ease-in-out; pointer-events: none; white-space: normal; font-weight: 500;
+  }
+  .post-it-tooltip::after {
+      content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px;
+      border-style: solid; border-color: var(--warning-bg) transparent transparent transparent;
+  }
+  .post-it-container:hover .post-it-tooltip { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .sortable-header { cursor: pointer; user-select: none; white-space: normal; transition: filter 0.2s; }
+  .sortable-header:hover { filter: brightness(0.85); }
+  .sort-icon { font-size: 0.8rem; margin-left: 2px; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; display: inline-block; }
+
+  @media (max-width: 1199px) {
+      .pagination-container { flex-direction: column; gap: 15px; text-align: center; padding: 15px;}
+
+      .custom-table, .sub-table { table-layout: auto !important; }
+      .custom-table, .sub-table,
+      .custom-table tbody, .sub-table tbody { 
+          display: block; width: 100%; border: none !important; background: transparent; 
+      }
+      .custom-table thead, .sub-table thead { display: none; }
+      
+      .custom-table tbody tr.parent-row {
+          display: block; margin-bottom: 15px; background: var(--card-bg);
+          border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--shadow);
+          padding: 0; width: 100%;
+      }
+      
+      .custom-table tbody td, .sub-table tbody td {
+          display: flex; justify-content: space-between; align-items: center; text-align: right;
+          padding: 10px 15px !important; border-bottom: 1px solid var(--border-color) !important; border-top: none;
+          gap: 10px; font-size: clamp(0.65rem, 3vw, 0.85rem) !important; width: 100%; word-break: normal; overflow-wrap: break-word;
+      }
+      .custom-table tbody td:last-child, .sub-table tbody td:last-child { border-bottom: none !important; }
+      
+      .custom-table tbody td::before, .sub-table tbody td::before {
+          content: attr(data-label); font-weight: 700; font-size: clamp(0.6rem, 2.5vw, 0.75rem) !important; text-transform: uppercase; 
+          color: var(--text-muted); text-align: left; flex-shrink: 0; max-width: 35% !important; margin-right: 8px;
+      }
+      .custom-table tbody td > * { flex-shrink: 1; min-width: 0; }
+
+      .custom-table tbody td .d-flex { max-width: 100%; flex-wrap: wrap !important; }
+      .custom-table tbody td a, .custom-table tbody td strong { word-break: break-all !important; white-space: normal !important; }
+
+      .sub-table tbody tr { 
+          display: block; margin: 10px 0 15px 0; background-color: var(--card-bg); 
+          border: 1px solid var(--border-color); border-left: 4px solid var(--accent); 
+          border-radius: 12px; box-shadow: var(--shadow); width: 100%;
+      }
+      .sub-table tbody td { padding: 10px 15px !important; border-bottom: 1px dashed var(--border-color) !important; }
+      
+      .sim-input { width: 100%; max-width: 70px; font-size: 0.85rem; padding: 6px; text-align: center;}
+      .table-box { width: 100%; overflow-x: hidden; }
+  }
+</style>
+
+<div class="viz-box">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+      <h5 class="chart-header m-0">Detalhamento dos Processos</h5>
+  </div>
+  <div class="table-box">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;" class="text-center align-middle">
+                <input type="checkbox" id="checkAllMaster" class="form-check-input m-0" onchange="toggleAllFiltered(this)" title="Marcar/Desmarcar Todos">
+            </th>
+            <th>Processo</th>
+            <th>Convênio</th>
+            <th>Local</th>
+            <th class="text-center">Solicitado</th>
+            <th class="text-center">Prioridade</th>
+            <th class="text-center">Status</th>
+            <th class="sortable-header text-center" onclick="handleSort('previsao')" title="Clique para ordenar">Previsão <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_previsao"></i></th>
+            <th class="sortable-header text-center" onclick="handleSort('data_aut')" title="Clique para ordenar">Autorização <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_aut"></i></th>
+            <th class="sortable-header text-center" onclick="handleSort('data_ent')" title="Clique para ordenar">Entrega <i class="bi bi-arrow-down-up sort-icon" id="icon_sort_data_ent"></i></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+  </div>
+  <div class="pagination-container" id="paginationControls">
+      <span class="small fw-bold" style="color:var(--text-muted)" id="pageInfo">Página 1</span>
+      <div class="d-flex gap-2">
+          <button class="pagination-btn" id="btnPrev" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
+          <button class="pagination-btn" id="btnNext" onclick="changePage(1)">Próximo <i class="bi bi-chevron-right"></i></button>
+      </div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+  const itemsPerPage = 50;
+  let groupedDataForTable = [];
+  let currentSortCol = null;
+  let currentSortDir = 'asc';
+
+  window.updateTabela = function() {
+      prepareTableData();
+      renderTablePage();
+  };
+
+  window.resetTablePagination = function() {
+      currentPage = 1;
+  };
+
+  window.resetTableSort = function() {
+      currentSortCol = null;
+      currentSortDir = 'asc';
+      updateSortIcons();
+  };
+
+  window.toggleAllFiltered = function(el) {
+      const isChecked = el.checked;
+      filteredData.forEach(item => {
+          item._active = isChecked;
+      });
+      updateDashboard();
+  };
+
+  window.toggleProcess = function(procKey, el) {
+      const isChecked = el.checked;
+      const group = groupedDataForTable.find(g => g.key === procKey);
+      if (group) {
+          group.items.forEach(item => {
+              item._active = isChecked;
+          });
+      }
+      updateDashboard();
+  };
+
+  window.toggleItem = function(uniqueId, el) {
+      const isChecked = el.checked;
+      const item = fullData.find(d => d._uniqueId === uniqueId);
+      if(item) {
+          item._active = isChecked;
+          updateDashboard();
+      }
+  };
+
+  window.updateSimQty = function(type, uniqueId, el) {
+      let val = parseFloat(el.value);
+      if(isNaN(val)) val = 0;
+      const item = fullData.find(d => d._uniqueId === uniqueId);
+      if(item) {
+          if (type === 'sol') item._sim_sol = val;
+          if (type === 'ent') item._sim_ent = val;
+          
+          const penVal = Math.max(0, item._sim_sol - item._sim_ent);
+          $('#sim_pen_' + uniqueId).text(penVal);
+          updateKPIs(); 
+      }
+  };
+
+  window.handleSort = function(col) {
+      if (currentSortCol === col) {
+          currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+          currentSortCol = col;
+          currentSortDir = 'asc';
+      }
+      updateSortIcons();
+      updateDashboard();
+  };
+
+  function updateSortIcons() {
+      $('.sort-icon').removeClass('bi-arrow-down bi-arrow-up').addClass('bi-arrow-down-up').css('opacity', '0.5');
+      if (currentSortCol) {
+          let iconId = '#icon_sort_' + currentSortCol;
+          $(iconId).removeClass('bi-arrow-down-up').addClass(currentSortDir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down').css('opacity', '1');
+      }
+  }
+
+  function prepareTableData() {
+      const tableCustomOrder = ["EM PRODUÇÃO", "EM MONTAGEM", "PLANEJAMENTO", "PENDENTE", "EM ESTOQUE", "SEM ORÇAMENTO", "NÃO AUTORIZADO", "ARQUIVADO", "FINALIZADA"];
+      
+      let sortedRaw = [...filteredData].sort((a, b) => {
+          if (currentSortCol) {
+              const stA = (a.status || '').toUpperCase().trim();
+              const stB = (b.status || '').toUpperCase().trim();
+              const isAFin = stA === 'FINALIZADA' || stA === 'FINALIZADO';
+              const isBFin = stB === 'FINALIZADA' || stB === 'FINALIZADO';
+
+              if (isAFin && !isBFin) return 1;  
+              if (!isAFin && isBFin) return -1; 
+
+              let dateA, dateB;
+              if (currentSortCol === 'previsao') {
+                  dateA = parseDate(a.previsao);
+                  dateB = parseDate(b.previsao);
+              } else if (currentSortCol === 'data_aut') {
+                  dateA = parseDate(a.data_autorizacao);
+                  dateB = parseDate(b.data_autorizacao);
+              } else if (currentSortCol === 'data_ent') {
+                  dateA = parseDate(a.data_entrega);
+                  dateB = parseDate(b.data_entrega);
+              }
+              
+              let tA = dateA.getTime();
+              let tB = dateB.getTime();
+              let emptyTime = new Date(9999, 11, 31).getTime();
+              
+              let isAEmpty = tA === emptyTime;
+              let isBEmpty = tB === emptyTime;
+
+              if (isAEmpty && !isBEmpty) return 1; 
+              if (!isAEmpty && isBEmpty) return -1;
+              
+              if (tA !== tB) {
+                  return currentSortDir === 'asc' ? tA - tB : tB - tA;
+              }
+          }
+
+          const getStIdx = (s) => {
+              s = (s || '').toUpperCase();
+              let idx = tableCustomOrder.findIndex(o => s.includes(o));
+              return idx === -1 ? 999 : idx;
+          };
+          let idxA = getStIdx(a.status); 
+          let idxB = getStIdx(b.status);
+          if (idxA !== idxB) return idxA - idxB;
+          
+          const getPrioVal = (p) => {
+              let val = parseInt(p);
+              if (isNaN(val) || val < 1) return 999;
+              return val;
+          };
+          let prioA = getPrioVal(a.prioridade);
+          let prioB = getPrioVal(b.prioridade);
+          if (prioA !== prioB) return prioA - prioB;
+
+          return parseDate(a.previsao) - parseDate(b.previsao);
+      });
+
+      let groups = {}; let order = []; 
+      sortedRaw.forEach(r => {
+          let procKey = String(r.processo).trim();
+          if(procKey === "") procKey = "SEM_PROCESSO_" + Math.random();
+          if(!groups[procKey]) { groups[procKey] = { main: r, items: [], totalSol: 0, key: procKey }; order.push(procKey); }
+          groups[procKey].items.push(r);
+          groups[procKey].totalSol += (r.qtd_solicitada || 0);
+      });
+      groupedDataForTable = order.map(k => groups[k]);
+  }
+
+  function renderTablePage() {
+      const tbody = $('#tableBody');
+      
+      let openCollapses = [];
+      $('.collapse.show').each(function() {
+          openCollapses.push($(this).attr('id'));
+      });
+
+      const allFilteredActive = filteredData.length > 0 && filteredData.every(d => d._active);
+      const someFilteredActive = filteredData.length > 0 && filteredData.some(d => d._active);
+      $('#checkAllMaster').prop('checked', allFilteredActive);
+      $('#checkAllMaster').prop('indeterminate', someFilteredActive && !allFilteredActive);
+
+      tbody.empty();
+      if (groupedDataForTable.length === 0) {
+          tbody.html(`<tr><td colspan="10" class="text-center p-4 fw-bold" style="color:var(--text-muted); font-size: 1rem; text-transform: uppercase;">NENHUM DADO ENCONTRADO.</td></tr>`);
+          $('#paginationControls').hide(); return;
+      }
+      $('#paginationControls').show();
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageItems = groupedDataForTable.slice(start, end);
+      const totalPages = Math.ceil(groupedDataForTable.length / itemsPerPage);
+
+      $('#pageInfo').text(`PÁGINA ${currentPage} DE ${totalPages} (${groupedDataForTable.length} PROCESSOS)`);
+      $('#btnPrev').prop('disabled', currentPage === 1);
+      $('#btnNext').prop('disabled', currentPage === totalPages);
+      const today = new Date(); today.setHours(0,0,0,0);
+      let htmlBuilder = "";
+
+      pageItems.forEach((group, idx) => {
+          let r = group.main; let subItems = group.items; let totalSol = group.totalSol;
+          const uniqueId = `p${currentPage}_${idx}`; const collapseId = `collapse_${uniqueId}`;
+
+          let prioVal = parseInt(r.prioridade); let prioClass = 'prio-default';
+          if(prioVal === 1) prioClass = 'prio-1';
+          else if(prioVal === 2) prioClass = 'prio-2';
+          else if(prioVal === 3) prioClass = 'prio-3';
+          else if(prioVal === 4) prioClass = 'prio-4';
+          else if(prioVal === 5) prioClass = 'prio-5';
+          let prioBadge = `<span class="prio-badge ${prioClass}">${r.prioridade || '-'}</span>`;
+
+          let stClass = "st-default"; let st = (r.status || '').toLowerCase();
+          if(st.includes('produção')) stClass = "st-prod";
+          else if(st.includes('montagem')) stClass = "st-montagem";
+          else if(st.includes('planejamento')) stClass = "st-planejamento";
+          else if(st.includes('aguardando')) stClass = "st-aguardando";
+          else if(st.includes('pendente')) stClass = "st-pendente";
+          else if(st.includes('estoque')) stClass = "st-estoque";
+          else if(st.includes('orcamento')) stClass = "st-orcamento";
+          else if(st.includes('não') && st.includes('aut')) stClass = "st-nao-aut";
+          else if(st.includes('arquivado')) stClass = "st-arquivado";
+          else if(st === 'finalizada') stClass = "st-finalizado";
+
+          let dateClass = ""; const prevDate = parseDate(r.previsao);
+          const diffTime = prevDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+          if (diffDays <= 5 && !stClass.includes('finalizado')) dateClass = "date-alert";
+
+          const allActive = subItems.every(i => i._active === true);
+          const someActive = subItems.some(i => i._active === true);
+          const checkAttr = allActive ? 'checked' : '';
+          const indeterminadeAttr = (someActive && !allActive) ? 'data-indeterminate="true"' : '';
+
+          const linkTratado = r.link_sei && r.link_sei.startsWith('http') ? r.link_sei : 'https://' + r.link_sei;
+          
+          const processoExibicao = r.link_sei 
+              ? `<a href="${linkTratado}" target="_blank" rel="noopener noreferrer" onclick="window.open('${linkTratado}', '_blank'); event.stopPropagation(); return false;" style="color:var(--accent); text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Abrir processo no SEI">
+                    <span style="text-decoration:underline;">${r.processo}</span>
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem; flex-shrink: 0;">open_in_new</span>
+                 </a>`
+              : `<span style="color:var(--danger);">${r.processo}</span>`;
+
+          let obsList = subItems.map(i => i.observacao).filter(o => o && o !== '');
+          let uniqueObs = [...new Set(obsList)];
+          let obsMestreHtml = '';
+          
+          if (uniqueObs.length > 0) {
+              let obsText = uniqueObs.join('<br><br>');
+              obsMestreHtml = `
+                  <div class="post-it-container" onclick="event.stopPropagation()">
+                      <i class="bi bi-sticky-fill post-it-icon" title="O Processo possui observações (passe o mouse)"></i>
+                      <div class="post-it-tooltip">
+                          <strong style="display:block; margin-bottom:4px; font-size:0.75rem; text-transform:uppercase; color:var(--warning-text-dark); font-family:'Poppins', sans-serif;">Observações do Processo</strong>
+                          ${obsText}
+                      </div>
+                  </div>
+              `;
+          }
+
+          htmlBuilder += `
+              <tr class="parent-row">
+                  <td data-label="Selecionar" class="text-center align-middle" onclick="event.stopPropagation()">
+                      <input type="checkbox" class="form-check-input m-0 process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)">
+                  </td>
+                  <td data-label="Processo" class="fw-bold" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" style="cursor: pointer;">
+                      <div class="d-flex align-items-center justify-content-between w-100">
+                          <div class="d-flex align-items-center" style="gap: 4px;">
+                              <i class="bi bi-chevron-down small d-none d-lg-inline-block" style="color:var(--accent);"></i>
+                              ${processoExibicao}
+                              ${obsMestreHtml}
+                          </div>
+                          <i class="bi bi-chevron-down small d-lg-none" style="color:var(--accent);"></i>
+                      </div>
+                  </td>
+                  <td data-label="Convênio">${r.convenio}</td>
+                  <td data-label="Local">${r.local}</td>
+                  <td data-label="Solicitado" class="text-center fw-bold" style="color:var(--text-muted);">${totalSol}</td>
+                  <td data-label="Prioridade" class="text-center">${prioBadge}</td>
+                  <td data-label="Status" class="text-center"><span class="status-badge ${stClass}">${r.status}</span></td>
+                  <td data-label="Previsão" class="text-center"><span class="${dateClass}">${r.previsao}</span></td>
+                  <td data-label="Data Autorização" class="text-center">${r.data_autorizacao}</td>
+                  <td data-label="Data Entrega" class="text-center">${r.data_entrega || '-'}</td>
+              </tr>
+          `;
+
+          let subRows = subItems.map(item => {
+              const itemCheck = item._active ? 'checked' : '';
+              const calcPen = Math.max(0, (item._sim_sol || 0) - (item._sim_ent || 0));
+
+              let itemObsHtml = '';
+              if (item.observacao && item.observacao !== '') {
+                  itemObsHtml = `
+                      <div class="post-it-container" onclick="event.stopPropagation()">
+                          <i class="bi bi-sticky-fill post-it-icon" title="Observação desta Mobília"></i>
+                          <div class="post-it-tooltip">
+                              ${item.observacao}
+                          </div>
+                      </div>
+                  `;
+              }
+
+              return `
+              <tr>
+                  <td data-label="Selecionar" class="text-center align-middle">
+                      <input type="checkbox" class="form-check-input m-0" ${itemCheck} onchange="toggleItem(${item._uniqueId}, this)">
+                  </td>
+                  <td data-label="Mobília">
+                      <div class="d-flex align-items-center">
+                          <strong>${item.mobilia}</strong>
+                          ${itemObsHtml}
+                          <a href="${item.link_planilha}" target="_blank" rel="noopener noreferrer" title="Abrir linha no Google Planilhas" class="ms-2" style="color: #0f9d58; font-size: 1.1rem; vertical-align: middle; flex-shrink: 0;" onclick="event.stopPropagation()">
+                              <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                          </a>
+                      </div>
+                  </td>
+                  <td data-label="Material">${item.material || '-'}</td>
+                  <td data-label="Dimensões">${item.dimensoes || '-'}</td>
+                  <td data-label="Qtd Solicitada" class="text-center">
+                      <input type="number" class="sim-input" value="${item._sim_sol}" onchange="updateSimQty('sol', ${item._uniqueId}, this)" min="0">
+                  </td>
+                  <td data-label="Qtd Entregue" class="text-center">
+                      <input type="number" class="sim-input" value="${item._sim_ent}" onchange="updateSimQty('ent', ${item._uniqueId}, this)" min="0">
+                  </td>
+                  <td data-label="Qtd Pendente" class="text-center">
+                      <span id="sim_pen_${item._uniqueId}" class="sim-val-pen">${calcPen}</span>
+                  </td>
+              </tr>
+          `;}).join('');
+
+          htmlBuilder += `<tr class="detail-row">
+              <td colspan="10">
+                  <div class="collapse" id="${collapseId}">
+                      <div class="p-lg-3 p-1">
+                          <table class="sub-table mb-0">
+                              <thead>
+                                  <tr>
+                                      <th style="width: 40px;" class="text-center"><input type="checkbox" class="form-check-input m-0 sub-process-checkbox" ${checkAttr} ${indeterminadeAttr} onchange="toggleProcess('${group.key}', this)" title="Marcar/Desmarcar todas as mobílias"></th>
+                                      <th>MOBÍLIA</th><th>MATERIAL</th><th>DIMENSÕES</th><th class="text-center">QUANTIDADE SOLICITADA</th><th class="text-center">QUANTIDADE ENTREGUE</th><th class="text-center">QUANTIDADE PENDENTE</th>
+                                  </tr>
+                              </thead>
+                              <tbody>${subRows}</tbody>
+                          </table>
+                      </div>
+                  </div>
+              </td>
+          </tr>`;
+      });
+      tbody.html(htmlBuilder);
+
+      $('.process-checkbox[data-indeterminate="true"]').prop('indeterminate', true);
+      $('.sub-process-checkbox[data-indeterminate="true"]').prop('indeterminate', true);
+
+      if (openCollapses.length > 0) {
+          openCollapses.forEach(id => {
+              $('#' + id).addClass('show');
+              $(`[data-bs-target="#${id}"]`).attr('aria-expanded', 'true');
+          });
+      }
+  }
+
+  window.changePage = function(delta) {
+      const totalPages = Math.ceil(groupedDataForTable.length / itemsPerPage);
+      const newPage = currentPage + delta;
+      if(newPage >= 1 && newPage <= totalPages) {
+          currentPage = newPage;
+          renderTablePage();
+          document.querySelector('.table-box').scrollTop = 0;
+      }
+  };
+</script>

@@ -1,0 +1,544 @@
+<style>
+    /* =========================================================
+       ESTILOS EXCLUSIVOS DA APRESENTAÇÃO (EXECUTIVA)
+       ========================================================= */
+    .apres-header {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: white;
+        padding: 35px 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .apres-header::after {
+        content: "\e616"; 
+        font-family: 'Material Icons';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-size: 150px;
+        opacity: 0.1;
+        transform: rotate(-15deg);
+    }
+
+    .apres-section-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        border-left: 5px solid var(--accent);
+        padding-left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .apres-kpi-card {
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        border-left: 6px solid var(--success);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .apres-kpi-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .apres-kpi-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .apres-kpi-val {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--text-main);
+        margin: 0 0 5px 0;
+        line-height: 1;
+    }
+
+    .apres-kpi-desc {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--success);
+    }
+
+    .apres-box {
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .apres-box-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+    }
+
+    .apres-box-subtitle {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+    }
+
+    .apres-table-wrapper {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 280px;
+        flex: 1;
+    }
+
+    .apres-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.85rem;
+    }
+
+    .apres-table th {
+        padding: 12px 10px;
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-muted);
+        position: sticky;
+        top: 0;
+        background: var(--card-bg);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 800;
+        z-index: 2;
+    }
+
+    .apres-table td {
+        padding: 12px 10px;
+        border-bottom: 1px dashed var(--border-color);
+        font-weight: 600;
+        color: var(--text-main);
+    }
+</style>
+
+<!-- =========================================================
+     CABEÇALHO EXECUTIVO
+     ========================================================= -->
+<div class="apres-header">
+    <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 10px 0; text-transform: uppercase;">Painel Executivo de Produção</h2>
+    <p style="font-size: 0.95rem; margin: 0; opacity: 0.9; font-weight: 500; max-width: 800px;">
+        Acompanhe de forma clara e objetiva o volume de mobílias entregues, o desempenho das oficinas e o atendimento aos parceiros institucionais. 
+        <br><span style="font-size: 0.8rem; opacity: 0.8; margin-top: 5px; display: inline-block;"><i class="bi bi-info-circle-fill"></i> Os dados abaixo refletem as entregas confirmadas e respeitam os filtros aplicados no topo da página.</span>
+    </p>
+</div>
+
+<!-- =========================================================
+     SEÇÃO 1: VISÃO GERAL DE ENTREGAS
+     ========================================================= -->
+<div style="margin-bottom: 40px;">
+    <h3 class="apres-section-title"><span class="material-icons">local_shipping</span> Resultados de Entregas</h3>
+    
+    <!-- KPIs Principais -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 30px;">
+        <div class="apres-kpi-card" style="border-left-color: var(--success);">
+            <span class="apres-kpi-label">Volume Total Entregue</span>
+            <h3 class="apres-kpi-val" id="apresKpiMoveis" style="color: var(--success);">0</h3>
+            <span class="apres-kpi-desc" style="color: var(--success);">peças de mobília finalizadas</span>
+        </div>
+        <div class="apres-kpi-card" style="border-left-color: var(--accent);">
+            <span class="apres-kpi-label">Processos Atendidos</span>
+            <h3 class="apres-kpi-val" id="apresKpiProcessos" style="color: var(--accent);">0</h3>
+            <span class="apres-kpi-desc" style="color: var(--accent);">processos SEI com itens entregues</span>
+        </div>
+        <div class="apres-kpi-card" style="border-left-color: var(--warning-text-dark);">
+            <span class="apres-kpi-label">Locais Beneficiados</span>
+            <h3 class="apres-kpi-val" id="apresKpiLocais" style="color: var(--warning-text-dark);">0</h3>
+            <span class="apres-kpi-desc" style="color: var(--warning-text-dark);">unidades prisionais e parceiros</span>
+        </div>
+    </div>
+
+    <!-- Gráficos Visuais (Marcenaria vs Serralheria) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-bottom: 30px;">
+        
+        <!-- Gráfico Top Marcenaria -->
+        <div class="apres-box">
+            <h3 class="apres-box-title"><span class="material-icons" style="color: var(--accent);">carpenter</span> Ranking Marcenaria</h3>
+            <p class="apres-box-subtitle">As 8 mobílias de madeira mais fabricadas e entregues.</p>
+            <div style="position: relative; height: 350px; width: 100%;">
+                <canvas id="apresChartTopMarcenaria"></canvas>
+            </div>
+        </div>
+        
+        <!-- Gráfico Top Serralheria -->
+        <div class="apres-box">
+            <h3 class="apres-box-title"><span class="material-icons" style="color: var(--warning-text-dark);">precision_manufacturing</span> Ranking Serralheria</h3>
+            <p class="apres-box-subtitle">As 8 estruturas metálicas/ferragens mais entregues.</p>
+            <div style="position: relative; height: 350px; width: 100%;">
+                <canvas id="apresChartTopSerralheria"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 40px 0;">
+
+<!-- =========================================================
+     SEÇÃO 2: DETALHAMENTO & PARCEIROS ESTRATÉGICOS
+     ========================================================= -->
+<div style="margin-bottom: 40px;">
+    
+    <!-- Tabela Geral de Locais -->
+    <div class="apres-box" style="margin-bottom: 30px;">
+        <h3 class="apres-section-title" style="border: none; padding: 0; margin-bottom: 5px;"><span class="material-icons">business</span> Maiores Destinos (Geral)</h3>
+        <p class="apres-box-subtitle">Ranking de unidades e órgãos que mais receberam mobílias.</p>
+        
+        <div class="apres-table-wrapper" style="max-height: 250px;">
+            <table class="apres-table">
+                <thead>
+                    <tr>
+                        <th>Local / Unidade</th>
+                        <th style="text-align: right;">Qtd. Entregue</th>
+                    </tr>
+                </thead>
+                <tbody id="apresTabelaLocais">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PROCON e Estação Tech Separados -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px;">
+        
+        <!-- Bloco PROCON -->
+        <div class="apres-box" style="border: 2px solid #b91c1c; background: linear-gradient(180deg, var(--card-bg) 60%, rgba(185, 28, 28, 0.05) 100%);">
+            <h3 class="apres-section-title" style="border-left-color: #b91c1c; color: #b91c1c; padding: 0; margin-bottom: 15px; border:none; display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons">gavel</span> PROCON
+            </h3>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="background: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15); color: var(--success); padding: 12px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;"><i class="bi bi-check-circle-fill me-1"></i> FINALIZADOS</div>
+                    <div id="apresKpiProconFin" style="font-size: 1.8rem; font-weight: 900; line-height: 1.1;">0</div>
+                </div>
+                <div style="background: #b91c1c; color: white; padding: 12px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 4px 6px rgba(185, 28, 28, 0.2);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; opacity: 0.9;"><i class="bi bi-box-seam-fill me-1"></i> MOBÍLIAS ENTREGUES</div>
+                    <div id="apresKpiProconMov" style="font-size: 1.8rem; font-weight: 900; line-height: 1.1;">0</div>
+                </div>
+            </div>
+
+            <div class="apres-table-wrapper">
+                <table class="apres-table">
+                    <thead>
+                        <tr>
+                            <th>Item Entregue</th>
+                            <th style="text-align: right;">Qtd.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apresTabelaProcon">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bloco ESTAÇÃO TECH -->
+        <div class="apres-box" style="border: 2px solid #0284c7; background: linear-gradient(180deg, var(--card-bg) 60%, rgba(2, 132, 199, 0.05) 100%);">
+            <h3 class="apres-section-title" style="border-left-color: #0284c7; color: #0284c7; padding: 0; margin-bottom: 15px; border:none; display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons">computer</span> Estação Tech
+            </h3>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="background: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15); color: var(--success); padding: 12px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;"><i class="bi bi-check-circle-fill me-1"></i> FINALIZADOS</div>
+                    <div id="apresKpiTechFin" style="font-size: 1.8rem; font-weight: 900; line-height: 1.1;">0</div>
+                </div>
+                <div style="background: #0284c7; color: white; padding: 12px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; opacity: 0.9;"><i class="bi bi-box-seam-fill me-1"></i> MOBÍLIAS ENTREGUES</div>
+                    <div id="apresKpiTechMov" style="font-size: 1.8rem; font-weight: 900; line-height: 1.1;">0</div>
+                </div>
+            </div>
+
+            <div class="apres-table-wrapper">
+                <table class="apres-table">
+                    <thead>
+                        <tr>
+                            <th>Item Entregue</th>
+                            <th style="text-align: right;">Qtd.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apresTabelaTech">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- =========================================================
+     SCRIPT DE LÓGICA DA APRESENTAÇÃO
+     ========================================================= -->
+<script>
+    let apresChartInstMarcenaria = null;
+    let apresChartInstSerralheria = null;
+
+    window.atualizarApresentacaoMarcenaria = function() {
+        if (typeof filteredData === 'undefined') return;
+
+        // Focamos apenas em registros ativos que já possuem entregas concluídas para a maior parte da tela
+        const entregues = filteredData.filter(d => d._active && d.qtd_entregue > 0);
+
+        // Globais
+        let totalMoveisEntregues = 0;
+        let processosUnicos = new Set();
+        let locaisUnicos = new Set();
+        let mapLocais = {};
+        
+        // Separação de Oficinas (Rankings)
+        let mapMarcenaria = {};
+        let mapSerralheria = {};
+        
+        // Parceiros - Lógica isolada para contar Total de Entregues
+        let totalProcon = 0;
+        let mapProcon = {};
+        let totalTech = 0;
+        let mapTech = {};
+
+        // Agrupamento estrito para calcular os "FINALIZADOS"
+        let groupsProcon = {};
+        let groupsTech = {};
+
+        // 1. Iteramos todos os itens filtrados e ativos para saber se um grupo PROCON/TECH está completamente finalizado
+        filteredData.filter(d => d._active).forEach(d => {
+            const locLower = (d.local || '').toLowerCase();
+            const demLower = (d.demandante || '').toLowerCase();
+            
+            const isProcon = demLower.includes('procon') || locLower.includes('procon');
+            const isTech = demLower.includes('estação tech') || locLower.includes('estação tech') || demLower.includes('estacao tech') || locLower.includes('estacao tech');
+
+            if (isProcon || isTech) {
+                // A mesma chave de agrupamento da página do Procon (local + origem)
+                const key = d.local.trim().toUpperCase() + "|" + d.origem;
+                if (isProcon) {
+                    if (!groupsProcon[key]) groupsProcon[key] = [];
+                    groupsProcon[key].push(d);
+                }
+                if (isTech) {
+                    if (!groupsTech[key]) groupsTech[key] = [];
+                    groupsTech[key].push(d);
+                }
+            }
+        });
+
+        // Contagem de Grupos Finalizados
+        let proconFinalizados = 0;
+        Object.values(groupsProcon).forEach(items => {
+            const isFin = items.every(i => (i.status || '').toUpperCase().trim() === 'FINALIZADA' || (i.status || '').toUpperCase().trim() === 'FINALIZADO');
+            if (isFin) proconFinalizados++;
+        });
+
+        let techFinalizados = 0;
+        Object.values(groupsTech).forEach(items => {
+            const isFin = items.every(i => (i.status || '').toUpperCase().trim() === 'FINALIZADA' || (i.status || '').toUpperCase().trim() === 'FINALIZADO');
+            if (isFin) techFinalizados++;
+        });
+
+        // 2. Iteramos apenas os que tiveram entregas para montar os gráficos e os rankings
+        entregues.forEach(d => {
+            const qtd = d.qtd_entregue;
+            totalMoveisEntregues += qtd;
+            
+            // Processos Globais
+            const procValido = d.processo && d.processo.toUpperCase() !== 'S/N' && d.processo.trim() !== '';
+            if (procValido) processosUnicos.add(d.processo);
+
+            // Locais Globais
+            const localNome = (d.local || "Não Identificado").trim().toUpperCase();
+            locaisUnicos.add(localNome);
+            mapLocais[localNome] = (mapLocais[localNome] || 0) + qtd;
+
+            // Separação de Ranking: Marcenaria vs Serralheria
+            const mobNome = (d.mobilia || "Sem Nome").trim().toUpperCase();
+            if (d.tipo_servico === 'SERRALHERIA') {
+                mapSerralheria[mobNome] = (mapSerralheria[mobNome] || 0) + qtd;
+            } else {
+                mapMarcenaria[mobNome] = (mapMarcenaria[mobNome] || 0) + qtd;
+            }
+
+            // Atribuir volumes entregues para Procon/Tech
+            const demLower = (d.demandante || '').toLowerCase();
+            const locLower = (d.local || '').toLowerCase();
+            
+            const isProcon = demLower.includes('procon') || locLower.includes('procon');
+            const isTech = demLower.includes('estação tech') || locLower.includes('estação tech') || demLower.includes('estacao tech') || locLower.includes('estacao tech');
+
+            if (isProcon) {
+                totalProcon += qtd;
+                mapProcon[mobNome] = (mapProcon[mobNome] || 0) + qtd;
+            } else if (isTech) {
+                totalTech += qtd;
+                mapTech[mobNome] = (mapTech[mobNome] || 0) + qtd;
+            }
+        });
+
+        // 3. Atualizar KPIs Gerais com Animação
+        const runAnim = (id, endVal) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const startVal = parseInt(el.innerText.replace(/\D/g, '')) || 0;
+            if (typeof animateValue === 'function') {
+                animateValue(id, startVal, endVal, 1000);
+            } else {
+                el.innerText = endVal.toLocaleString('pt-BR');
+            }
+        };
+
+        // Dados Gerais
+        runAnim("apresKpiMoveis", totalMoveisEntregues);
+        runAnim("apresKpiProcessos", processosUnicos.size);
+        runAnim("apresKpiLocais", locaisUnicos.size);
+
+        // Dados PROCON & TECH
+        runAnim("apresKpiProconFin", proconFinalizados);
+        runAnim("apresKpiProconMov", totalProcon);
+        
+        runAnim("apresKpiTechFin", techFinalizados);
+        runAnim("apresKpiTechMov", totalTech);
+
+        // Função auxiliar de render de tabelas
+        const renderTabela = (mapObj, elementId, emptyMsg, colorHex = 'var(--accent)') => {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
+            const ordenados = Object.entries(mapObj).sort((a, b) => b[1] - a[1]);
+            
+            if (ordenados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted); font-weight: 500; padding: 20px;">${emptyMsg}</td></tr>`;
+            } else {
+                ordenados.forEach(([nome, qtd]) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${nome}</td>
+                            <td style="text-align: right; color: ${colorHex}; font-weight: 800;">${qtd.toLocaleString('pt-BR')}</td>
+                        </tr>`;
+                });
+            }
+        };
+
+        // 4. Preencher Tabelas
+        renderTabela(mapLocais, 'apresTabelaLocais', 'Nenhuma entrega registrada.');
+        renderTabela(mapProcon, 'apresTabelaProcon', 'Nenhuma mobília entregue para o PROCON neste filtro.', '#b91c1c');
+        renderTabela(mapTech, 'apresTabelaTech', 'Nenhuma mobília entregue para a Estação Tech neste filtro.', '#0284c7');
+
+        // 5. Preparar Dados para os Gráficos (Sem substring, mostrando texto completo)
+        const topMarcenaria = Object.entries(mapMarcenaria).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const lblsMarc = topMarcenaria.map(i => i[0]);
+        const dataMarc = topMarcenaria.map(i => i[1]);
+
+        const topSerralheria = Object.entries(mapSerralheria).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const lblsSerr = topSerralheria.map(i => i[0]);
+        const dataSerr = topSerralheria.map(i => i[1]);
+
+        renderizarGraficosRanking(lblsMarc, dataMarc, lblsSerr, dataSerr);
+    }
+
+    function renderizarGraficosRanking(lblsMarc, dataMarc, lblsSerr, dataSerr) {
+        const isDark = document.body.classList.contains('dark-mode');
+        const textColor = isDark ? '#f0f2f5' : '#1e293b';
+        
+        // Cores CSS Variables
+        const corMarcenaria = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#001E7A';
+        const corSerralheria = getComputedStyle(document.documentElement).getPropertyValue('--warning-text-dark').trim() || '#e65100';
+
+        const chartOptions = (textColor) => ({
+            indexAxis: 'y', // Eixo Horizontal para textos compridos não colidirem
+            responsive: true, maintainAspectRatio: false,
+            layout: { padding: { right: 35 } },
+            plugins: {
+                legend: { display: false },
+                datalabels: { anchor: 'end', align: 'right', color: textColor, font: { weight: 'bold', family: 'Poppins', size: 11 } }
+            },
+            scales: {
+                x: { display: false },
+                y: { grid: { display: false }, ticks: { color: textColor, font: { family: 'Poppins', weight: '600', size: 10 } } }
+            }
+        });
+
+        // Gráfico 1: Top Marcenaria
+        const ctxMarc = document.getElementById('apresChartTopMarcenaria').getContext('2d');
+        if (apresChartInstMarcenaria) apresChartInstMarcenaria.destroy();
+        
+        apresChartInstMarcenaria = new Chart(ctxMarc, {
+            type: 'bar',
+            data: {
+                labels: lblsMarc,
+                datasets: [{ data: dataMarc, backgroundColor: corMarcenaria, borderRadius: 6 }]
+            },
+            options: chartOptions(textColor)
+        });
+
+        // Gráfico 2: Top Serralheria
+        const ctxSerr = document.getElementById('apresChartTopSerralheria').getContext('2d');
+        if (apresChartInstSerralheria) apresChartInstSerralheria.destroy();
+        
+        apresChartInstSerralheria = new Chart(ctxSerr, {
+            type: 'bar',
+            data: {
+                labels: lblsSerr,
+                datasets: [{ data: dataSerr, backgroundColor: corSerralheria, borderRadius: 6 }]
+            },
+            options: chartOptions(textColor)
+        });
+    }
+
+    // ========================================================
+    // SEQUESTRO DO CICLO DE VIDA DO DASHBOARD (Patch Seguro)
+    // ========================================================
+    let _painelApresIniciado = false;
+    
+    const initInterval = setInterval(() => {
+        if (typeof window.populateApresentacao === 'function') {
+            
+            window.populateApresentacao = function() {
+                window.atualizarApresentacaoMarcenaria();
+            };
+            
+            if (typeof window.updateDashboard === 'function' && !window._apresPatched) {
+                const originalUpdateDashboard = window.updateDashboard;
+                window.updateDashboard = function() {
+                    originalUpdateDashboard(); 
+                    window.atualizarApresentacaoMarcenaria();
+                };
+                window._apresPatched = true;
+            }
+            
+            if (typeof filteredData !== 'undefined' && filteredData.length > 0 && !_painelApresIniciado) {
+                window.atualizarApresentacaoMarcenaria();
+                _painelApresIniciado = true;
+            }
+            
+            if (window._apresPatched) clearInterval(initInterval);
+        }
+    }, 150);
+</script>

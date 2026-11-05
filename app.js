@@ -24,6 +24,11 @@ const ROTA_PORTAL_SSO = `${PORTAL_URL}/ir/marcenaria_painel`; // Rota oficial co
 
 // --- MIDDLEWARE DE PROTEÇÃO SSO (8 HORAS) ---
 async function verificarSSO(req, res, next) {
+    // 0. BYPASS PARA TESTES NO LOCALHOST
+    if (req.hostname === 'localhost' || req.hostname === '127.0.0.1') {
+        return next();
+    }
+
     const ssoToken = req.query.sso_token;
     const currentUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
@@ -248,13 +253,16 @@ async function fetchDataFromSheets() {
 
                 combinedMarcenaria.push(item);
 
+                // FILTRO DO PROCON E ESTAÇÃO TECH (Ignora 'Não Autorizado')
                 if (localCheck.includes('procon') || localCheck.includes('estação tech') || localCheck.includes('estacao tech')) {
-                    combinedProcon.push({
-                        origem: item.origem, processo: item.processo, link_sei: item.link_sei, link_planilha: item.link_planilha,
-                        local: item.local.toUpperCase(), status: item.status, previsao: item.previsao, mobilia: item.mobilia,
-                        material: item.material, dimensoes: item.dimensoes, qtd_sol: item.qtd_solicitada,
-                        qtd_ent: item.qtd_entregue, qtd_pen: item.qtd_pendente
-                    });
+                    if (item.status !== 'NÃO AUTORIZADO' && item.status !== 'NAO AUTORIZADO') {
+                        combinedProcon.push({
+                            origem: item.origem, processo: item.processo, link_sei: item.link_sei, link_planilha: item.link_planilha,
+                            local: item.local.toUpperCase(), status: item.status, previsao: item.previsao, mobilia: item.mobilia,
+                            material: item.material, dimensoes: item.dimensoes, qtd_sol: item.qtd_solicitada,
+                            qtd_ent: item.qtd_entregue, qtd_pen: item.qtd_pendente
+                        });
+                    }
                 }
             });
         } catch (err) { console.error(`Erro ao processar ${src.type}:`, err); }

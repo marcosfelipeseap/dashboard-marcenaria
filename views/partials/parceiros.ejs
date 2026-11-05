@@ -1,0 +1,55 @@
+<div class="viz-box">
+    <h5 class="chart-header">Solicitações por Parceiro (Local)</h5>
+    <div class="chart-container">
+        <canvas id="chartParceiro"></canvas>
+    </div>
+</div>
+
+<script>
+  window.updateChartParceiros = function() {
+      if (chartInstances['chartParceiro']) {
+          chartInstances['chartParceiro'].destroy();
+          chartInstances['chartParceiro'] = null;
+      }
+
+      const canvas = document.getElementById('chartParceiro');
+      if (!canvas) return;
+
+      const c = getColors();
+      const opts = getOpts();
+
+      // Verifica se o usuário selecionou explicitamente algum status no filtro geral
+      const statusFilter = activeFilters['status'] || [];
+      const hasExplicitStatusSelection = statusFilter.length > 0;
+
+      // Filtra os dados da tabela para o gráfico de parceiros
+      const dataForParceiro = filteredData.filter(row => {
+          const st = (row.status || '').toUpperCase().trim();
+          const isRestricted = st.includes('ARQUIVADO') || (st.includes('NÃO') && st.includes('AUT')) || st.includes('NAO AUTORIZADO');
+
+          // Se o usuário NÃO marcou nenhum status no filtro, removemos os não autorizados e arquivados
+          if (!hasExplicitStatusSelection) {
+              return !isRestricted;
+          }
+
+          // Se o usuário marcou status específicos no filtro, respeitamos a seleção dele
+          return true;
+      });
+
+      const dataParceiro = groupAndTop(dataForParceiro, 'local', ['qtd_solicitada']);
+
+      chartInstances['chartParceiro'] = new Chart(canvas, { 
+          type: 'bar', 
+          data: { 
+              labels: dataParceiro.labels, 
+              datasets: [
+                  { label: 'SOLICITADOS', data: dataParceiro.datasets[0], backgroundColor: c.sol, borderRadius: 6 }
+              ] 
+          }, 
+          options: { 
+              ...opts, 
+              indexAxis: 'y' 
+          } 
+      });
+  };
+</script>

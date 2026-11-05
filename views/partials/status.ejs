@@ -1,0 +1,45 @@
+<div class="viz-box">
+    <h5 class="chart-header">Pendente vs Entregue (Por Móvel)</h5>
+    <div class="chart-container">
+        <canvas id="chartMovelStatus"></canvas>
+    </div>
+</div>
+
+<script>
+  window.updateChartStatus = function() {
+      if (chartInstances['chartMovelStatus']) {
+          chartInstances['chartMovelStatus'].destroy();
+          chartInstances['chartMovelStatus'] = null;
+      }
+      
+      const canvas = document.getElementById('chartMovelStatus');
+      if (!canvas) return;
+
+      const c = getColors();
+      const opts = getOpts();
+      const dataMovel = groupAndTop(filteredData, 'mobilia', ['qtd_pendente', 'qtd_entregue']);
+      const labelsWrappedMovel = dataMovel.labels.map(l => wrapLabel(l));
+
+      chartInstances['chartMovelStatus'] = new Chart(canvas, { 
+          type: 'bar', 
+          data: { 
+              labels: labelsWrappedMovel, 
+              datasets: [
+                  { label: 'PENDENTE', data: dataMovel.datasets[0], backgroundColor: c.pend, borderRadius: 6 }, 
+                  { label: 'ENTREGUE', data: dataMovel.datasets[1], backgroundColor: c.ent, borderRadius: 6 }
+              ] 
+          }, 
+          options: { 
+              ...opts, 
+              scales: { 
+                  ...opts.scales, 
+                  x: { 
+                      stacked: false, 
+                      grid: { display: false }, 
+                      ticks: { color: c.text, maxRotation: 0, minRotation: 0, autoSkip: false, font: { family: 'Poppins', weight: '600' } } 
+                  } 
+              } 
+          } 
+      });
+  };
+</script>

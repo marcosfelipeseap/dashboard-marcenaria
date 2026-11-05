@@ -1,0 +1,316 @@
+<div class="row mb-4 w-100 m-0 align-items-stretch">
+    <!-- Card PROCON -->
+    <div class="col-12 col-lg-6 p-0 pe-lg-2 mb-3 mb-lg-0">
+        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column" style="background-color: var(--accent); border-radius: 16px; border: none;">
+            <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: #ffffff; font-size: 1.1rem; letter-spacing: 0.5px;">
+                <i class="bi bi-building me-1"></i> PROCON
+            </h6>
+            <div class="row g-2 flex-grow-1">
+                <div class="col-6">
+                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15);">
+                        <div class="fw-bold mb-1 text-center" style="color: var(--success); font-size: 0.75rem;"><i class="bi bi-check-circle-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>FINALIZADOS</div>
+                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--success);" id="proconKpiFin">0</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--warning-bg); border: 1px solid rgba(230, 81, 0, 0.15);">
+                        <div class="fw-bold mb-1 text-center" style="color: var(--warning-text-dark); font-size: 0.75rem;"><i class="bi bi-clock-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>PENDENTES</div>
+                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="proconKpiPen">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card ESTAÇÃO TECH -->
+    <div class="col-12 col-lg-6 p-0 ps-lg-2">
+        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column" style="background-color: var(--accent); border-radius: 16px; border: none;">
+            <h6 class="fw-bolder mb-3 text-uppercase text-center" style="color: #ffffff; font-size: 1.1rem; letter-spacing: 0.5px;">
+                <i class="bi bi-pc-display me-1"></i> ESTAÇÃO TECH
+            </h6>
+            <div class="row g-2 flex-grow-1">
+                <div class="col-6">
+                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--success-bg); border: 1px solid rgba(27, 94, 32, 0.15);">
+                        <div class="fw-bold mb-1 text-center" style="color: var(--success); font-size: 0.75rem;"><i class="bi bi-check-circle-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>FINALIZADOS</div>
+                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--success);" id="techKpiFin">0</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="h-100 d-flex flex-column justify-content-center align-items-center p-3 rounded-4" style="background-color: var(--warning-bg); border: 1px solid rgba(230, 81, 0, 0.15);">
+                        <div class="fw-bold mb-1 text-center" style="color: var(--warning-text-dark); font-size: 0.75rem;"><i class="bi bi-clock-fill d-block d-sm-inline mb-1 mb-sm-0 me-sm-1"></i>PENDENTES</div>
+                        <div class="procon-kpi-val" style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--warning-text-dark);" id="techKpiPen">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<div class="card-custom mb-4" style="position: relative; z-index: 99;">
+    <div style="padding: 20px 25px;">
+      <div class="d-flex justify-content-between align-items-center">
+          <div class="flex-grow-1" data-bs-toggle="collapse" data-bs-target="#collapseProconFilters" aria-expanded="false" style="cursor: pointer; padding-block: 5px;">
+              <h6 class="fw-bold m-0" style="color: var(--accent); text-transform: uppercase; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                  <span class="material-icons" style="font-size: 20px;">filter_alt</span> Filtros & Pesquisa <i class="bi bi-chevron-down ms-1 filter-chevron"></i>
+              </h6>
+          </div>
+          <button class="btn-notif btn-notif-sec ms-2" style="border-radius: 12px;" onclick="resetProconFilters();"><i class="bi bi-eraser-fill"></i> Limpar</button>
+      </div>
+      
+      <div class="collapse mt-3" id="collapseProconFilters">
+          <div class="row g-3">
+              <div class="col-md-4">
+                  <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Cidade/Local</label>
+                  <input type="text" id="proconSearchInput" class="form-control oficina-selector" placeholder="Ex: Centro, Bacabal..." style="font-weight: normal; font-size: 0.9rem;" onkeyup="filterProconData()">
+              </div>
+              <div class="col-md-4">
+               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Tipo</label>
+               <div class="dropdown">
+                  <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_tipo">Todos</button>
+                  <div class="dropdown-menu dropdown-menu-custom">
+                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--accent); border-bottom: 1px dashed var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                          <input class="form-check-input" type="checkbox" id="selectAll_proc_tipo" onchange="toggleSelectAllProcon('tipo', this)">
+                          <span class="text-truncate">SELECIONAR TODOS</span>
+                      </label>
+                      <div class="dropdown-list-container" id="list_proc_tipo"></div>
+                  </div>
+               </div>
+              </div>
+              <div class="col-md-4">
+               <label class="small fw-bold mb-1 text-uppercase" style="color: var(--text-muted); font-size: 0.75rem;">Status</label>
+               <div class="dropdown">
+                  <button class="btn custom-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btn_proc_status">Todos</button>
+                  <div class="dropdown-menu dropdown-menu-custom">
+                      <label class="dropdown-item-custom" style="font-weight: 700; color: var(--accent); border-bottom: 1px dashed var(--border-color); margin-bottom: 5px; padding-bottom: 10px;">
+                          <input class="form-check-input" type="checkbox" id="selectAll_proc_status" onchange="toggleSelectAllProcon('status', this)">
+                          <span class="text-truncate">SELECIONAR TODOS</span>
+                      </label>
+                      <div class="dropdown-list-container" id="list_proc_status"></div>
+                  </div>
+               </div>
+              </div>
+          </div>
+      </div>
+    </div>
+</div>
+
+<div class="row m-0" id="proconContainer"></div>
+
+<script>
+  let proconRawData = [];
+
+  window.loadProconData = async function(forceRefresh = false) {
+      if(forceRefresh || proconRawData.length === 0) $('#loader').css('opacity', '1').show();
+      try {
+          let dataToProcess = INITIAL_DATA;
+          if (forceRefresh) {
+              const res = await fetch('/api/data');
+              dataToProcess = await res.json();
+          }
+          proconRawData = dataToProcess.procon;
+          initProconFilters(); 
+          filterProconData();  
+      } catch (err) {
+          alert("Erro ao carregar Procon: " + err.message);
+      } finally {
+          $('#loader').css('opacity', '0'); 
+          setTimeout(() => $('#loader').hide(), 500);
+      }
+  };
+
+  window.toggleSelectAllProcon = function(listType, el) {
+      $(`#list_proc_${listType} input[type="checkbox"]`).prop('checked', el.checked);
+      filterProconData();
+  };
+
+  function initProconFilters() {
+      const tipos = new Set();
+      const statusList = new Set();
+      const customOrder = ["EM PRODUÇÃO", "FABRICAÇÃO", "PLANEJAMENTO", "PENDENTE", "EM ESTOQUE", "SEM ORÇAMENTO", "NÃO AUTORIZADO", "NAO AUTORIZADO", "ARQUIVADO", "", "FINALIZADA", "FINALIZADO", "ENTREGUE"];
+
+      proconRawData.forEach(item => {
+          let nomeLower = item.local.toLowerCase();
+          let tipo = "OUTROS";
+          if(nomeLower.includes('procon')) tipo = "PROCON";
+          else if(nomeLower.includes('estação') || nomeLower.includes('estacao')) tipo = "ESTAÇÃO TECH";
+          tipos.add(tipo);
+          item._virtualTipo = tipo;
+          statusList.add(item.status);
+      });
+
+      const divTipo = $('#list_proc_tipo').empty();
+      [...tipos].sort().forEach(t => {
+          divTipo.append(`<label class="dropdown-item-custom"><input class="form-check-input" type="checkbox" value="${t}" onchange="filterProconData()"><span class="text-truncate">${t}</span></label>`);
+      });
+
+      const divStatus = $('#list_proc_status').empty();
+      const sortedStatus = [...statusList].sort((a, b) => {
+           const getIndex = (val) => {
+               val = (val || '').toUpperCase();
+               let idx = customOrder.indexOf(val);
+               if(idx > -1) return idx;
+               return customOrder.findIndex(c => c !== "" && val.includes(c));
+           };
+           let idxA = getIndex(a); if(idxA === -1) idxA = 999;
+           let idxB = getIndex(b); if(idxB === -1) idxB = 999;
+           if (idxA !== idxB) return idxA - idxB;
+           return a.localeCompare(b);
+      });
+
+      sortedStatus.forEach(s => {
+          let label = s === "" ? "(SEM STATUS)" : s;
+          divStatus.append(`<label class="dropdown-item-custom"><input class="form-check-input" type="checkbox" value="${s}" onchange="filterProconData()"><span class="text-truncate">${label}</span></label>`);
+      });
+  }
+
+  window.filterProconData = function() {
+      const searchTerm = $('#proconSearchInput').val().toLowerCase();
+      const selTipos = [];
+      $('#list_proc_tipo input:checked').each(function() { selTipos.push($(this).val()); });
+      const selStatus = [];
+      $('#list_proc_status input:checked').each(function() { selStatus.push($(this).val()); });
+
+      $('#btn_proc_tipo').text(selTipos.length ? `${selTipos.length} SELECIONADO(S)` : 'TODOS').css('color', selTipos.length ? 'var(--accent)' : 'var(--text-main)').css('font-weight', selTipos.length ? 'bold' : '500');
+      $('#btn_proc_status').text(selStatus.length ? `${selStatus.length} SELECIONADO(S)` : 'TODOS').css('color', selStatus.length ? 'var(--accent)' : 'var(--text-main)').css('font-weight', selStatus.length ? 'bold' : '500');
+
+      const filtered = proconRawData.filter(item => {
+          if (searchTerm && !item.local.toLowerCase().includes(searchTerm)) return false;
+          if (selTipos.length > 0 && !selTipos.includes(item._virtualTipo)) return false;
+          if (selStatus.length > 0 && !selStatus.includes(item.status)) return false;
+          return true;
+      });
+      renderProconCards(filtered);
+
+      const tTipo = $('#list_proc_tipo input[type="checkbox"]').length;
+      const cTipo = $('#list_proc_tipo input[type="checkbox"]:checked').length;
+      $('#selectAll_proc_tipo').prop('checked', tTipo > 0 && tTipo === cTipo);
+
+      const tStatus = $('#list_proc_status input[type="checkbox"]').length;
+      const cStatus = $('#list_proc_status input[type="checkbox"]:checked').length;
+      $('#selectAll_proc_status').prop('checked', tStatus > 0 && tStatus === cStatus);
+  };
+
+  window.resetProconFilters = function() {
+      $('#proconSearchInput').val('');
+      $('#viewProcon input[type="checkbox"]').prop('checked', false);
+      filterProconData();
+  };
+
+  function renderProconCards(data) {
+      const container = $('#proconContainer'); container.empty();
+      if(!data || data.length === 0) {
+          container.html('<div class="col-12 text-center text-muted py-5 text-uppercase fw-bold">Nenhum processo encontrado.</div>'); return;
+      }
+      const parseDateLocal = (str) => {
+          if (!str || typeof str !== 'string') return new Date(9999, 11, 31); 
+          const parts = str.split('/'); return parts.length === 3 ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(9999, 11, 31);
+      };
+      
+      const groups = {};
+      data.forEach(item => {
+          const key = item.local.trim().toUpperCase() + "|" + item.origem; 
+          if (!groups[key]) groups[key] = { local: item.local.trim(), origem: item.origem, processo: item.processo, items: [], key: key };
+          groups[key].items.push(item);
+      });
+
+      const groupArray = Object.values(groups);
+      const getWeight = (s) => {
+          s = (s || '').toUpperCase().trim();
+          if (s.includes('PRODUÇÃO') || s.includes('FABRICAÇÃO')) return 1;
+          if (s.includes('MONTAGEM')) return 2;
+          if (s.includes('PLANEJAMENTO')) return 3;
+          if (s.includes('AGUARDANDO')) return 4;
+          if (s.includes('PENDENTE')) return 5;
+          if (s.includes('ESTOQUE')) return 6;
+          if (s.includes('SEM ORÇAMENTO')) return 7;
+          if (s.includes('NÃO AUTORIZADO') || s.includes('NAO AUTORIZADO')) return 8;
+          if (s.includes('ARQUIVADO')) return 9;
+          if (s === 'FINALIZADA') return 10; 
+          if (s === '') return 11;
+          return 99;
+      };
+
+      let proconFin = 0, proconPen = 0;
+      let techFin = 0, techPen = 0;
+
+      groupArray.forEach(group => {
+          const rawItems = proconRawData.filter(i => (i.local.trim().toUpperCase() + "|" + i.origem) === group.key);
+          
+          group.isFinalized = rawItems.every(i => (i.status || '').toUpperCase().trim() === 'FINALIZADA');
+
+          let bestItem = rawItems[0]; let bestWeight = 999;
+          rawItems.forEach(item => { let w = getWeight(item.status); if (w < bestWeight) { bestWeight = w; bestItem = item; } });
+          
+          group.mainStatus = group.isFinalized ? 'FINALIZADA' : bestItem.status;
+          group.mainDate = bestItem.previsao; 
+
+          group.totalSol = rawItems.reduce((acc, curr) => acc + (curr.qtd_sol || 0), 0);
+          group.totalEnt = rawItems.reduce((acc, curr) => acc + (curr.qtd_ent || 0), 0);
+          group.totalPen = rawItems.reduce((acc, curr) => acc + (curr.qtd_pen || 0), 0);
+
+          let tipo = group.items[0] && group.items[0]._virtualTipo;
+          if (tipo === "PROCON") {
+              if (group.isFinalized) proconFin++; else proconPen++;
+          } else if (tipo === "ESTAÇÃO TECH") {
+              if (group.isFinalized) techFin++; else techPen++;
+          }
+      });
+
+      $('#proconKpiFin').text(proconFin);
+      $('#proconKpiPen').text(proconPen);
+      $('#techKpiFin').text(techFin);
+      $('#techKpiPen').text(techPen);
+
+      groupArray.sort((a, b) => {
+          if (a.isFinalized && !b.isFinalized) return 1;
+          if (!a.isFinalized && b.isFinalized) return -1;
+          const wA = getWeight(a.mainStatus); const wB = getWeight(b.mainStatus);
+          if (wA !== wB) return wA - wB;
+          return parseDateLocal(a.mainDate) - parseDateLocal(b.mainDate);
+      });
+
+      groupArray.forEach((group, index) => {
+          const isRegional = group.origem === 'REGIONAL';
+          const originLabel = isRegional ? 'REGIONAL' : 'SEDE';
+          const originClass = isRegional ? 'origin-regional' : 'origin-sede';
+          let stClass = "st-default";
+          let st = (group.mainStatus || '').toUpperCase().trim();
+          
+          if(st.includes('PRODUÇÃO')) stClass = "st-prod";
+          else if(st.includes('MONTAGEM')) stClass = "st-montagem";
+          else if(st.includes('PLANEJAMENTO')) stClass = "st-planejamento";
+          else if(st.includes('AGUARDANDO')) stClass = "st-aguardando";
+          else if(st.includes('PENDENTE')) stClass = "st-pendente";
+          else if(st.includes('ESTOQUE')) stClass = "st-estoque";
+          else if(st.includes('ORÇAMENTO')) stClass = "st-orcamento";
+          else if(st.includes('AUTORIZADO')) stClass = "st-nao-aut";
+          else if(st.includes('ARQUIVADO')) stClass = "st-arquivado";
+          else if(st === 'FINALIZADA') stClass = "st-finalizado";
+          
+          if (group.isFinalized) stClass = "st-finalizado";
+
+          const cardId = `proconCard_${index}`;
+          const itemsHtml = group.items.map(item => {
+              return `<div class="procon-item-row">
+                  <div class="d-flex justify-content-between align-items-center mb-3"><h6 class="fw-bold m-0 text-uppercase" style="font-size:0.95rem; color:var(--accent);">${item.mobilia}</h6><span class="status-badge ${stClass}" style="transform:scale(0.9)">${item.status}</span></div>
+                  <div class="detail-grid"><div class="detail-item"><strong>MATERIAL</strong><span>${item.material || '-'}</span></div><div class="detail-item"><strong>DIMENSÕES</strong><span>${item.dimensoes || '-'}</span></div></div>
+                  <div class="d-flex justify-content-between gap-2 mt-3"><div class="qty-badge"><span class="qty-val" style="color:var(--accent)">${item.qtd_sol}</span><span class="qty-lbl">SOLICITADO</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--success)">${item.qtd_ent}</span><span class="qty-lbl">ENTREGUE</span></div><div class="qty-badge"><span class="qty-val" style="color:var(--warning-text-dark);">${item.qtd_pen}</span><span class="qty-lbl">PENDENTE</span></div></div>
+              </div>`;
+          }).join('');
+          
+          container.append(`<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 p-2"><div class="procon-card">
+              <div class="procon-header" data-bs-toggle="collapse" data-bs-target="#collapse_${cardId}">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="origin-badge ${originClass}">${originLabel}</span>
+                      <div class="date-badge"><i class="bi bi-calendar"></i> ${group.mainDate || '-'}</div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center"><span class="status-badge ${stClass}">${group.mainStatus || 'SEM STATUS'}</span></div>
+                  <div class="procon-title text-truncate mt-3 mb-1">${group.local}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">PROCESSO: <span style="color: var(--accent);">${group.processo || '-'}</span></div>
+                  <div class="header-totals mt-3"><span class="h-badge" style="color:var(--accent)">TOTAL: ${group.totalSol}</span><span class="h-badge" style="color:var(--success)">ENTREGUE: ${group.totalEnt}</span><span class="h-badge" style="color:var(--warning-text-dark)">PENDENTE: ${group.totalPen}</span></div>
+              </div>
+              <div class="collapse" id="collapse_${cardId}"><div class="procon-details">${itemsHtml}</div></div>
+          </div></div>`);
+      });
+  }
+</script>
