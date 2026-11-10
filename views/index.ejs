@@ -26,12 +26,12 @@
     :root {
       --bg-color: #f8fafc; 
       --card-bg: #ffffff; 
-      --sidebar-bg: #001E7A;
+      --sidebar-bg: #044c14; 
       --text-main: #1e293b; 
       --text-muted: #64748b; 
-      --accent: #001E7A; 
-      --accent-dark: #001557;
-      --accent-light: #e0e7ff;
+      --accent: #044c14; 
+      --accent-dark: #02300c;
+      --accent-light: #e8f5e9;
       --border-color: #e2e8f0; 
       --input-bg: #f1f5f9;
       --shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -53,8 +53,8 @@
     body.dark-mode {
       --bg-color: #121416; --card-bg: #1c2126; --sidebar-bg: #1c2126;
       --text-main: #f0f2f5; --text-muted: #a0abb5;
-      --accent: #b0bec5; --accent-dark: #78909c;
-      --accent-light: #23292e;
+      --accent: #4caf50; --accent-dark: #388e3c;
+      --accent-light: #1b5e20;
       --border-color: #2a3138; --input-bg: #23292e;
       --shadow: 0 10px 30px rgba(0,0,0,0.3);
       --chart-grid: #333333;
@@ -307,8 +307,10 @@
       <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
       
       <div class="sidebar" id="sidebar">
-          <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding-bottom: 20px; margin-bottom: 5px; border-bottom: 1px solid var(--border-color); position: relative;">
+          <!-- AQUI ESTÁ A LOGO COM O NOVO TÍTULO "PAINEL MARCENARIA" E O FLEX COLUMN -->
+          <div style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; margin-bottom: 5px; border-bottom: 1px solid var(--border-color); position: relative;">
               <img src="/images/logo.png" alt="Logo" style="height: 100px; max-width: 85%; object-fit: contain;">
+              <div style="color: #ffffff; font-weight: 700; font-size: 1.1rem; margin-top: 12px; text-align: center; letter-spacing: 0.5px;">PAINEL MARCENARIA</div>
               <div style="position: absolute; top: 10px; right: 15px; cursor: pointer; display: flex; align-items: center; transition: transform 0.2s;" onclick="openNotifications()" title="Entregas da Semana" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                   <span class="material-icons" style="font-size: 26px; color: #ffffff;">notifications</span>
                   <span id="notifBadge" style="display:none; position: absolute; top: -5px; right: -5px; background: #E53935; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; text-align: center; line-height: 16px; border: 2px solid var(--sidebar-bg);">0</span>
@@ -430,7 +432,6 @@
                   <%- include('partials/tabela') %>
               </div>
 
-              <!-- NOVA ABA ESTOQUE -->
               <div id="viewEstoque" class="view-section">
                   <%- include('partials/estoque') %>
               </div>
@@ -486,7 +487,7 @@
 
     const INITIAL_DATA = <%- INITIAL_DATA %>;
     let fullData = [], filteredData = [], chartInstances = {}, activeFilters = {}; 
-    let estoqueData = []; // VARIÁVEL PARA DADOS DO ESTOQUE
+    let estoqueData = []; 
 
     const filterFields = [
       {key: 'tipo_servico', label: 'Tipo Serviço'},
@@ -507,8 +508,8 @@
             grid: isDarkMode ? '#333333' : '#e2e8f0',
             pend: '#b71c1c', 
             ent: '#1b5e20', 
-            sol: '#001E7A', 
-            vol: '#001E7A'
+            sol: '#044c14', 
+            vol: '#044c14'
         };
     }
 
@@ -576,7 +577,7 @@
         if(currentViewId === 'viewProcon' && typeof loadProconData === 'function') {
             loadProconData(forceRefresh);
         } else if (currentViewId === 'viewEstoque' && typeof renderEstoqueTable === 'function') {
-            loadData(forceRefresh); // Recarrega os dados globais e o render cuida do Estoque
+            loadData(forceRefresh); 
         } else {
             loadData(forceRefresh);
         }
@@ -592,7 +593,6 @@
             $('#sidebar-overlay').removeClass('show');
         }
 
-        // Se for PROCON, Apresentação ou Estoque, ocultamos os filtros globais e a top bar padrão
         if(viewId === 'viewProcon' || viewId === 'viewApresentacao' || viewId === 'viewEstoque') {
             $('#mainSectionGroup').hide();
             $('.top-bar').hide(); 
@@ -616,7 +616,7 @@
         else { $('#themeIcon').text('dark_mode'); }
         updateCharts();
         if(typeof calendarInstance !== 'undefined' && calendarInstance) calendarInstance.render();
-        if (typeof renderEstoqueTable === 'function' && currentViewId === 'viewEstoque') renderEstoqueTable(); // Atualiza tema tabela estoque
+        if (typeof renderEstoqueTable === 'function' && currentViewId === 'viewEstoque') renderEstoqueTable();
     }
 
     /* --- FILTROS GERAIS E CARREGAMENTO DE DADOS --- */
@@ -684,7 +684,6 @@
                return d;
           });
           
-          // PREENCHE DADOS DE ESTOQUE
           estoqueData = dataToProcess.estoque || [];
 
           applyFilters(null); 
