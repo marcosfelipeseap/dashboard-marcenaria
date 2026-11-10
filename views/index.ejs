@@ -317,6 +317,7 @@
 
           <button class="nav-item nav-btn active" onclick="switchView('viewApresentacao', this)"><i class="bi bi-file-earmark-slides-fill"></i> <span>Apresentação</span></button>
           <button class="nav-item nav-btn" onclick="switchView('viewTable', this)"><i class="bi bi-table"></i> <span>Tabela</span></button>
+          <button class="nav-item nav-btn" onclick="switchView('viewEstoque', this)"><i class="bi bi-box-seam"></i> <span>Estoque</span></button>
           <button class="nav-item nav-btn" onclick="switchView('viewCalendar', this)"><i class="bi bi-calendar-event"></i> <span>Calendário</span></button>
           <button class="nav-item nav-btn" onclick="switchView('viewChart1', this)"><i class="bi bi-bar-chart-fill"></i> <span>Status</span></button>
           <button class="nav-item nav-btn" onclick="switchView('viewChart2', this)"><i class="bi bi-geo-alt-fill"></i> <span>Parceiros</span></button>
@@ -429,6 +430,11 @@
                   <%- include('partials/tabela') %>
               </div>
 
+              <!-- NOVA ABA ESTOQUE -->
+              <div id="viewEstoque" class="view-section">
+                  <%- include('partials/estoque') %>
+              </div>
+
               <div id="viewCalendar" class="view-section">
                   <%- include('partials/calendar') %>
               </div>
@@ -480,6 +486,7 @@
 
     const INITIAL_DATA = <%- INITIAL_DATA %>;
     let fullData = [], filteredData = [], chartInstances = {}, activeFilters = {}; 
+    let estoqueData = []; // VARIÁVEL PARA DADOS DO ESTOQUE
 
     const filterFields = [
       {key: 'tipo_servico', label: 'Tipo Serviço'},
@@ -568,6 +575,8 @@
     window.refreshCurrent = function(forceRefresh = false) {
         if(currentViewId === 'viewProcon' && typeof loadProconData === 'function') {
             loadProconData(forceRefresh);
+        } else if (currentViewId === 'viewEstoque' && typeof renderEstoqueTable === 'function') {
+            loadData(forceRefresh); // Recarrega os dados globais e o render cuida do Estoque
         } else {
             loadData(forceRefresh);
         }
@@ -583,10 +592,12 @@
             $('#sidebar-overlay').removeClass('show');
         }
 
-        if(viewId === 'viewProcon' || viewId === 'viewApresentacao') {
+        // Se for PROCON, Apresentação ou Estoque, ocultamos os filtros globais e a top bar padrão
+        if(viewId === 'viewProcon' || viewId === 'viewApresentacao' || viewId === 'viewEstoque') {
             $('#mainSectionGroup').hide();
             $('.top-bar').hide(); 
             if(viewId === 'viewProcon' && typeof loadProconData === 'function') loadProconData(false);
+            if(viewId === 'viewEstoque' && typeof renderEstoqueTable === 'function') renderEstoqueTable();
         } else {
             $('#mainSectionGroup').show();
             $('.top-bar').show();
@@ -605,6 +616,7 @@
         else { $('#themeIcon').text('dark_mode'); }
         updateCharts();
         if(typeof calendarInstance !== 'undefined' && calendarInstance) calendarInstance.render();
+        if (typeof renderEstoqueTable === 'function' && currentViewId === 'viewEstoque') renderEstoqueTable(); // Atualiza tema tabela estoque
     }
 
     /* --- FILTROS GERAIS E CARREGAMENTO DE DADOS --- */
@@ -672,9 +684,16 @@
                return d;
           });
           
+          // PREENCHE DADOS DE ESTOQUE
+          estoqueData = dataToProcess.estoque || [];
+
           applyFilters(null); 
           buildNotifications();
           populateApresentacao();
+          
+          if(currentViewId === 'viewEstoque' && typeof renderEstoqueTable === 'function') {
+              renderEstoqueTable();
+          }
       } catch (err) {
           alert("Erro: " + err.message); 
       } finally {

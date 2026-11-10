@@ -1,0 +1,107 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold m-0" style="color: var(--text-main); text-transform: uppercase;">Estoque de Mobílias</h2>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">
+            Visão Geral - SEDE
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn-action" onclick="refreshCurrent(true)" title="Atualizar Dados">
+            <span class="material-icons">sync</span>
+        </button>
+        <button class="btn-action" id="mobile-menu-btn-estoque" onclick="toggleSidebar()" title="Menu" style="display: none;">
+            <span class="material-icons">menu</span>
+        </button>
+    </div>
+</div>
+
+<div class="card-custom mb-4" style="padding: 20px;">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold m-0" style="color: var(--text-main); text-transform: uppercase; font-size: 1.1rem;">Itens em Estoque</h5>
+        
+        <!-- Barra de pesquisa exclusiva do Estoque -->
+        <div style="position: relative; max-width: 100%; width: 350px;">
+            <span class="material-icons" style="position: absolute; left: 12px; top: 12px; font-size: 20px; color: var(--text-muted);">search</span>
+            <input type="text" id="searchInputEstoque" class="form-control oficina-selector" placeholder="Pesquisar por local ou mobília..." style="padding-left: 40px; font-weight: normal; font-size: 0.9rem;" onkeyup="renderEstoqueTable()">
+        </div>
+    </div>
+
+    <!-- Container da Tabela com Scroll -->
+    <div class="table-responsive" style="max-height: 65vh; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-color);">
+        <table class="table table-hover mb-0" style="background-color: var(--card-bg); color: var(--text-main); min-width: 600px; border-collapse: separate; border-spacing: 0;">
+            <thead style="position: sticky; top: 0; background-color: var(--input-bg); z-index: 10;">
+                <tr>
+                    <th style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; padding: 12px 20px; border-bottom: 2px solid var(--border-color);">Local</th>
+                    <th style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; padding: 12px 20px; border-bottom: 2px solid var(--border-color);">Mobília</th>
+                    <th style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; padding: 12px 20px; border-bottom: 2px solid var(--border-color); text-align: center; width: 160px;">Quantidade</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyEstoque">
+                <tr><td colspan="3" class="text-center py-4" style="color: var(--text-muted);">Carregando estoque...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Função principal que desenha a tabela do estoque
+    function renderEstoqueTable() {
+        const tbody = $('#tbodyEstoque');
+        const term = $('#searchInputEstoque').val().toLowerCase().trim();
+        
+        // Controle de exibição do botão de menu mobile
+        if (window.innerWidth <= 1199) {
+            $('#mobile-menu-btn-estoque').show();
+        } else {
+            $('#mobile-menu-btn-estoque').hide();
+        }
+
+        // Validação se os dados chegaram da planilha
+        if (!estoqueData || estoqueData.length === 0) {
+            tbody.html('<tr><td colspan="3" class="text-center py-4 fw-bold" style="color: var(--text-muted);"><span class="material-icons" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--border-color);">inventory_2</span> Nenhum item cadastrado no estoque.</td></tr>');
+            return;
+        }
+
+        // Filtro local da barra de pesquisa do estoque
+        let filtered = estoqueData;
+        if (term !== '') {
+            filtered = estoqueData.filter(item => {
+                return (item.local || '').toLowerCase().includes(term) || 
+                       (item.mobilia || '').toLowerCase().includes(term);
+            });
+        }
+
+        if (filtered.length === 0) {
+            tbody.html('<tr><td colspan="3" class="text-center py-4 fw-bold" style="color: var(--text-muted);">Nenhum item corresponde à pesquisa.</td></tr>');
+            return;
+        }
+
+        // Gerar linhas da tabela
+        let html = '';
+        filtered.forEach(item => {
+            // Se quantidade for > 0 usa badge verde (st-estoque), senão usa badge vermelha (st-pendente)
+            let badgeClass = item.quantidade > 0 ? 'st-estoque' : 'st-pendente';
+            let qtdDisplay = `<span class="status-badge ${badgeClass}" style="font-size: 0.85rem; padding: 6px 14px; min-width: 40px;">${item.quantidade}</span>`;
+            
+            html += `
+            <tr style="transition: background-color 0.2s;">
+                <td style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; font-size: 0.85rem; font-weight: 700; color: var(--accent);">${item.local}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; font-size: 0.85rem; font-weight: 500;">${item.mobilia}</td>
+                <td style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; text-align: center;">${qtdDisplay}</td>
+            </tr>`;
+        });
+
+        tbody.html(html);
+    }
+
+    // Monitorar redimensionamento de janela para o menu responsivo
+    $(window).resize(function() {
+        if (currentViewId === 'viewEstoque') {
+            if (window.innerWidth <= 1199) {
+                $('#mobile-menu-btn-estoque').show();
+            } else {
+                $('#mobile-menu-btn-estoque').hide();
+            }
+        }
+    });
+</script>

@@ -268,7 +268,40 @@ async function fetchDataFromSheets() {
         } catch (err) { console.error(`Erro ao processar ${src.type}:`, err); }
     }));
 
-    return { marcenaria: combinedMarcenaria, procon: combinedProcon };
+    // --- NOVA LÓGICA: BUSCA ABA ESTOQUE ---
+    let combinedEstoque = [];
+    try {
+        const resEstoque = await sheets.spreadsheets.values.get({
+            spreadsheetId: '17WAyG3sGud8441tlQR2E0gxWp15Ogd26zDoViv2PisE', // ID principal SEDE
+            range: 'ESTOQUE',
+            valueRenderOption: 'FORMATTED_VALUE'
+        });
+        const dataE = resEstoque.data.values;
+        if (dataE && dataE.length > 1) {
+            const headersE = dataE[0];
+            const normalize = (text) => text ? text.toString().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : '';
+            const mapE = {};
+            headersE.forEach((h, i) => { mapE[normalize(h)] = i; });
+            
+            const idxLoc = mapE['LOCAL'] !== undefined ? mapE['LOCAL'] : 0;
+            const idxMob = mapE['MOBILIA'] !== undefined ? mapE['MOBILIA'] : 1;
+            const idxQtd = mapE['QUANTIDADE EM ESTOQUE'] !== undefined ? mapE['QUANTIDADE EM ESTOQUE'] : (mapE['QUANTIDADE'] !== undefined ? mapE['QUANTIDADE'] : 2);
+
+            dataE.slice(1).forEach(row => {
+                if(row[idxMob] || row[idxLoc]) {
+                    combinedEstoque.push({
+                        local: (row[idxLoc] || 'Não Identificado').toString().trim(),
+                        mobilia: (row[idxMob] || '').toString().trim(),
+                        quantidade: parseInt((row[idxQtd] || '0').toString().replace(/\D/g, '')) || 0
+                    });
+                }
+            });
+        }
+    } catch (err) {
+        console.warn(`[AVISO] Aba 'ESTOQUE' não encontrada ou falha ao ler:`, err.message);
+    }
+
+    return { marcenaria: combinedMarcenaria, procon: combinedProcon, estoque: combinedEstoque };
 }
 
 // --- ROTAS DO SERVIDOR (PROTEGIDAS PELO SSO) ---
